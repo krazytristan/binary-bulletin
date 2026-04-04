@@ -12,26 +12,24 @@ export default function Home() {
 
   const fetchArticles = async () => {
     setLoading(true);
+    setErrorMsg("");
 
-    const { data, error } = await supabase
-      .from("articles")
-      .select(`
-        id,
-        title,
-        excerpt,
-        image_url,
-        created_at,
-        categories(name)
-      `)
-      .eq("status", "published")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("articles")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Supabase Error:", error.message);
-      setErrorMsg("Failed to load articles.");
-      setArticles([]);
-    } else {
+      console.log("SUPABASE DATA:", data);
+      console.log("SUPABASE ERROR:", error);
+
+      if (error) throw error;
+
       setArticles(data || []);
+    } catch (err) {
+      console.error("FETCH ERROR:", err.message);
+      setErrorMsg(err.message || "Failed to load articles");
+      setArticles([]);
     }
 
     setLoading(false);
@@ -39,8 +37,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 🔥 HEADER */}
-      <div className="bg-primary text-white py-10 text-center">
+      {/* 🔷 HEADER */}
+      <div className="bg-blue-900 text-white py-10 text-center">
         <h1 className="text-4xl font-bold">
           The Binary Bulletin
         </h1>
@@ -49,20 +47,20 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto p-6">
         
         {/* ⏳ LOADING */}
         {loading && (
-          <div className="text-center text-gray-500">
+          <p className="text-center text-gray-500">
             Loading articles...
-          </div>
+          </p>
         )}
 
         {/* ❌ ERROR */}
-        {errorMsg && (
-          <div className="text-center text-red-500">
+        {!loading && errorMsg && (
+          <p className="text-center text-red-500 font-semibold">
             {errorMsg}
-          </div>
+          </p>
         )}
 
         {/* 📰 ARTICLES */}
@@ -70,7 +68,7 @@ export default function Home() {
           <>
             {articles.length === 0 ? (
               <p className="text-center text-gray-500">
-                No articles found.
+                No articles yet. Add one in admin panel or database.
               </p>
             ) : (
               <div className="grid md:grid-cols-3 gap-6">
@@ -79,7 +77,7 @@ export default function Home() {
                     key={article.id}
                     className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden"
                   >
-                    {/* 🖼 IMAGE */}
+                    {/* IMAGE */}
                     <img
                       src={
                         article.image_url ||
@@ -89,13 +87,9 @@ export default function Home() {
                       className="h-48 w-full object-cover"
                     />
 
-                    {/* 📄 CONTENT */}
+                    {/* CONTENT */}
                     <div className="p-4">
-                      <p className="text-xs text-blue-600 font-semibold">
-                        {article.categories?.name || "General"}
-                      </p>
-
-                      <h2 className="text-lg font-bold mt-1 line-clamp-2">
+                      <h2 className="text-lg font-bold line-clamp-2">
                         {article.title}
                       </h2>
 
@@ -104,7 +98,9 @@ export default function Home() {
                       </p>
 
                       <p className="text-xs text-gray-400 mt-3">
-                        {new Date(article.created_at).toLocaleDateString()}
+                        {article.created_at
+                          ? new Date(article.created_at).toLocaleDateString()
+                          : ""}
                       </p>
                     </div>
                   </div>
