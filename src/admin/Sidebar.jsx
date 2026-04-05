@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-export default function Sidebar() {
+export default function Sidebar({ setSidebarOpen }) {
   const links = [
     { name: "Dashboard", path: "/admin/dashboard" },
     { name: "Articles", path: "/admin/articles" },
@@ -25,11 +25,11 @@ export default function Sidebar() {
           <NavLink
             key={link.path}
             to={link.path}
-            end
+            onClick={() => setSidebarOpen(false)} // 🔥 CLOSE ON CLICK (MOBILE FIX)
             className={({ isActive }) =>
               `block px-3 py-2 rounded-md transition ${
                 isActive
-                  ? "bg-secondary font-semibold"
+                  ? "bg-secondary font-semibold shadow-md"
                   : "hover:bg-secondary/70"
               }`
             }
