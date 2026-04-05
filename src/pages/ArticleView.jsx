@@ -195,18 +195,22 @@ export default function ArticleView() {
 
             {/* AUTHOR */}
             <div className="mt-6 flex items-center gap-3">
-              <img
-                src="/tristan.png"
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <p className="text-sm font-semibold">Campus Writer</p>
-                <p className="text-xs text-gray-400">
-                  Tristan Jorge Cuartero | The Binary Bulletin
+            <img
+                src={
+                article.author_image ||
+                "https://i.pravatar.cc/40"
+                }
+                className="w-10 h-10 rounded-full object-cover"
+            />
+            <div>
+                <p className="text-sm font-semibold">
+                {article.author_name || "Campus Writer"}
                 </p>
-              </div>
+                <p className="text-xs text-gray-400">
+                The Binary Bulletin
+                </p>
             </div>
-
+            </div>
             {/* ACTIONS */}
             <div className="flex gap-4 mt-6 flex-wrap">
 

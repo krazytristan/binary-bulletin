@@ -13,15 +13,17 @@ export default function Articles() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
-  const [form, setForm] = useState({
+    const [form, setForm] = useState({
     title: "",
     excerpt: "",
     content: "",
     category: "News",
+    author_name: "Campus Writer", // ✅ ADDED
+    author_image: "", // ✅ ADDED
     image: null,
     image_url: "",
     preview: "",
-  });
+    });
 
   useEffect(() => {
     fetchArticles();
@@ -53,6 +55,8 @@ export default function Articles() {
         image: null,
         image_url: article.image_url,
         preview: article.image_url,
+        author_name: article?.author_name || "Campus Writer",
+        author_image: article?.author_image || "",
       });
     } else {
       setForm({
@@ -108,13 +112,23 @@ export default function Articles() {
     return data.publicUrl;
   };
 
-  // 🔥 SAVE
-  const handleSubmit = async (e) => {
+    // 🔥 SUCCESS + AUTO RELOAD (ALREADY GOOD — KEEP THIS)
+    const showSuccessAndReload = (text) => {
+    setMessage({ type: "success", text });
+
+    setTimeout(() => {
+        setMessage(null);
+        window.location.reload(); // 🔥 final reload
+    }, 3000);
+    };
+
+    // 🔥 SAVE (UPDATED FIX)
+    const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.title) {
-      setMessage({ type: "error", text: "Title is required" });
-      return;
+        setMessage({ type: "error", text: "Title is required" });
+        return;
     }
 
     setSaving(true);
@@ -122,40 +136,44 @@ export default function Articles() {
     const imageUrl = await uploadImage();
 
     const payload = {
-      title: form.title,
-      excerpt: form.excerpt,
-      content: form.content,
-      category: form.category,
-      image_url: imageUrl,
-      updated_at: new Date(), // 🔥 IMPORTANT (cache fix)
+        title: form.title,
+        excerpt: form.excerpt,
+        content: form.content,
+        category: form.category,
+        image_url: imageUrl,
+        updated_at: new Date(),
+        author_name: form.author_name,
+        author_image: form.author_image,
     };
 
     let error;
 
     if (editing) {
-      ({ error } = await supabase
+        ({ error } = await supabase
         .from("articles")
         .update(payload)
         .eq("id", editing.id));
     } else {
-      ({ error } = await supabase.from("articles").insert([payload]));
+        ({ error } = await supabase.from("articles").insert([payload]));
     }
 
     setSaving(false);
 
     if (error) {
-      setMessage({ type: "error", text: "Failed to save article" });
-      return;
+        setMessage({ type: "error", text: "Failed to save article" });
+        return;
     }
 
-    setMessage({
-      type: "success",
-      text: editing ? "Article updated!" : "Article added!",
-    });
-
+    // 🔥 CLOSE MODAL FIRST
     setModalOpen(false);
-    fetchArticles();
-  };
+
+    // 🔥 USE THIS INSTEAD (IMPORTANT FIX)
+    showSuccessAndReload(
+        editing
+        ? "Article updated successfully!"
+        : "Article created successfully!"
+    );
+    };
 
   // 🔥 DELETE
   const confirmDelete = async () => {
@@ -283,6 +301,24 @@ export default function Articles() {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-3">
+                
+                <input
+                placeholder="Author Name"
+                value={form.author_name}
+                onChange={(e) =>
+                    setForm({ ...form, author_name: e.target.value })
+                }
+                className="w-full border p-2 rounded"
+                />
+
+                <input
+                placeholder="Author Image URL (optional)"
+                value={form.author_image}
+                onChange={(e) =>
+                    setForm({ ...form, author_image: e.target.value })
+                }
+                className="w-full border p-2 rounded"
+                />
 
               <input
                 placeholder="Title"
