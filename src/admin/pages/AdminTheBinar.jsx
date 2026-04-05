@@ -23,11 +23,28 @@ export default function AdminTheBinar() {
   }, []);
 
   const fetchVideos = async () => {
-    const { data } = await supabase.from("videos").select("*");
+    const { data, error } = await supabase
+      .from("videos")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    console.log("FETCH:", data, error);
+
     setVideos(data || []);
   };
 
-  // 🎥 FILE
+  // 🎥 CHECK YOUTUBE
+  const isYouTube = (url) =>
+    url?.includes("youtube.com") || url?.includes("youtu.be");
+
+  const getYouTubeEmbed = (url) => {
+    if (!url) return "";
+    const id =
+      url.split("v=")[1]?.split("&")[0] || url.split("/").pop();
+    return `https://www.youtube.com/embed/${id}`;
+  };
+
+  // 🎥 FILE SELECT
   const handleFile = (e) => {
     const f = e.target.files[0];
     if (!f) return;
@@ -36,13 +53,21 @@ export default function AdminTheBinar() {
     setPreview(URL.createObjectURL(f));
   };
 
-  // 🚀 UPLOAD
+  // 🚀 UPLOAD (FIXED WITH ERROR HANDLING)
   const uploadVideo = async () => {
-    if (!file) return form.video_url; // 🔥 use link if no file
+    if (!file) return form.video_url;
 
     const name = `${Date.now()}-${file.name}`;
 
-    await supabase.storage.from("articles").upload(name, file);
+    const { error } = await supabase.storage
+      .from("articles")
+      .upload(name, file);
+
+    if (error) {
+      console.error("UPLOAD ERROR:", error);
+      alert("Upload failed");
+      return null;
+    }
 
     const { data } = supabase.storage
       .from("articles")
@@ -51,7 +76,7 @@ export default function AdminTheBinar() {
     return data.publicUrl;
   };
 
-  // 💾 SAVE
+  // 💾 SAVE (FULL FIX)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -65,10 +90,37 @@ export default function AdminTheBinar() {
     try {
       const url = await uploadVideo();
 
-      await supabase.from("videos").insert({
+      console.log("VIDEO URL:", url);
+
+      // 🚨 PREVENT NULL INSERT (MAIN FIX)
+      if (!url) {
+        alert("Please upload a video OR provide a video link");
+        setLoading(false);
+        return;
+      }
+
+      const payload = {
         ...form,
         video_url: url,
-      });
+        video_type: file ? "file" : "link",
+      };
+
+      console.log("PAYLOAD:", payload);
+
+      const { data, error } = await supabase
+        .from("videos")
+        .insert(payload)
+        .select();
+
+      console.log("INSERT RESULT:", data);
+      console.log("INSERT ERROR:", error);
+
+      if (error) {
+        alert("Insert failed (check console)");
+        return;
+      }
+
+      alert("Saved successfully ✅");
 
       setForm({
         title: "",
@@ -81,10 +133,11 @@ export default function AdminTheBinar() {
       setFile(null);
       setPreview("");
       setModalOpen(false);
+
       fetchVideos();
     } catch (err) {
-      console.error(err);
-      alert("Upload failed");
+      console.error("SUBMIT ERROR:", err);
+      alert("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -130,17 +183,30 @@ export default function AdminTheBinar() {
               </button>
             </div>
 
-            <video
-              src={v.video_url}
-              controls
-              className="w-full h-40 mt-3 rounded"
-            />
+            {/* VIDEO DISPLAY */}
+            {v.video_type === "link" || isYouTube(v.video_url) ? (
+              <iframe
+                src={getYouTubeEmbed(v.video_url)}
+                className="w-full h-40 mt-3 rounded"
+                title="video"
+              />
+            ) : (
+              <video
+                src={v.video_url}
+                controls
+                className="w-full h-40 mt-3 rounded"
+              />
+            )}
+
+            <p className="text-sm mt-2 text-gray-600">
+              {v.excerpt}
+            </p>
 
           </div>
         ))
       )}
 
-      {/* 🔥 MODAL (LIKE ARTICLES) */}
+      {/* MODAL */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
 
@@ -168,6 +234,15 @@ export default function AdminTheBinar() {
                 className="w-full border p-2 rounded"
               />
 
+              <textarea
+                placeholder="Full Content"
+                value={form.content}
+                onChange={(e) =>
+                  setForm({ ...form, content: e.target.value })
+                }
+                className="w-full border p-2 rounded h-24"
+              />
+
               <input
                 placeholder="Author"
                 value={form.author_name}
@@ -177,7 +252,6 @@ export default function AdminTheBinar() {
                 className="w-full border p-2 rounded"
               />
 
-              {/* 🔥 VIDEO LINK */}
               <input
                 placeholder="Video URL (optional)"
                 value={form.video_url}
@@ -191,10 +265,8 @@ export default function AdminTheBinar() {
                 OR upload video file
               </p>
 
-              {/* FILE */}
               <input type="file" onChange={handleFile} />
 
-              {/* PREVIEW */}
               {preview && (
                 <video
                   src={preview}
@@ -203,6 +275,7 @@ export default function AdminTheBinar() {
                 />
               )}
 
+              {/* BUTTON */}
               <div className="flex justify-end gap-2">
 
                 <button
@@ -215,9 +288,12 @@ export default function AdminTheBinar() {
 
                 <button
                   disabled={loading}
-                  className="bg-primary text-white px-3 py-1 rounded"
+                  className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2"
                 >
-                  {loading ? "Uploading..." : "Save"}
+                  {loading && (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  )}
+                  {loading ? "Saving..." : "Save"}
                 </button>
 
               </div>
@@ -231,31 +307,18 @@ export default function AdminTheBinar() {
       {/* DELETE MODAL */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl w-80 text-center">
 
-            <h2 className="font-bold mb-3">Delete Video</h2>
+          <div className="bg-white p-6 rounded-xl text-center">
 
-            <p className="text-sm text-gray-600 mb-4">
-              Are you sure?
-            </p>
+            <p>Delete this video?</p>
 
-            <div className="flex justify-center gap-3">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="bg-gray-400 text-white px-4 py-1 rounded"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={confirmDelete}
-                className="bg-red-500 text-white px-4 py-1 rounded"
-              >
-                Delete
-              </button>
+            <div className="flex justify-center gap-3 mt-3">
+              <button onClick={() => setDeleteId(null)}>Cancel</button>
+              <button onClick={confirmDelete}>Delete</button>
             </div>
 
           </div>
+
         </div>
       )}
 

@@ -17,6 +17,8 @@ export default function AdminGallery() {
   const [viewerIndex, setViewerIndex] = useState(0);
   const [currentAlbum, setCurrentAlbum] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+
   const fileInputRef = useRef();
 
   useEffect(() => {
@@ -107,25 +109,34 @@ export default function AdminGallery() {
 
     if (!title) return alert("Title required");
 
-    const imageUrls = await uploadImages();
+    setLoading(true);
 
-    if (editing) {
-      await supabase
-        .from("gallery")
-        .update({
+    try {
+      const imageUrls = await uploadImages();
+
+      if (editing) {
+        await supabase
+          .from("gallery")
+          .update({
+            title,
+            images: imageUrls.length ? imageUrls : editing.images,
+          })
+          .eq("id", editing.id);
+      } else {
+        await supabase.from("gallery").insert({
           title,
-          images: imageUrls.length ? imageUrls : editing.images,
-        })
-        .eq("id", editing.id);
-    } else {
-      await supabase.from("gallery").insert({
-        title,
-        images: imageUrls,
-      });
-    }
+          images: imageUrls,
+        });
+      }
 
-    resetForm();
-    fetchGallery();
+      resetForm();
+      fetchGallery();
+    } catch (err) {
+      console.error(err);
+      alert("Failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
@@ -299,12 +310,25 @@ export default function AdminGallery() {
               </div>
 
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={resetForm}>
+
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="bg-gray-400 text-white px-3 py-1 rounded"
+                >
                   Cancel
                 </button>
-                <button className="bg-primary text-white px-3 py-1 rounded">
-                  Save
+
+                <button
+                  disabled={loading}
+                  className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2"
+                >
+                  {loading && (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  )}
+                  {loading ? "Saving..." : "Save"}
                 </button>
+
               </div>
 
             </form>
@@ -313,7 +337,7 @@ export default function AdminGallery() {
         </div>
       )}
 
-      {/* IMAGE VIEWER */}
+      {/* VIEWER */}
       {viewer && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
 
