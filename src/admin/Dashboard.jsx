@@ -1,61 +1,139 @@
-// src/admin/Dashboard.jsx
 import { useEffect, useState } from "react";
+import AdminLayout from "./AdminLayout";
 import { supabase } from "../lib/supabase";
 
 export default function Dashboard() {
-  const [articles, setArticles] = useState([]);
-  const [title, setTitle] = useState("");
+  const [stats, setStats] = useState({
+    articles: 0,
+    events: 0,
+    announcements: 0,
+    messages: 0,
+  });
+
+  const [recentArticles, setRecentArticles] = useState([]);
 
   useEffect(() => {
-    fetchArticles();
+    fetchStats();
+    fetchRecentArticles();
   }, []);
 
-  const fetchArticles = async () => {
-    const { data } = await supabase.from("articles").select("*");
-    setArticles(data);
+  // 🔥 FETCH COUNTS
+  const fetchStats = async () => {
+    try {
+      const { count: articles } = await supabase
+        .from("articles")
+        .select("*", { count: "exact", head: true });
+
+      const { count: events } = await supabase
+        .from("events")
+        .select("*", { count: "exact", head: true });
+
+      const { count: announcements } = await supabase
+        .from("announcements")
+        .select("*", { count: "exact", head: true });
+
+      const { count: messages } = await supabase
+        .from("contacts")
+        .select("*", { count: "exact", head: true });
+
+      setStats({
+        articles: articles || 0,
+        events: events || 0,
+        announcements: announcements || 0,
+        messages: messages || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
   };
 
-  const addArticle = async () => {
-    await supabase.from("articles").insert([{ title }]);
-    setTitle("");
-    fetchArticles();
-  };
+  // 🔥 FETCH RECENT ARTICLES
+  const fetchRecentArticles = async () => {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(5);
 
-  const deleteArticle = async (id) => {
-    await supabase.from("articles").delete().eq("id", id);
-    fetchArticles();
+    if (!error) setRecentArticles(data);
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+    <AdminLayout title="Dashboard">
 
-      <div className="my-4 flex gap-2">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="border p-2 flex-1"
-          placeholder="Article title"
-        />
-        <button
-          onClick={addArticle}
-          className="bg-green-600 text-white px-4 rounded"
-        >
-          Add
-        </button>
+      {/* 🔷 STATS */}
+      <div className="grid md:grid-cols-4 gap-6 mb-8">
+
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h3 className="text-sm text-gray-500">Articles</h3>
+          <p className="text-2xl font-bold text-primary">
+            {stats.articles}
+          </p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h3 className="text-sm text-gray-500">Events</h3>
+          <p className="text-2xl font-bold text-primary">
+            {stats.events}
+          </p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h3 className="text-sm text-gray-500">Announcements</h3>
+          <p className="text-2xl font-bold text-primary">
+            {stats.announcements}
+          </p>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h3 className="text-sm text-gray-500">Messages</h3>
+          <p className="text-2xl font-bold text-primary">
+            {stats.messages}
+          </p>
+        </div>
+
       </div>
 
-      {articles.map((a) => (
-        <div key={a.id} className="flex justify-between border p-3 mb-2">
-          {a.title}
-          <button
-            onClick={() => deleteArticle(a.id)}
-            className="text-red-500"
-          >
-            Delete
-          </button>
-        </div>
-      ))}
-    </div>
+      {/* 🔷 RECENT ARTICLES */}
+      <div className="bg-white rounded-xl shadow p-6">
+
+        <h2 className="text-lg font-bold mb-4">
+          Recent Articles
+        </h2>
+
+        {recentArticles.length === 0 ? (
+          <p className="text-gray-500 text-sm">
+            No articles yet.
+          </p>
+        ) : (
+          <div className="space-y-4">
+
+            {recentArticles.map((article) => (
+              <div
+                key={article.id}
+                className="border-b pb-3 flex justify-between items-center"
+              >
+                <div>
+                  <p className="font-semibold text-gray-800">
+                    {article.title}
+                  </p>
+
+                  <p className="text-xs text-gray-400">
+                    {new Date(article.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+                  Article
+                </span>
+              </div>
+            ))}
+
+          </div>
+        )}
+
+      </div>
+
+    </AdminLayout>
   );
 }
