@@ -155,7 +155,7 @@ export default function AdminTheBinar() {
 
       {/* HEADER */}
       <div className="flex justify-between mb-6">
-        <h1 className="text-xl font-bold">The Binar</h1>
+        <h1 className="text-xl font-bold">The Binary Online</h1>
 
         <button
           onClick={() => setModalOpen(true)}
