@@ -23,17 +23,26 @@ export default function Home() {
 
     if (!error && data && data.length > 0) {
       setFeatured(data[0]);
-      setArticles(data.slice(1, 4));
+      setArticles(data);
     }
 
     setLoading(false);
   };
 
-  // 🔥 IMAGE HANDLER (DB READY)
-  const getImage = (url) => {
-    if (!url) return "https://picsum.photos/800/400";
-    return url;
+  // 🖼 IMAGE HANDLER (FIX CACHE)
+  const getImage = (article) => {
+    if (!article?.image_url) return "https://picsum.photos/400/200";
+
+    const t = new Date(
+      article.updated_at || article.created_at
+    ).getTime();
+
+    return `${article.image_url}?t=${t}`;
   };
+
+  // 🔥 CATEGORY FILTER
+  const getCategory = (cat) =>
+    articles.filter((a) => a.category === cat).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-light font-sans">
@@ -78,7 +87,7 @@ export default function Home() {
               <div className="bg-white rounded-xl shadow-card overflow-hidden hover:shadow-lg transition">
 
                 <img
-                  src={getImage(featured.image_url)}
+                  src={getImage(featured)}
                   alt={featured.title}
                   className="w-full h-80 object-cover"
                 />
@@ -97,7 +106,7 @@ export default function Home() {
                   </p>
 
                   <span className="inline-block mt-3 text-secondary text-sm font-medium">
-                    Read full article →
+                    Read more →
                   </span>
                 </div>
 
@@ -106,7 +115,7 @@ export default function Home() {
           </section>
         )}
 
-        {/* 📰 NEWS */}
+        {/* 📰 LATEST NEWS (UNCHANGED) */}
         <section className="mb-12">
 
           <div className="flex justify-between items-center mb-4">
@@ -119,47 +128,95 @@ export default function Home() {
             </Link>
           </div>
 
-          {articles.length === 0 ? (
-            <p className="text-gray-500">No articles yet.</p>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
 
-              {articles.map((article) => (
-                <Link key={article.id} to={`/article/${article.id}`}>
+            {articles.slice(1, 4).map((article) => (
+              <Link key={article.id} to={`/article/${article.id}`}>
 
-                  <div className="bg-white rounded-xl shadow-card overflow-hidden hover:shadow-lg transition">
+                <div className="bg-white rounded-xl shadow-card overflow-hidden hover:shadow-lg transition">
 
-                    <img
-                      src={getImage(article.image_url)}
-                      alt={article.title}
-                      className="h-40 w-full object-cover"
-                    />
+                  <img
+                    src={getImage(article)}
+                    alt={article.title}
+                    className="h-40 w-full object-cover"
+                  />
 
-                    <div className="p-4">
-                      <h4 className="font-semibold text-dark line-clamp-2">
-                        {article.title}
-                      </h4>
+                  <div className="p-4">
+                    <h4 className="font-semibold text-dark line-clamp-2">
+                      {article.title}
+                    </h4>
 
-                      <p className="text-sm text-gray-500 mt-2 line-clamp-3">
-                        {article.excerpt || "No description available."}
-                      </p>
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-3">
+                      {article.excerpt || "No description available."}
+                    </p>
 
-                      <p className="text-xs text-gray-400 mt-3">
-                        {new Date(article.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-
+                    <p className="text-xs text-gray-400 mt-3">
+                      {new Date(article.created_at).toLocaleDateString()}
+                    </p>
                   </div>
 
-                </Link>
-              ))}
+                </div>
 
-            </div>
-          )}
+              </Link>
+            ))}
+
+          </div>
 
         </section>
 
-        {/* 🎯 QUICK SECTIONS */}
+        {/* 🆕 CATEGORIES (2 COLUMN ONLY THIS PART) */}
+        <section className="mb-12 grid md:grid-cols-2 gap-8">
+
+          {/* 🏀 SPORTS */}
+          <div>
+            <h2 className="text-xl font-bold border-l-4 border-primary pl-2 mb-4">
+              Sports
+            </h2>
+
+            {getCategory("Sports").map((a) => (
+              <Link key={a.id} to={`/article/${a.id}`}>
+                <div className="flex gap-3 bg-white p-3 rounded-xl shadow-card mb-3">
+                  <img src={getImage(a)} className="w-20 h-16 object-cover rounded"/>
+                  <p className="text-sm font-semibold">{a.title}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* 💬 OPINION */}
+          <div>
+            <h2 className="text-xl font-bold border-l-4 border-primary pl-2 mb-4">
+              Opinion
+            </h2>
+
+            {getCategory("Opinion").map((a) => (
+              <Link key={a.id} to={`/article/${a.id}`}>
+                <div className="bg-white p-3 rounded-xl shadow-card mb-3">
+                  <p className="text-sm font-semibold">{a.title}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* ✨ FEATURE */}
+          <div>
+            <h2 className="text-xl font-bold border-l-4 border-primary pl-2 mb-4">
+              Feature
+            </h2>
+
+            {getCategory("Feature").map((a) => (
+              <Link key={a.id} to={`/article/${a.id}`}>
+                <div className="flex gap-3 bg-white p-3 rounded-xl shadow-card mb-3">
+                  <img src={getImage(a)} className="w-20 h-16 object-cover rounded"/>
+                  <p className="text-sm font-semibold">{a.title}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+        </section>
+
+        {/* 🎯 QUICK SECTIONS (UNCHANGED) */}
         <section className="grid md:grid-cols-3 gap-6">
 
           <div className="bg-white p-6 rounded-xl shadow-card hover:shadow-md transition">
@@ -194,7 +251,7 @@ export default function Home() {
 
         </section>
 
-        {/* 🏫 ABOUT */}
+        {/* 🏫 ABOUT (UNCHANGED) */}
         <section className="mt-12 bg-white p-6 rounded-xl shadow-card">
           <h3 className="text-lg font-bold text-dark mb-2 border-l-4 border-primary pl-2">
             About The Binary Bulletin

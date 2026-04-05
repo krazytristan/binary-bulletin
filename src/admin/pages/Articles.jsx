@@ -17,6 +17,7 @@ export default function Articles() {
     title: "",
     excerpt: "",
     content: "",
+    category: "News",
     image: null,
     image_url: "",
     preview: "",
@@ -26,7 +27,7 @@ export default function Articles() {
     fetchArticles();
   }, []);
 
-  // 🔥 FETCH
+  // 🔥 FETCH ARTICLES
   const fetchArticles = async () => {
     setLoading(true);
 
@@ -48,6 +49,7 @@ export default function Articles() {
         title: article.title,
         excerpt: article.excerpt,
         content: article.content || "",
+        category: article.category || "News",
         image: null,
         image_url: article.image_url,
         preview: article.image_url,
@@ -57,6 +59,7 @@ export default function Articles() {
         title: "",
         excerpt: "",
         content: "",
+        category: "News",
         image: null,
         image_url: "",
         preview: "",
@@ -66,7 +69,7 @@ export default function Articles() {
     setModalOpen(true);
   };
 
-  // 🔥 HANDLE IMAGE CHANGE + PREVIEW
+  // 🔥 IMAGE CHANGE
   const handleImageChange = (file) => {
     if (!file) return;
 
@@ -79,7 +82,7 @@ export default function Articles() {
     });
   };
 
-  // 🔥 IMAGE UPLOAD
+  // 🔥 FIXED IMAGE UPLOAD (IMPORTANT)
   const uploadImage = async () => {
     if (!form.image) return form.image_url;
 
@@ -87,9 +90,13 @@ export default function Articles() {
 
     const { error } = await supabase.storage
       .from("articles")
-      .upload(fileName, form.image);
+      .upload(fileName, form.image, {
+        cacheControl: "3600",
+        upsert: false,
+      });
 
     if (error) {
+      console.error(error);
       setMessage({ type: "error", text: "Image upload failed" });
       return null;
     }
@@ -118,7 +125,9 @@ export default function Articles() {
       title: form.title,
       excerpt: form.excerpt,
       content: form.content,
+      category: form.category,
       image_url: imageUrl,
+      updated_at: new Date(), // 🔥 IMPORTANT (cache fix)
     };
 
     let error;
@@ -172,7 +181,7 @@ export default function Articles() {
   return (
     <AdminLayout title="Manage Articles">
 
-      {/* 🔔 MESSAGE */}
+      {/* MESSAGE */}
       {message && (
         <div
           className={`mb-4 px-4 py-2 rounded text-sm ${
@@ -214,18 +223,31 @@ export default function Articles() {
                 className="flex justify-between items-center border-b pb-3"
               >
                 <div className="flex items-center gap-3">
+
+                  {/* 🔥 FIXED IMAGE DISPLAY */}
                   <img
-                    src={a.image_url}
-                    alt=""
+                    src={
+                      a.image_url
+                        ? `${a.image_url}?t=${new Date(
+                            a.updated_at || a.created_at
+                          ).getTime()}`
+                        : "https://picsum.photos/400/200"
+                    }
                     className="w-16 h-12 object-cover rounded"
                   />
 
                   <div>
                     <p className="font-semibold">{a.title}</p>
+
+                    <p className="text-xs text-primary font-medium">
+                      {a.category || "News"}
+                    </p>
+
                     <p className="text-xs text-gray-400">
                       {new Date(a.created_at).toLocaleDateString()}
                     </p>
                   </div>
+
                 </div>
 
                 <div className="flex gap-3">
@@ -289,17 +311,31 @@ export default function Articles() {
                 className="w-full border p-2 rounded"
               />
 
-              {/* IMAGE INPUT */}
+              {/* CATEGORY */}
+              <select
+                value={form.category}
+                onChange={(e) =>
+                  setForm({ ...form, category: e.target.value })
+                }
+                className="w-full border p-2 rounded"
+              >
+                <option>News</option>
+                <option>Sports</option>
+                <option>Opinion</option>
+                <option>Feature</option>
+                <option>Editorial</option>
+                <option>Literary</option>
+              </select>
+
+              {/* IMAGE */}
               <input
                 type="file"
                 onChange={(e) => handleImageChange(e.target.files[0])}
               />
 
-              {/* 🔥 IMAGE PREVIEW */}
               {form.preview && (
                 <img
                   src={form.preview}
-                  alt="preview"
                   className="h-32 w-full object-cover rounded"
                 />
               )}
