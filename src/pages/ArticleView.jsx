@@ -11,11 +11,19 @@ export default function ArticleView() {
   const [related, setRelated] = useState([]);
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState("");
+
+  const [likes, setLikes] = useState(0);
+  const [liked, setLiked] = useState(false);
+
+  const [bookmarked, setBookmarked] = useState(false);
+
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     fetchArticle();
     fetchComments();
+    fetchLikes();
+    checkBookmark();
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -23,14 +31,12 @@ export default function ArticleView() {
 
   // 🔥 SCROLL PROGRESS
   const handleScroll = () => {
-    const totalHeight =
+    const total =
       document.documentElement.scrollHeight -
       document.documentElement.clientHeight;
 
-    const scroll = window.scrollY;
-    const percent = (scroll / totalHeight) * 100;
-
-    setProgress(percent);
+    const current = window.scrollY;
+    setProgress((current / total) * 100);
   };
 
   // 🔥 FETCH ARTICLE
@@ -55,7 +61,63 @@ export default function ArticleView() {
     }
   };
 
-  // 🔥 COMMENTS
+  // 🖼 IMAGE FIX
+  const getImage = (a) => {
+    if (!a?.image_url) return "https://picsum.photos/800/400";
+
+    const t = new Date(a.updated_at || a.created_at).getTime();
+    return `${a.image_url}?t=${t}`;
+  };
+
+  // 👍 FETCH LIKES
+  const fetchLikes = async () => {
+    const { data } = await supabase
+      .from("likes")
+      .select("*")
+      .eq("article_id", id);
+
+    setLikes(data?.length || 0);
+  };
+
+  const handleLike = async () => {
+    if (liked) return;
+
+    await supabase.from("likes").insert({
+      article_id: id,
+    });
+
+    setLikes((prev) => prev + 1);
+    setLiked(true);
+  };
+
+  // 🔖 BOOKMARK
+  const checkBookmark = async () => {
+    const { data } = await supabase
+      .from("bookmarks")
+      .select("*")
+      .eq("article_id", id);
+
+    if (data?.length > 0) setBookmarked(true);
+  };
+
+  const toggleBookmark = async () => {
+    if (bookmarked) {
+      await supabase
+        .from("bookmarks")
+        .delete()
+        .eq("article_id", id);
+
+      setBookmarked(false);
+    } else {
+      await supabase.from("bookmarks").insert({
+        article_id: id,
+      });
+
+      setBookmarked(true);
+    }
+  };
+
+  // 💬 COMMENTS
   const fetchComments = async () => {
     const { data } = await supabase
       .from("comments")
@@ -76,14 +138,6 @@ export default function ArticleView() {
 
     setComment("");
     fetchComments();
-  };
-
-  // 🖼 IMAGE
-  const getImage = (a) => {
-    if (!a?.image_url) return "https://picsum.photos/800/400";
-
-    const t = new Date(a.updated_at || a.created_at).getTime();
-    return `${a.image_url}?t=${t}`;
   };
 
   // 🔗 SHARE
@@ -128,7 +182,7 @@ export default function ArticleView() {
               {article.title}
             </h1>
 
-            {/* META */}
+            {/* DATE */}
             <p className="text-sm text-gray-400 mt-1">
               {new Date(article.created_at).toLocaleDateString()}
             </p>
@@ -142,15 +196,54 @@ export default function ArticleView() {
             {/* AUTHOR */}
             <div className="mt-6 flex items-center gap-3">
               <img
-                src="https://i.pravatar.cc/40"
+                src="/tristan.png"
                 className="w-10 h-10 rounded-full"
               />
               <div>
                 <p className="text-sm font-semibold">Campus Writer</p>
                 <p className="text-xs text-gray-400">
-                  The Binary Bulletin
+                  Tristan Jorge Cuartero | The Binary Bulletin
                 </p>
               </div>
+            </div>
+
+            {/* ACTIONS */}
+            <div className="flex gap-4 mt-6 flex-wrap">
+
+              <button
+                onClick={handleLike}
+                className={`px-4 py-2 rounded ${
+                  liked ? "bg-primary text-white" : "bg-gray-200"
+                }`}
+              >
+                👍 {likes}
+              </button>
+
+              <button
+                onClick={toggleBookmark}
+                className={`px-4 py-2 rounded ${
+                  bookmarked
+                    ? "bg-yellow-400 text-black"
+                    : "bg-gray-200"
+                }`}
+              >
+                🔖 {bookmarked ? "Saved" : "Save"}
+              </button>
+
+              <button
+                onClick={shareFB}
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                Share
+              </button>
+
+              <button
+                onClick={copyLink}
+                className="bg-gray-300 px-4 py-2 rounded"
+              >
+                Copy Link
+              </button>
+
             </div>
 
             {/* EXCERPT */}
@@ -163,23 +256,6 @@ export default function ArticleView() {
               {article.content?.split("\n").map((p, i) => (
                 <p key={i}>{p}</p>
               ))}
-            </div>
-
-            {/* 🔗 SHARE */}
-            <div className="mt-8 flex gap-4">
-              <button
-                onClick={shareFB}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Share Facebook
-              </button>
-
-              <button
-                onClick={copyLink}
-                className="bg-gray-300 px-4 py-2 rounded"
-              >
-                Copy Link
-              </button>
             </div>
 
             {/* 💬 COMMENTS */}
@@ -203,10 +279,7 @@ export default function ArticleView() {
 
               <div className="space-y-3">
                 {comments.map((c) => (
-                  <div
-                    key={c.id}
-                    className="bg-white p-3 rounded shadow"
-                  >
+                  <div key={c.id} className="bg-white p-3 rounded shadow">
                     <p className="text-sm">{c.text}</p>
                     <p className="text-xs text-gray-400">
                       {new Date(c.created_at).toLocaleString()}
@@ -218,12 +291,12 @@ export default function ArticleView() {
 
             {/* 🔥 RELATED */}
             <section className="mt-12">
-              <h2 className="font-bold mb-3">Related</h2>
+              <h2 className="font-bold mb-3">Related Articles</h2>
 
               <div className="grid md:grid-cols-3 gap-4">
                 {related.map((r) => (
                   <Link key={r.id} to={`/article/${r.id}`}>
-                    <div className="bg-white rounded shadow">
+                    <div className="bg-white rounded shadow hover:shadow-lg transition">
                       <img
                         src={getImage(r)}
                         className="h-32 w-full object-cover"
@@ -236,6 +309,15 @@ export default function ArticleView() {
                 ))}
               </div>
             </section>
+
+            {/* BACK */}
+            <Link
+              to="/news"
+              className="inline-block mt-10 text-secondary text-sm"
+            >
+              ← Back to News
+            </Link>
+
           </>
         )}
 
