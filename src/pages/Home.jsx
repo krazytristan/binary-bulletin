@@ -29,6 +29,18 @@ export default function Home() {
     setLoading(false);
   };
 
+  const [slide, setSlide] = useState(0);
+
+    useEffect(() => {
+    if (articles.length === 0) return;
+
+    const interval = setInterval(() => {
+        setSlide((prev) => (prev + 1) % articles.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+    }, [articles]);
+
   // 🖼 IMAGE HANDLER (FIX CACHE)
   const getImage = (article) => {
     if (!article?.image_url) return "https://picsum.photos/400/200";
@@ -164,55 +176,191 @@ export default function Home() {
 
         </section>
 
-        {/* 🆕 CATEGORIES (2 COLUMN ONLY THIS PART) */}
+        {/* 🔥 NEWS HIGHLIGHT SECTION */}
+        <section className="mb-12 grid md:grid-cols-3 gap-6">
+
+        {/* 📰 LEFT: AUTOPLAY CAROUSEL */}
+        <div className="md:col-span-2 bg-white rounded-xl shadow overflow-hidden">
+
+            {articles.length > 0 && (
+            <Link to={`/article/${articles[slide]?.id}`}>
+
+                <div className="relative">
+
+                <img
+                    src={getImage(articles[slide])}
+                    className="w-full h-64 object-cover"
+                />
+
+                <div className="p-4">
+
+                    <h2 className="text-lg font-bold line-clamp-2">
+                    {articles[slide]?.title}
+                    </h2>
+
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                    {articles[slide]?.excerpt}
+                    </p>
+
+                    <div className="flex justify-between items-center mt-3 text-xs text-gray-400">
+                    <span>
+                        {new Date(
+                        articles[slide]?.created_at
+                        ).toLocaleDateString()}
+                    </span>
+
+                    <span>
+                        {articles[slide]?.author_name || "Campus Writer"}
+                    </span>
+                    </div>
+
+                    <span className="text-primary text-sm mt-2 inline-block">
+                    Read Article →
+                    </span>
+
+                </div>
+
+                </div>
+
+            </Link>
+            )}
+
+        </div>
+
+        {/* 🔥 RIGHT: LATEST LIST */}
+        <div className="bg-white rounded-xl shadow p-4">
+
+            <div className="flex justify-between items-center mb-3">
+            <h3 className="font-bold">Latest</h3>
+
+            <Link
+                to="/news"
+                className="text-xs text-primary hover:underline"
+            >
+                View All →
+            </Link>
+            </div>
+
+            <div className="space-y-4">
+
+            {articles.slice(0, 5).map((a) => (
+                <Link key={a.id} to={`/article/${a.id}`}>
+
+                <div className="flex gap-3 group">
+
+                    {/* IMAGE */}
+                    <img
+                    src={getImage(a)}
+                    className="w-16 h-16 object-cover rounded"
+                    />
+
+                    {/* TEXT */}
+                    <div className="flex-1">
+
+                    <h4 className="text-sm font-semibold line-clamp-2 group-hover:text-primary">
+                        {a.title}
+                    </h4>
+
+                    <p className="text-xs text-gray-400 mt-1">
+                        {new Date(a.created_at).toLocaleDateString()}
+                    </p>
+
+                    <p className="text-xs text-gray-500 line-clamp-1">
+                        {a.author_name || "Campus Writer"}
+                    </p>
+
+                    </div>
+
+                </div>
+
+                </Link>
+            ))}
+
+            </div>
+
+        </div>
+
+        </section>
+
+        {/* 🆕 CATEGORIES WITH CAROUSEL */}
         <section className="mb-12 grid md:grid-cols-2 gap-8">
 
-          {/* 🏀 SPORTS */}
-          <div>
-            <h2 className="text-xl font-bold border-l-4 border-primary pl-2 mb-4">
-              Sports
-            </h2>
+        {["Sports", "Opinion", "Feature", "Editorial", "Literary"].map((cat) => {
+            const items = getCategory(cat);
 
-            {getCategory("Sports").map((a) => (
-              <Link key={a.id} to={`/article/${a.id}`}>
-                <div className="flex gap-3 bg-white p-3 rounded-xl shadow-card mb-3">
-                  <img src={getImage(a)} className="w-20 h-16 object-cover rounded"/>
-                  <p className="text-sm font-semibold">{a.title}</p>
+            return (
+            <div key={cat}>
+
+                {/* TITLE */}
+                <h2 className="text-xl font-bold border-l-4 border-primary pl-2 mb-4">
+                {cat}
+                </h2>
+
+                {/* ⭐ FEATURED */}
+                {items[0] && (
+                <Link to={`/article/${items[0].id}`}>
+                    <div className="bg-white rounded-xl shadow-card overflow-hidden mb-4 hover:shadow-lg transition">
+
+                    <img
+                        src={getImage(items[0])}
+                        className="w-full h-40 object-cover"
+                    />
+
+                    <div className="p-4">
+                        <h3 className="font-bold line-clamp-2">
+                        {items[0].title}
+                        </h3>
+
+                        <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                        {items[0].excerpt || "No description available."}
+                        </p>
+
+                        <span className="text-primary text-sm mt-2 inline-block">
+                        Read Article →
+                        </span>
+                    </div>
+
+                    </div>
+                </Link>
+                )}
+
+                {/* 🔥 CAROUSEL */}
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+
+                {items.slice(1).map((a) => (
+                    <Link key={a.id} to={`/article/${a.id}`}>
+
+                    <div className="min-w-[180px] bg-white rounded-xl shadow-card hover:shadow-md transition">
+
+                        <img
+                        src={getImage(a)}
+                        className="h-28 w-full object-cover rounded-t-xl"
+                        />
+
+                        <div className="p-3">
+                        <p className="text-sm font-semibold line-clamp-2">
+                            {a.title}
+                        </p>
+
+                        <p className="text-xs text-gray-400 mt-1">
+                            {new Date(a.created_at).toLocaleDateString()}
+                        </p>
+
+                        <span className="text-xs text-primary mt-1 inline-block">
+                            Read →
+                        </span>
+                        </div>
+
+                    </div>
+
+                    </Link>
+                ))}
+
                 </div>
-              </Link>
-            ))}
-          </div>
 
-          {/* 💬 OPINION */}
-          <div>
-            <h2 className="text-xl font-bold border-l-4 border-primary pl-2 mb-4">
-              Opinion
-            </h2>
-
-            {getCategory("Opinion").map((a) => (
-              <Link key={a.id} to={`/article/${a.id}`}>
-                <div className="bg-white p-3 rounded-xl shadow-card mb-3">
-                  <p className="text-sm font-semibold">{a.title}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* ✨ FEATURE */}
-          <div>
-            <h2 className="text-xl font-bold border-l-4 border-primary pl-2 mb-4">
-              Feature
-            </h2>
-
-            {getCategory("Feature").map((a) => (
-              <Link key={a.id} to={`/article/${a.id}`}>
-                <div className="flex gap-3 bg-white p-3 rounded-xl shadow-card mb-3">
-                  <img src={getImage(a)} className="w-20 h-16 object-cover rounded"/>
-                  <p className="text-sm font-semibold">{a.title}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+            </div>
+            );
+        })}
 
         </section>
 
@@ -249,7 +397,7 @@ export default function Home() {
             </Link>
           </div>
 
-        </section>
+        </section> 
 
         {/* 🏫 ABOUT (UNCHANGED) */}
         <section className="mt-12 bg-white p-6 rounded-xl shadow-card">
