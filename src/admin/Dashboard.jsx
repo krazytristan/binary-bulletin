@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "./AdminLayout";
 import { supabase } from "../lib/supabase";
 
 export default function Dashboard() {
@@ -17,7 +16,6 @@ export default function Dashboard() {
     fetchRecentArticles();
   }, []);
 
-  // 🔥 FETCH COUNTS
   const fetchStats = async () => {
     try {
       const { count: articles } = await supabase
@@ -43,58 +41,49 @@ export default function Dashboard() {
         messages: messages || 0,
       });
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error(error);
     }
   };
 
-  // 🔥 FETCH RECENT ARTICLES
   const fetchRecentArticles = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("articles")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(5);
 
-    if (!error) setRecentArticles(data);
+    setRecentArticles(data || []);
   };
 
   return (
-    <AdminLayout title="Dashboard">
+    <div className="p-4 md:p-6">
 
-      {/* 🔷 STATS */}
+      {/* STATS */}
       <div className="grid md:grid-cols-4 gap-6 mb-8">
 
         <div className="bg-white p-5 rounded-xl shadow">
           <h3 className="text-sm text-gray-500">Articles</h3>
-          <p className="text-2xl font-bold text-primary">
-            {stats.articles}
-          </p>
+          <p className="text-2xl font-bold text-primary">{stats.articles}</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow">
           <h3 className="text-sm text-gray-500">Events</h3>
-          <p className="text-2xl font-bold text-primary">
-            {stats.events}
-          </p>
+          <p className="text-2xl font-bold text-primary">{stats.events}</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow">
           <h3 className="text-sm text-gray-500">Announcements</h3>
-          <p className="text-2xl font-bold text-primary">
-            {stats.announcements}
-          </p>
+          <p className="text-2xl font-bold text-primary">{stats.announcements}</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow">
           <h3 className="text-sm text-gray-500">Messages</h3>
-          <p className="text-2xl font-bold text-primary">
-            {stats.messages}
-          </p>
+          <p className="text-2xl font-bold text-primary">{stats.messages}</p>
         </div>
 
       </div>
 
-      {/* 🔷 RECENT ARTICLES */}
+      {/* RECENT */}
       <div className="bg-white rounded-xl shadow p-6">
 
         <h2 className="text-lg font-bold mb-4">
@@ -102,12 +91,9 @@ export default function Dashboard() {
         </h2>
 
         {recentArticles.length === 0 ? (
-          <p className="text-gray-500 text-sm">
-            No articles yet.
-          </p>
+          <p className="text-gray-500 text-sm">No articles yet.</p>
         ) : (
           <div className="space-y-4">
-
             {recentArticles.map((article) => (
               <div
                 key={article.id}
@@ -117,7 +103,6 @@ export default function Dashboard() {
                   <p className="font-semibold text-gray-800">
                     {article.title}
                   </p>
-
                   <p className="text-xs text-gray-400">
                     {new Date(article.created_at).toLocaleDateString()}
                   </p>
@@ -128,12 +113,11 @@ export default function Dashboard() {
                 </span>
               </div>
             ))}
-
           </div>
         )}
 
       </div>
 
-    </AdminLayout>
+    </div>
   );
 }

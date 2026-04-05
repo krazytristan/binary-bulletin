@@ -1,39 +1,41 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { supabase } from "../lib/supabase";
 
-export default function AdminLayout({ children, title }) {
+export default function AdminLayout() {
   const navigate = useNavigate();
   const dropdownRef = useRef();
 
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // 🔐 GET SESSION (FIXED)
+  // 🔐 CHECK AUTH SESSION
   useEffect(() => {
-    let mounted = true;
+    const getUser = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-
-      if (mounted) {
-        if (!data.session) {
-          navigate("/admin"); // redirect if not logged in
+        if (!user) {
+          navigate("/admin"); // redirect to login
         } else {
-          setUser(data.session.user);
+          setUser(user);
         }
+      } catch (err) {
+        console.error("Auth error:", err);
+        navigate("/admin");
+      } finally {
+        setLoading(false);
       }
     };
 
-    getSession();
-
-    return () => {
-      mounted = false;
-    };
+    getUser();
   }, [navigate]);
 
-  // 🔥 CLICK OUTSIDE DROPDOWN
+  // 🔥 CLOSE DROPDOWN WHEN CLICK OUTSIDE
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -42,7 +44,8 @@ export default function AdminLayout({ children, title }) {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // 🔓 LOGOUT
@@ -51,6 +54,15 @@ export default function AdminLayout({ children, title }) {
     navigate("/admin");
   };
 
+  // ⏳ LOADING SCREEN
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-100">
 
@@ -58,39 +70,38 @@ export default function AdminLayout({ children, title }) {
       <Sidebar />
 
       {/* 🔷 MAIN CONTENT */}
-      <div className="ml-64 flex-1">
+      <div className="flex-1 md:ml-64">
 
         {/* 🔹 TOPBAR */}
-        <div className="bg-white shadow px-6 py-4 flex justify-between items-center">
+        <div className="bg-white shadow px-6 py-4 flex justify-between items-center border-b">
 
-          {/* PAGE TITLE */}
-          <h1 className="text-xl font-bold text-gray-800">
-            {title || "Admin Panel"}
+          {/* TITLE */}
+          <h1 className="text-lg md:text-xl font-semibold text-gray-800">
+            Admin Panel
           </h1>
 
-          {/* PROFILE */}
+          {/* PROFILE DROPDOWN */}
           <div className="relative" ref={dropdownRef}>
 
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-md hover:bg-gray-200 transition"
+              className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-md hover:bg-gray-200 transition"
             >
-              {/* Avatar */}
-              <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">
+              {/* AVATAR */}
+              <div className="w-9 h-9 bg-primary text-white rounded-full flex items-center justify-center font-bold">
                 {user?.email?.charAt(0).toUpperCase() || "A"}
               </div>
 
-              {/* Email */}
-              <span className="text-sm text-gray-700 hidden md:block">
-                {user?.email || "Admin"}
+              {/* EMAIL */}
+              <span className="hidden md:block text-sm text-gray-700">
+                {user?.email}
               </span>
             </button>
 
-            {/* 🔽 DROPDOWN */}
+            {/* DROPDOWN MENU */}
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-md overflow-hidden z-50">
+              <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-md overflow-hidden z-50">
 
-                {/* USER INFO */}
                 <div className="px-4 py-2 text-xs text-gray-500 border-b">
                   Signed in as
                   <div className="font-medium text-gray-800 truncate">
@@ -98,28 +109,25 @@ export default function AdminLayout({ children, title }) {
                   </div>
                 </div>
 
-                {/* PROFILE */}
                 <button
                   onClick={() => navigate("/admin/profile")}
                   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                 >
-                  Profile
+                  👤 Profile
                 </button>
 
-                {/* SETTINGS */}
                 <button
                   onClick={() => alert("Settings coming soon")}
                   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                 >
-                  Settings
+                  ⚙️ Settings
                 </button>
 
-                {/* LOGOUT */}
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
                 >
-                  Logout
+                  🚪 Logout
                 </button>
 
               </div>
@@ -128,9 +136,9 @@ export default function AdminLayout({ children, title }) {
           </div>
         </div>
 
-        {/* 🔹 PAGE CONTENT */}
-        <div className="p-6">
-          {children}
+        {/* 🔹 PAGE CONTENT (VERY IMPORTANT) */}
+        <div className="p-4 md:p-6">
+          <Outlet />
         </div>
 
       </div>

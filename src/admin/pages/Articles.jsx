@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "../AdminLayout";
 import { supabase } from "../../lib/supabase";
 
 export default function Articles() {
@@ -13,17 +12,17 @@ export default function Articles() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
-    const [form, setForm] = useState({
+  const [form, setForm] = useState({
     title: "",
     excerpt: "",
     content: "",
     category: "News",
-    author_name: "Campus Writer", // ✅ ADDED
-    author_image: "", // ✅ ADDED
+    author_name: "Campus Writer",
+    author_image: "",
     image: null,
     image_url: "",
     preview: "",
-    });
+  });
 
   useEffect(() => {
     fetchArticles();
@@ -67,6 +66,8 @@ export default function Articles() {
         image: null,
         image_url: "",
         preview: "",
+        author_name: "Campus Writer",
+        author_image: "",
       });
     }
 
@@ -86,7 +87,7 @@ export default function Articles() {
     });
   };
 
-  // 🔥 FIXED IMAGE UPLOAD (IMPORTANT)
+  // 🔥 IMAGE UPLOAD
   const uploadImage = async () => {
     if (!form.image) return form.image_url;
 
@@ -112,23 +113,23 @@ export default function Articles() {
     return data.publicUrl;
   };
 
-    // 🔥 SUCCESS + AUTO RELOAD (ALREADY GOOD — KEEP THIS)
-    const showSuccessAndReload = (text) => {
+  // 🔥 SUCCESS + RELOAD
+  const showSuccessAndReload = (text) => {
     setMessage({ type: "success", text });
 
     setTimeout(() => {
-        setMessage(null);
-        window.location.reload(); // 🔥 final reload
+      setMessage(null);
+      window.location.reload();
     }, 3000);
-    };
+  };
 
-    // 🔥 SAVE (UPDATED FIX)
-    const handleSubmit = async (e) => {
+  // 🔥 SAVE
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.title) {
-        setMessage({ type: "error", text: "Title is required" });
-        return;
+      setMessage({ type: "error", text: "Title is required" });
+      return;
     }
 
     setSaving(true);
@@ -136,44 +137,42 @@ export default function Articles() {
     const imageUrl = await uploadImage();
 
     const payload = {
-        title: form.title,
-        excerpt: form.excerpt,
-        content: form.content,
-        category: form.category,
-        image_url: imageUrl,
-        updated_at: new Date(),
-        author_name: form.author_name,
-        author_image: form.author_image,
+      title: form.title,
+      excerpt: form.excerpt,
+      content: form.content,
+      category: form.category,
+      image_url: imageUrl,
+      updated_at: new Date(),
+      author_name: form.author_name,
+      author_image: form.author_image,
     };
 
     let error;
 
     if (editing) {
-        ({ error } = await supabase
+      ({ error } = await supabase
         .from("articles")
         .update(payload)
         .eq("id", editing.id));
     } else {
-        ({ error } = await supabase.from("articles").insert([payload]));
+      ({ error } = await supabase.from("articles").insert([payload]));
     }
 
     setSaving(false);
 
     if (error) {
-        setMessage({ type: "error", text: "Failed to save article" });
-        return;
+      setMessage({ type: "error", text: "Failed to save article" });
+      return;
     }
 
-    // 🔥 CLOSE MODAL FIRST
     setModalOpen(false);
 
-    // 🔥 USE THIS INSTEAD (IMPORTANT FIX)
     showSuccessAndReload(
-        editing
+      editing
         ? "Article updated successfully!"
         : "Article created successfully!"
     );
-    };
+  };
 
   // 🔥 DELETE
   const confirmDelete = async () => {
@@ -197,7 +196,7 @@ export default function Articles() {
   };
 
   return (
-    <AdminLayout title="Manage Articles">
+    <div className="p-4 md:p-6">
 
       {/* MESSAGE */}
       {message && (
@@ -242,7 +241,6 @@ export default function Articles() {
               >
                 <div className="flex items-center gap-3">
 
-                  {/* 🔥 FIXED IMAGE DISPLAY */}
                   <img
                     src={
                       a.image_url
@@ -301,24 +299,24 @@ export default function Articles() {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-3">
-                
-                <input
+
+              <input
                 placeholder="Author Name"
                 value={form.author_name}
                 onChange={(e) =>
-                    setForm({ ...form, author_name: e.target.value })
+                  setForm({ ...form, author_name: e.target.value })
                 }
                 className="w-full border p-2 rounded"
-                />
+              />
 
-                <input
+              <input
                 placeholder="Author Image URL (optional)"
                 value={form.author_image}
                 onChange={(e) =>
-                    setForm({ ...form, author_image: e.target.value })
+                  setForm({ ...form, author_image: e.target.value })
                 }
                 className="w-full border p-2 rounded"
-                />
+              />
 
               <input
                 placeholder="Title"
@@ -347,7 +345,6 @@ export default function Articles() {
                 className="w-full border p-2 rounded"
               />
 
-              {/* CATEGORY */}
               <select
                 value={form.category}
                 onChange={(e) =>
@@ -363,7 +360,6 @@ export default function Articles() {
                 <option>Literary</option>
               </select>
 
-              {/* IMAGE */}
               <input
                 type="file"
                 onChange={(e) => handleImageChange(e.target.files[0])}
@@ -442,6 +438,6 @@ export default function Articles() {
         </div>
       )}
 
-    </AdminLayout>
+    </div>
   );
 }

@@ -8,6 +8,8 @@ export default function Navbar() {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "News", path: "/news" },
+    { name: "The Binary Online", path: "/thebinar" },
+    { name: "Gallery", path: "/gallery" },
     { name: "Events", path: "/events" },
     { name: "Announcements", path: "/announcements" },
     { name: "About", path: "/about" },

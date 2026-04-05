@@ -61,23 +61,40 @@ export default function Home() {
 
       <Navbar />
 
-      {/* 🔷 HERO */}
-      <section className="bg-primary text-white py-16 text-center px-4 border-b">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-          The Binary Bulletin
-        </h1>
+        {/* 🔷 HERO WITH BG IMAGE + COLOR OVERLAY */}
+        <section className="relative py-16 text-center px-4 border-b overflow-hidden">
 
-        <p className="mt-3 text-sm md:text-base opacity-80">
-          Official Campus Publication of AMA Computer College Lipa
-        </p>
+        {/* 🖼 BACKGROUND IMAGE */}
+        <div className="absolute inset-0">
+            <img
+            src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b"
+            alt="Campus Background"
+            className="w-full h-full object-cover"
+            />
 
-        <Link
-          to="/news"
-          className="inline-block mt-6 bg-white text-primary px-6 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
-        >
-          Explore News
-        </Link>
-      </section>
+            {/* 🎨 COLOR OVERLAY (KEEPS YOUR THEME) */}
+            <div className="absolute inset-0 bg-primary/90"></div>
+        </div>
+
+        {/* 🔤 CONTENT */}
+        <div className="relative z-10 text-white">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+            The Binary Bulletin
+            </h1>
+
+            <p className="mt-3 text-sm md:text-base opacity-80">
+            Official Campus Publication of AMA Computer College Lipa
+            </p>
+
+            <Link
+            to="/news"
+            className="inline-block mt-6 bg-white text-primary px-6 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
+            >
+            Explore News
+            </Link>
+        </div>
+
+        </section>
 
       <div className="max-w-7xl mx-auto p-6">
 
