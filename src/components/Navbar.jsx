@@ -18,9 +18,8 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-md bg-primary/90 text-white shadow-lg border-b border-white/10">
-
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-
+        
         {/* 🔷 LOGO */}
         <div className="flex items-center gap-3">
           <img
@@ -35,10 +34,8 @@ export default function Navbar() {
 
         {/* 🖥 DESKTOP MENU */}
         <div className="hidden md:flex gap-8 text-sm">
-
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path;
-
             return (
               <Link
                 key={link.path}
@@ -64,26 +61,25 @@ export default function Navbar() {
               </Link>
             );
           })}
-
         </div>
 
         {/* 📱 MOBILE BUTTON */}
         <button
-          className="md:hidden text-2xl transition"
+          className="md:hidden text-2xl transition p-2 focus:outline-none"
           onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle Menu"
         >
           {menuOpen ? "✖" : "☰"}
         </button>
       </div>
 
-      {/* 📱 MOBILE MENU */}
+      {/* 📱 MOBILE MENU - FIXED SCROLLING */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ${
-          menuOpen ? "max-h-96" : "max-h-0"
+        className={`md:hidden overflow-y-auto transition-all duration-300 ease-in-out ${
+          menuOpen ? "max-h-[80vh] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="bg-primary/95 backdrop-blur-md px-6 pb-4 space-y-3">
-
+        <div className="bg-primary/95 backdrop-blur-md px-6 py-4 space-y-1">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path;
 
@@ -92,17 +88,16 @@ export default function Navbar() {
                 key={link.path}
                 to={link.path}
                 onClick={() => setMenuOpen(false)}
-                className={`block py-2 border-b border-white/10 transition ${
+                className={`block py-3 px-2 border-b border-white/5 transition-colors ${
                   isActive
-                    ? "text-secondary font-semibold"
-                    : "hover:text-secondary"
+                    ? "text-secondary font-bold bg-white/5 rounded-md"
+                    : "hover:text-secondary hover:bg-white/5 rounded-md"
                 }`}
               >
                 {link.name}
               </Link>
             );
           })}
-
         </div>
       </div>
     </nav>
