@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Loader2,
   Image as ImageIcon,
+  User,
   X
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ export default function Articles() {
     content: "",
     category: "News",
     author_name: "Campus Writer",
+    author_image: "", // Added author_image field
     image_url: "",
   });
 
@@ -54,7 +56,7 @@ export default function Articles() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (preview) URL.revokeObjectURL(preview); // Memory cleanup
+      if (preview) URL.revokeObjectURL(preview); 
       setImageFile(file);
       setPreview(URL.createObjectURL(file));
     }
@@ -113,7 +115,15 @@ export default function Articles() {
   };
 
   const resetForm = () => {
-    setForm({ title: "", excerpt: "", content: "", category: "News", author_name: "Campus Writer", image_url: "" });
+    setForm({ 
+      title: "", 
+      excerpt: "", 
+      content: "", 
+      category: "News", 
+      author_name: "Campus Writer", 
+      author_image: "", // Reset field
+      image_url: "" 
+    });
     setEditing(null);
     setImageFile(null);
     if (preview) URL.revokeObjectURL(preview);
@@ -128,6 +138,7 @@ export default function Articles() {
       content: article.content,
       category: article.category,
       author_name: article.author_name,
+      author_image: article.author_image || "", // Load existing author image
       image_url: article.image_url,
     });
     setPreview(article.image_url);
@@ -207,7 +218,12 @@ export default function Articles() {
                         {article.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{article.author_name}</td>
+                    <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                            <img src={article.author_image || 'https://via.placeholder.com/100'} className="w-6 h-6 rounded-full object-cover bg-gray-100" />
+                            <span className="text-sm text-gray-600">{article.author_name}</span>
+                        </div>
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-400">
                       {new Date(article.created_at).toLocaleDateString()}
                     </td>
@@ -245,10 +261,33 @@ export default function Articles() {
                     <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Title</label>
                     <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Author</label>
-                    <input required value={form.author_name} onChange={e => setForm({...form, author_name: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                  
+                  {/* Author Details Group */}
+                  <div className="grid grid-cols-1 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Author Name</label>
+                      <input required value={form.author_name} onChange={e => setForm({...form, author_name: e.target.value})} className="w-full p-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Author Profile Image URL</label>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                            {form.author_image ? (
+                                <img src={form.author_image} className="w-full h-full object-cover" alt="Author" />
+                            ) : (
+                                <User className="w-full h-full p-2 text-gray-400" />
+                            )}
+                        </div>
+                        <input 
+                          placeholder="https://example.com/photo.jpg" 
+                          value={form.author_image} 
+                          onChange={e => setForm({...form, author_image: e.target.value})} 
+                          className="flex-1 p-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                        />
+                      </div>
+                    </div>
                   </div>
+
                   <div>
                     <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Category</label>
                     <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
@@ -263,7 +302,7 @@ export default function Articles() {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Thumbnail</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Article Thumbnail</label>
                   <div className="relative aspect-video bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
                     {preview ? (
                       <>
