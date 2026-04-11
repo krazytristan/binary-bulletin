@@ -1,440 +1,354 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
+import { 
+  Search, TrendingUp, Calendar, Clock, ArrowRight, Zap, 
+  CloudSun, MapPin, Users, BookOpen, ChevronRight,
+  MessageSquare, Newspaper, Award, Quote, PenTool
+} from "lucide-react";
 
 export default function Home() {
   const [articles, setArticles] = useState([]);
   const [featured, setFeatured] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [email, setEmail] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data, error: fetchError } = await supabase
+        .from("articles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (fetchError) throw fetchError;
+      if (data && data.length > 0) {
+        setArticles(data);
+        setFeatured(data[0]);
+      }
+    } catch (err) {
+      setError("Failed to load publication. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, []);
+    document.title = "The Binary Bulletin | Official Campus Publication";
+  }, [fetchData]);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const filteredArticles = useMemo(() => {
+    if (!searchQuery) return articles;
+    return articles.filter(a => 
+      a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [articles, searchQuery]);
 
-    const { data, error } = await supabase
-      .from("articles")
-      .select("*")
-      .order("created_at", { ascending: false });
+  const categorized = useMemo(() => {
+    const get = (cat) => filteredArticles.filter((a) => a.category === cat);
+    return {
+      news: get("News"),
+      sports: get("Sports"),
+      feature: get("Feature"),
+      opinion: get("Opinion"),
+      editorial: get("Editorial"),
+      literary: get("Literary"),
+    };
+  }, [filteredArticles]);
 
-    if (!error && data && data.length > 0) {
-      setFeatured(data[0]);
-      setArticles(data);
-    }
+  // Extract real headlines for the Ticker
+  const headlines = useMemo(() => {
+    return articles.slice(0, 5).map(a => a.title);
+  }, [articles]);
 
-    setLoading(false);
-  };
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString("en-GB", {
+      day: "numeric", month: "long", year: "numeric",
+    });
 
-  const [slide, setSlide] = useState(0);
-
-    useEffect(() => {
-    if (articles.length === 0) return;
-
-    const interval = setInterval(() => {
-        setSlide((prev) => (prev + 1) % articles.length);
-    }, 3000);
-
-    return () => clearInterval(interval);
-    }, [articles]);
-
-  // 🖼 IMAGE HANDLER (FIX CACHE)
-  const getImage = (article) => {
-    if (!article?.image_url) return "https://picsum.photos/400/200";
-
-    const t = new Date(
-      article.updated_at || article.created_at
-    ).getTime();
-
-    return `${article.image_url}?t=${t}`;
-  };
-
-  // 🔥 CATEGORY FILTER
-  const getCategory = (cat) =>
-    articles.filter((a) => a.category === cat).slice(0, 4);
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="font-black tracking-widest text-primary uppercase text-xs">Printing Edition...</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-light font-sans">
-
+    <div className="min-h-screen bg-[#FCFCFA] text-dark font-sans selection:bg-accent/30">
       <Navbar />
 
-        {/* 🔷 HERO WITH BG IMAGE + COLOR OVERLAY */}
-        <section className="relative py-16 text-center px-4 border-b overflow-hidden">
-
-        {/* 🖼 BACKGROUND IMAGE */}
-        <div className="absolute inset-0">
-            <img
-            src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b"
-            alt="Campus Background"
-            className="w-full h-full object-cover"
-            />
-
-            {/* 🎨 COLOR OVERLAY (KEEPS YOUR THEME) */}
-            <div className="absolute inset-0 bg-primary/90"></div>
+      {/* 🌤️ TOP STATUS BAR */}
+      <div className="bg-primary text-white py-2 text-[10px] font-bold uppercase tracking-widest">
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+          <div className="flex gap-6">
+            <span className="flex items-center gap-1"><MapPin size={12}/> Lipa City, PH</span>
+            <span className="flex items-center gap-1 hidden md:flex"><CloudSun size={12}/> 29°C Partly Cloudy</span>
+            <span className="flex items-center gap-1"><Calendar size={12}/> {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+          </div>
+          <div className="flex gap-6">
+            <span className="flex items-center gap-1 hidden sm:flex"><Users size={12}/> 1,240 Campus Readers Online</span>
+            <span>● Volume IV, Issue II</span>
+          </div>
         </div>
-
-        {/* 🔤 CONTENT */}
-        <div className="relative z-10 text-white">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            The Binary Bulletin
-            </h1>
-
-            <p className="mt-3 text-sm md:text-base opacity-80">
-            Official Campus Publication of AMA Computer College Lipa
-            </p>
-
-            <Link
-            to="/news"
-            className="inline-block mt-6 bg-white text-primary px-6 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
-            >
-            Explore News
-            </Link>
-        </div>
-
-        </section>
-
-      <div className="max-w-7xl mx-auto p-6">
-
-        {/* ⏳ LOADING */}
-        {loading && (
-          <div className="flex justify-center py-16">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
-
-        {/* 🌟 FEATURED */}
-        {!loading && featured && (
-          <section className="mb-12">
-            <h2 className="text-xl font-bold text-dark mb-4 border-l-4 border-primary pl-2">
-              Featured Article
-            </h2>
-
-            <Link to={`/article/${featured.id}`}>
-              <div className="bg-white rounded-xl shadow-card overflow-hidden hover:shadow-lg transition">
-
-                <img
-                  src={getImage(featured)}
-                  alt={featured.title}
-                  className="w-full h-80 object-cover"
-                />
-
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-dark">
-                    {featured.title}
-                  </h3>
-
-                  <p className="text-gray-600 mt-2">
-                    {featured.excerpt || "No description available."}
-                  </p>
-
-                  <p className="text-xs text-gray-400 mt-3">
-                    {new Date(featured.created_at).toLocaleDateString()}
-                  </p>
-
-                  <span className="inline-block mt-3 text-secondary text-sm font-medium">
-                    Read more →
-                  </span>
-                </div>
-
-              </div>
-            </Link>
-          </section>
-        )}
-
-        {/* 📰 LATEST NEWS (UNCHANGED) */}
-        <section className="mb-12">
-
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-dark border-l-4 border-primary pl-2">
-              Latest News
-            </h2>
-
-            <Link to="/news" className="text-secondary text-sm hover:underline">
-              View all →
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-
-            {articles.slice(1, 4).map((article) => (
-              <Link key={article.id} to={`/article/${article.id}`}>
-
-                <div className="bg-white rounded-xl shadow-card overflow-hidden hover:shadow-lg transition">
-
-                  <img
-                    src={getImage(article)}
-                    alt={article.title}
-                    className="h-40 w-full object-cover"
-                  />
-
-                  <div className="p-4">
-                    <h4 className="font-semibold text-dark line-clamp-2">
-                      {article.title}
-                    </h4>
-
-                    <p className="text-sm text-gray-500 mt-2 line-clamp-3">
-                      {article.excerpt || "No description available."}
-                    </p>
-
-                    <p className="text-xs text-gray-400 mt-3">
-                      {new Date(article.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                </div>
-
-              </Link>
-            ))}
-
-          </div>
-
-        </section>
-
-        {/* 🔥 NEWS HIGHLIGHT SECTION */}
-        <section className="mb-12 grid md:grid-cols-3 gap-6">
-
-        {/* 📰 LEFT: AUTOPLAY CAROUSEL */}
-        <div className="md:col-span-2 bg-white rounded-xl shadow overflow-hidden">
-
-            {articles.length > 0 && (
-            <Link to={`/article/${articles[slide]?.id}`}>
-
-                <div className="relative">
-
-                <img
-                    src={getImage(articles[slide])}
-                    className="w-full h-64 object-cover"
-                />
-
-                <div className="p-4">
-
-                    <h2 className="text-lg font-bold line-clamp-2">
-                    {articles[slide]?.title}
-                    </h2>
-
-                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                    {articles[slide]?.excerpt}
-                    </p>
-
-                    <div className="flex justify-between items-center mt-3 text-xs text-gray-400">
-                    <span>
-                        {new Date(
-                        articles[slide]?.created_at
-                        ).toLocaleDateString()}
-                    </span>
-
-                    <span>
-                        {articles[slide]?.author_name || "Campus Writer"}
-                    </span>
-                    </div>
-
-                    <span className="text-primary text-sm mt-2 inline-block">
-                    Read Article →
-                    </span>
-
-                </div>
-
-                </div>
-
-            </Link>
-            )}
-
-        </div>
-
-        {/* 🔥 RIGHT: LATEST LIST */}
-        <div className="bg-white rounded-xl shadow p-4">
-
-            <div className="flex justify-between items-center mb-3">
-            <h3 className="font-bold">Latest</h3>
-
-            <Link
-                to="/news"
-                className="text-xs text-primary hover:underline"
-            >
-                View All →
-            </Link>
-            </div>
-
-            <div className="space-y-4">
-
-            {articles.slice(0, 5).map((a) => (
-                <Link key={a.id} to={`/article/${a.id}`}>
-
-                <div className="flex gap-3 group">
-
-                    {/* IMAGE */}
-                    <img
-                    src={getImage(a)}
-                    className="w-16 h-16 object-cover rounded"
-                    />
-
-                    {/* TEXT */}
-                    <div className="flex-1">
-
-                    <h4 className="text-sm font-semibold line-clamp-2 group-hover:text-primary">
-                        {a.title}
-                    </h4>
-
-                    <p className="text-xs text-gray-400 mt-1">
-                        {new Date(a.created_at).toLocaleDateString()}
-                    </p>
-
-                    <p className="text-xs text-gray-500 line-clamp-1">
-                        {a.author_name || "Campus Writer"}
-                    </p>
-
-                    </div>
-
-                </div>
-
-                </Link>
-            ))}
-
-            </div>
-
-        </div>
-
-        </section>
-
-        {/* 🆕 CATEGORIES WITH CAROUSEL */}
-        <section className="mb-12 grid md:grid-cols-2 gap-8">
-
-        {["Sports", "Opinion", "Feature", "Editorial", "Literary"].map((cat) => {
-            const items = getCategory(cat);
-
-            return (
-            <div key={cat}>
-
-                {/* TITLE */}
-                <h2 className="text-xl font-bold border-l-4 border-primary pl-2 mb-4">
-                {cat}
-                </h2>
-
-                {/* ⭐ FEATURED */}
-                {items[0] && (
-                <Link to={`/article/${items[0].id}`}>
-                    <div className="bg-white rounded-xl shadow-card overflow-hidden mb-4 hover:shadow-lg transition">
-
-                    <img
-                        src={getImage(items[0])}
-                        className="w-full h-40 object-cover"
-                    />
-
-                    <div className="p-4">
-                        <h3 className="font-bold line-clamp-2">
-                        {items[0].title}
-                        </h3>
-
-                        <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                        {items[0].excerpt || "No description available."}
-                        </p>
-
-                        <span className="text-primary text-sm mt-2 inline-block">
-                        Read Article →
-                        </span>
-                    </div>
-
-                    </div>
-                </Link>
-                )}
-
-                {/* 🔥 CAROUSEL */}
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-
-                {items.slice(1).map((a) => (
-                    <Link key={a.id} to={`/article/${a.id}`}>
-
-                    <div className="min-w-[180px] bg-white rounded-xl shadow-card hover:shadow-md transition">
-
-                        <img
-                        src={getImage(a)}
-                        className="h-28 w-full object-cover rounded-t-xl"
-                        />
-
-                        <div className="p-3">
-                        <p className="text-sm font-semibold line-clamp-2">
-                            {a.title}
-                        </p>
-
-                        <p className="text-xs text-gray-400 mt-1">
-                            {new Date(a.created_at).toLocaleDateString()}
-                        </p>
-
-                        <span className="text-xs text-primary mt-1 inline-block">
-                            Read →
-                        </span>
-                        </div>
-
-                    </div>
-
-                    </Link>
-                ))}
-
-                </div>
-
-            </div>
-            );
-        })}
-
-        </section>
-
-        {/* 🎯 QUICK SECTIONS (UNCHANGED) */}
-        <section className="grid md:grid-cols-3 gap-6">
-
-          <div className="bg-white p-6 rounded-xl shadow-card hover:shadow-md transition">
-            <h3 className="font-bold text-lg text-dark">Events</h3>
-            <p className="text-gray-500 text-sm mt-2">
-              Stay updated with upcoming campus activities and programs.
-            </p>
-            <Link to="/events" className="text-secondary text-sm mt-3 inline-block">
-              View events →
-            </Link>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-card hover:shadow-md transition">
-            <h3 className="font-bold text-lg text-dark">Announcements</h3>
-            <p className="text-gray-500 text-sm mt-2">
-              Official announcements and important updates.
-            </p>
-            <Link to="/announcements" className="text-secondary text-sm mt-3 inline-block">
-              View →
-            </Link>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-card hover:shadow-md transition">
-            <h3 className="font-bold text-lg text-dark">Contact</h3>
-            <p className="text-gray-500 text-sm mt-2">
-              Connect with our editorial team and staff.
-            </p>
-            <Link to="/contact" className="text-secondary text-sm mt-3 inline-block">
-              Contact →
-            </Link>
-          </div>
-
-        </section> 
-
-        {/* 🏫 ABOUT (UNCHANGED) */}
-        <section className="mt-12 bg-white p-6 rounded-xl shadow-card">
-          <h3 className="text-lg font-bold text-dark mb-2 border-l-4 border-primary pl-2">
-            About The Binary Bulletin
-          </h3>
-
-          <p className="text-gray-600 text-sm">
-            The Binary Bulletin is the official campus publication of AMA Computer College Lipa,
-            delivering reliable campus news, feature stories, and student-driven content.
-          </p>
-
-          <Link to="/about" className="text-secondary text-sm mt-3 inline-block">
-            Learn more →
-          </Link>
-        </section>
-
       </div>
 
+      {/* 🚀 IMPACT HERO SECTION */}
+      <section className="relative h-[85vh] flex items-center overflow-hidden bg-primary">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b" 
+            className="w-full h-full object-cover opacity-50 grayscale" 
+            alt="Campus Background"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/60 to-transparent"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
+          <div className="max-w-2xl text-white space-y-4">
+             <div className="inline-block bg-secondary px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-4">
+               ● The Official Publication of AMA Lipa
+             </div>
+             <h1 className="text-7xl md:text-[10rem] font-black leading-[0.85] tracking-tighter mb-6">
+               THE<br/>BINARY
+             </h1>
+             <p className="text-xl text-white/90 font-medium leading-relaxed border-l-4 border-accent pl-6 max-w-lg">
+               Decoding stories, campus updates, and technological breakthroughs for the modern student.
+             </p>
+             <div className="flex flex-wrap gap-4 pt-8">
+               <Link to="/news" className="bg-white text-primary px-8 py-4 rounded-lg font-black text-sm uppercase tracking-widest hover:bg-slate-100 transition-all">
+                 Latest News
+               </Link>
+               <div className="relative flex-grow max-w-xs">
+                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" size={18} />
+                 <input 
+                    type="text" 
+                    placeholder="Search articles..." 
+                    className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-lg py-4 pl-12 pr-4 text-white placeholder:text-white/40 outline-none"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                 />
+               </div>
+             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ⚡ TRUE DATA BREAKING NEWS TICKER */}
+      <div className="bg-dark text-white py-3 overflow-hidden whitespace-nowrap border-y border-dark">
+        <div className="flex animate-marquee gap-12 items-center font-sans text-[11px] font-black uppercase tracking-widest">
+          {/* We render the set twice to ensure seamless looping */}
+          {[1, 2].map((set) => (
+            <div key={set} className="flex gap-12 items-center">
+              {headlines.length > 0 ? (
+                headlines.map((text, index) => (
+                  <span key={index} className="flex items-center gap-3">
+                    <Zap size={14} className="text-accent" fill="currentColor"/> 
+                    {text}
+                  </span>
+                ))
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Zap size={14} className="text-accent" fill="currentColor"/> 
+                  Fetching Latest Headlines...
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <main className="max-w-7xl mx-auto px-6 py-18">
+        {/* 🏛️ TRADITIONAL NEWSPAPER GRID */}
+        <div className="grid lg:grid-cols-12 gap-10 mb-22">
+          
+          {/* Left: Opinion & Editorial */}
+          <div className="lg:col-span-3 space-y-10 border-r border-gray-100 pr-10 hidden lg:block">
+            <div className="bg-light p-6 rounded-xl border border-gray-200">
+               <div className="flex items-center gap-2 mb-4 text-primary">
+                 <Quote size={20} fill="currentColor"/>
+                 <h2 className="font-black uppercase text-xs tracking-widest">Editorial</h2>
+               </div>
+               {categorized.editorial[0] && (
+                 <Link to={`/article/${categorized.editorial[0].id}`} className="group">
+                    <h3 className="font-serif text-xl font-bold leading-tight mb-4 group-hover:text-secondary transition-colors">
+                      {categorized.editorial[0].title}
+                    </h3>
+                    <span className="text-[10px] font-black uppercase text-primary border-b border-primary pb-1">Read Full Statement</span>
+                 </Link>
+               )}
+            </div>
+
+            <div className="space-y-6">
+              <h2 className="font-black border-b-2 border-dark pb-1 text-xs uppercase tracking-widest">Campus Voices</h2>
+              {categorized.opinion.slice(0, 4).map(a => (
+                <Link key={a.id} to={`/article/${a.id}`} className="block group border-b border-gray-100 pb-4">
+                  <h4 className="font-bold leading-snug group-hover:text-primary transition-colors mb-1">{a.title}</h4>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">By Editorial Staff</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Center: Top Trending Story */}
+          <div className="lg:col-span-6 space-y-8">
+            <h2 className="uppercase tracking-[0.3em] font-black text-[10px] text-secondary">The Lead Coverage</h2>
+            {featured && (
+              <Link to={`/article/${featured.id}`} className="group block">
+                <div className="relative aspect-[16/10] overflow-hidden rounded-2xl mb-6 shadow-card">
+                  <img src={featured.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Lead"/>
+                  <div className="absolute top-4 left-4 bg-accent text-dark font-black text-[10px] px-3 py-1 rounded uppercase">Front Page</div>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black leading-[0.9] tracking-tighter mb-4 group-hover:text-primary transition-colors font-serif">
+                  {featured.title}
+                </h2>
+                <p className="text-gray-500 text-lg leading-relaxed line-clamp-3 font-medium italic">"{featured.excerpt}"</p>
+                <div className="flex items-center gap-4 mt-6 font-black text-[10px] uppercase tracking-widest text-secondary">
+                  <span>{formatDate(featured.created_at)}</span>
+                  <span>•</span>
+                  <span>5 MIN READ</span>
+                </div>
+              </Link>
+            )}
+          </div>
+
+          {/* Right: The Latest Bulletins */}
+          <div className="lg:col-span-3 border-l border-gray-100 pl-10 space-y-8">
+            <h2 className="font-black border-b-2 border-dark pb-1 text-xs uppercase tracking-widest flex items-center gap-2">
+              <TrendingUp size={16}/> The Latest
+            </h2>
+            <div className="divide-y divide-gray-100">
+              {articles.slice(1, 6).map((a) => (
+                <Link key={a.id} to={`/article/${a.id}`} className="py-4 block group">
+                  <span className="text-[9px] font-black text-primary uppercase tracking-widest">{a.category}</span>
+                  <h4 className="font-bold text-md leading-tight group-hover:underline decoration-accent underline-offset-4">{a.title}</h4>
+                </Link>
+              ))}
+            </div>
+            
+            <div className="bg-dark text-white p-6 rounded-xl text-center space-y-3 shadow-card">
+               <Award size={32} className="mx-auto text-accent"/>
+               <h3 className="font-black text-[10px] uppercase tracking-[0.2em]">Student Merit</h3>
+               <p className="text-[11px] text-gray-400 italic">Submit your literary works for the upcoming Volume IV Issue.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 🖋️ DEDICATED OPINION & LITERARY SECTION */}
+        <div className="grid lg:grid-cols-2 gap-12 mb-22">
+          {/* Column: Opinion */}
+          <section className="pt-12 border-t-2 border-dark">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-black uppercase tracking-tighter italic text-primary flex items-center gap-2">
+                <PenTool size={24} className="text-accent" /> Opinion
+              </h2>
+            </div>
+            <div className="space-y-6">
+              {categorized.opinion.slice(0, 3).map((a) => (
+                <Link key={a.id} to={`/article/${a.id}`} className="flex gap-4 group">
+                  <div className="w-20 h-20 flex-shrink-0 bg-light rounded-lg overflow-hidden border border-gray-100">
+                    <img src={a.image_url} className="w-full h-full object-cover grayscale" alt="op-thumb" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg leading-tight group-hover:text-secondary transition-colors line-clamp-2">{a.title}</h4>
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-1 italic">By Student Columnist</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* Column: Literary */}
+          <section className="pt-12 border-t-2 border-dark">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-black uppercase tracking-tighter italic text-primary flex items-center gap-2">
+                <BookOpen size={24} className="text-accent" /> Literary
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {categorized.literary.slice(0, 2).map((a) => (
+                <Link key={a.id} to={`/article/${a.id}`} className="relative aspect-[4/5] overflow-hidden rounded-xl bg-dark group">
+                  <img src={a.image_url} className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" alt="lit-thumb" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-80"></div>
+                  <div className="absolute bottom-0 p-4">
+                    <h4 className="text-white font-bold text-sm leading-tight group-hover:text-accent transition-colors">{a.title}</h4>
+                    <span className="text-[8px] font-black text-white/50 uppercase tracking-widest mt-2 block">Poetry / Prose</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* 📚 THE BIG THREE CATEGORIES */}
+        {["News", "Sports", "Feature"].map((cat) => (
+          categorized[cat.toLowerCase()].length > 0 && (
+            <section key={cat} className="pt-12 border-t-2 border-dark mb-18">
+              <div className="flex items-end justify-between mb-8">
+                <div>
+                  <h2 className="text-4xl font-black uppercase tracking-tighter italic text-primary">{cat}</h2>
+                  <div className="h-1 w-20 bg-accent mt-1"></div>
+                </div>
+                <Link to="/news" className="text-[10px] font-black uppercase tracking-widest border-b-2 border-dark pb-1 hover:text-primary transition-colors">Full Archive</Link>
+              </div>
+              <div className="grid md:grid-cols-3 gap-10">
+                {categorized[cat.toLowerCase()].slice(0, 3).map((article) => (
+                  <Link key={article.id} to={`/article/${article.id}`} className="group">
+                    <div className="aspect-video bg-gray-100 mb-6 overflow-hidden rounded-xl shadow-sm grayscale group-hover:grayscale-0 transition-all duration-500">
+                      <img src={article.image_url} className="w-full h-full object-cover" alt="thumb" />
+                    </div>
+                    <h4 className="text-xl font-bold leading-tight mb-2 group-hover:text-secondary font-serif">{article.title}</h4>
+                    <p className="text-sm text-gray-500 line-clamp-2 font-medium">{article.excerpt}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )
+        ))}
+
+        {/* 📬 NEWSLETTER SECTION */}
+        <section className="bg-white border-4 border-dark p-12 md:p-22 text-center my-22 rounded-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+          <div className="max-w-xl mx-auto space-y-6 relative z-10">
+            <Newspaper size={48} className="mx-auto text-primary" />
+            <h2 className="text-5xl font-black uppercase tracking-tighter">Stay Wired.</h2>
+            <p className="font-medium text-gray-600 italic text-lg">Get the Bulletin digest delivered to your campus inbox every Monday morning.</p>
+            <div className="flex flex-col md:flex-row gap-3 mt-8">
+              <input 
+                type="email" 
+                placeholder="ama.student@email.com" 
+                className="flex-grow border-2 border-dark px-6 py-4 rounded-lg font-bold focus:outline-none focus:bg-light"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <button className="bg-dark text-white px-10 py-4 rounded-lg font-black uppercase text-xs tracking-widest hover:bg-primary transition-colors">
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
       <Footer />
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          display: flex;
+          width: fit-content;
+          animation: marquee 40s linear infinite;
+        }
+      `}} />
     </div>
   );
 }

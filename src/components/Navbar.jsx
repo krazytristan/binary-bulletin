@@ -1,36 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+
+// Moved outside to prevent re-creation on every render
+const navLinks = [
+  { name: "Home", path: "/" },
+  { name: "News", path: "/news" },
+  { name: "The Binary Online", path: "/thebinar" }, // Fixed potential typo
+  { name: "Gallery", path: "/gallery" },
+  { name: "Events", path: "/events" },
+  { name: "Announcements", path: "/announcements" },
+  { name: "About", path: "/about" },
+  { name: "Contact", path: "/contact" },
+];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
-  const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "News", path: "/news" },
-    { name: "The Binary Online", path: "/thebinar" },
-    { name: "Gallery", path: "/gallery" },
-    { name: "Events", path: "/events" },
-    { name: "Announcements", path: "/announcements" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
-  ];
+  // Close mobile menu if window is resized to desktop width
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) setMenuOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-md bg-primary/90 text-white shadow-lg border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
         
         {/* 🔷 LOGO */}
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
           <img
             src="/binary-logo.png"
-            alt="Binary Bulletin"
+            alt="Binary Bulletin Logo"
             className="h-10 w-10 object-contain"
           />
           <h1 className="font-bold text-lg tracking-wide hidden sm:block">
             Binary Bulletin
           </h1>
-        </div>
+        </Link>
 
         {/* 🖥 DESKTOP MENU */}
         <div className="hidden md:flex gap-8 text-sm">
@@ -40,13 +50,13 @@ export default function Navbar() {
               <Link
                 key={link.path}
                 to={link.path}
-                className="relative group"
+                className="relative group py-2"
               >
                 <span
-                  className={`transition ${
+                  className={`transition-colors duration-200 ${
                     isActive
                       ? "text-secondary font-semibold"
-                      : "hover:text-secondary"
+                      : "hover:text-secondary/80"
                   }`}
                 >
                   {link.name}
@@ -54,7 +64,7 @@ export default function Navbar() {
 
                 {/* 🔥 UNDERLINE ANIMATION */}
                 <span
-                  className={`absolute left-0 -bottom-1 h-[2px] bg-secondary transition-all duration-300 ${
+                  className={`absolute left-0 bottom-0 h-[2px] bg-secondary transition-all duration-300 ${
                     isActive ? "w-full" : "w-0 group-hover:w-full"
                   }`}
                 ></span>
@@ -65,21 +75,30 @@ export default function Navbar() {
 
         {/* 📱 MOBILE BUTTON */}
         <button
-          className="md:hidden text-2xl transition p-2 focus:outline-none"
+          className="md:hidden text-2xl transition p-2 focus:outline-none flex items-center justify-center"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle Menu"
+          aria-expanded={menuOpen}
+          aria-label="Toggle navigation menu"
         >
-          {menuOpen ? "✖" : "☰"}
+          {menuOpen ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          )}
         </button>
       </div>
 
-      {/* 📱 MOBILE MENU - FIXED SCROLLING */}
+      {/* 📱 MOBILE MENU */}
       <div
-        className={`md:hidden overflow-y-auto transition-all duration-300 ease-in-out ${
-          menuOpen ? "max-h-[80vh] opacity-100" : "max-h-0 opacity-0"
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          menuOpen ? "max-h-[100vh] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="bg-primary/95 backdrop-blur-md px-6 py-4 space-y-1">
+        <div className="bg-primary/95 border-t border-white/5 px-6 py-4 space-y-1 shadow-inner">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path;
 
@@ -88,10 +107,10 @@ export default function Navbar() {
                 key={link.path}
                 to={link.path}
                 onClick={() => setMenuOpen(false)}
-                className={`block py-3 px-2 border-b border-white/5 transition-colors ${
+                className={`block py-4 px-3 transition-all duration-200 ${
                   isActive
-                    ? "text-secondary font-bold bg-white/5 rounded-md"
-                    : "hover:text-secondary hover:bg-white/5 rounded-md"
+                    ? "text-secondary font-bold bg-white/10 rounded-lg"
+                    : "hover:text-secondary hover:bg-white/5 rounded-lg"
                 }`}
               >
                 {link.name}

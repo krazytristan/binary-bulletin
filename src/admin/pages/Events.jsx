@@ -1,16 +1,320 @@
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
+import { 
+  FileText, 
+  Plus, 
+  Search, 
+  MoreVertical, 
+  Trash2, 
+  Edit3, 
+  ExternalLink,
+  Loader2,
+  Image as ImageIcon,
+  X
+} from "lucide-react";
+
 export default function Articles() {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [form, setForm] = useState({
+    title: "",
+    excerpt: "",
+    content: "",
+    category: "News",
+    author_name: "Campus Writer",
+    image_url: "",
+  });
+
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState("");
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  // 📡 FETCH DATA
+  const fetchArticles = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error) setArticles(data || []);
+    setLoading(false);
+  };
+
+  // 🖼️ HANDLE IMAGE
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (preview) URL.revokeObjectURL(preview); // Memory cleanup
+      setImageFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadImage = async () => {
+    if (!imageFile) return form.image_url;
+
+    const fileExt = imageFile.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `article-thumbnails/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("articles")
+      .upload(filePath, imageFile);
+
+    if (uploadError) return null;
+
+    const { data } = supabase.storage.from("articles").getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
+  // ✍️ SAVE LOGIC
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    const publicUrl = await uploadImage();
+
+    const payload = {
+      ...form,
+      image_url: publicUrl,
+      updated_at: new Date(),
+    };
+
+    let error;
+    if (editing) {
+      const { error: err } = await supabase
+        .from("articles")
+        .update(payload)
+        .eq("id", editing.id);
+      error = err;
+    } else {
+      const { error: err } = await supabase
+        .from("articles")
+        .insert([payload]);
+      error = err;
+    }
+
+    if (!error) {
+      setModalOpen(false);
+      resetForm();
+      fetchArticles();
+    }
+    setSaving(false);
+  };
+
+  const resetForm = () => {
+    setForm({ title: "", excerpt: "", content: "", category: "News", author_name: "Campus Writer", image_url: "" });
+    setEditing(null);
+    setImageFile(null);
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview("");
+  };
+
+  const openEdit = (article) => {
+    setEditing(article);
+    setForm({
+      title: article.title,
+      excerpt: article.excerpt,
+      content: article.content,
+      category: article.category,
+      author_name: article.author_name,
+      image_url: article.image_url,
+    });
+    setPreview(article.image_url);
+    setModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    const { error } = await supabase.from("articles").delete().eq("id", deleteId);
+    if (!error) {
+      setArticles(articles.filter(a => a.id !== deleteId));
+      setDeleteId(null);
+    }
+  };
+
+  const filteredArticles = articles.filter(a => 
+    a.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="p-4 md:p-6">
-
-      <h1 className="text-xl font-bold mb-4">
-        Articles Management
-      </h1>
-
-      <div className="bg-white p-6 rounded-xl shadow">
-        <p className="text-gray-500 text-sm">
-          Articles management coming soon...
-        </p>
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+      
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Articles</h1>
+          <p className="text-gray-500">Create, edit, and manage your news stories.</p>
+        </div>
+        <button 
+          onClick={() => { resetForm(); setModalOpen(true); }}
+          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100"
+        >
+          <Plus size={20} /> New Article
+        </button>
       </div>
+
+      {/* SEARCH & FILTERS */}
+      <div className="relative group max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+        <input 
+          type="text"
+          placeholder="Search articles..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+        />
+      </div>
+
+      {/* TABLE/LIST */}
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+        {loading ? (
+          <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-blue-600" size={32} /></div>
+        ) : filteredArticles.length === 0 ? (
+          <div className="p-20 text-center text-gray-400">No articles found.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50/50 text-xs uppercase tracking-widest text-gray-400 font-bold">
+                  <th className="px-6 py-4">Article</th>
+                  <th className="px-6 py-4">Category</th>
+                  <th className="px-6 py-4">Author</th>
+                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filteredArticles.map((article) => (
+                  <tr key={article.id} className="hover:bg-gray-50/50 transition">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <img src={article.image_url || 'https://via.placeholder.com/150'} className="w-12 h-12 rounded-lg object-cover bg-gray-100" />
+                        <span className="font-bold text-gray-900 line-clamp-1">{article.title}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-[10px] font-black uppercase px-2 py-1 bg-blue-50 text-blue-600 rounded-md">
+                        {article.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{article.author_name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-400">
+                      {new Date(article.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => openEdit(article)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                          <Edit3 size={18} />
+                        </button>
+                        <button onClick={() => setDeleteId(article.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* MODAL */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+          <div className="bg-white p-6 md:p-8 rounded-3xl w-full max-w-3xl shadow-2xl overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-black text-gray-900">{editing ? 'Edit' : 'New'} Article</h2>
+              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X /></button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Title</label>
+                    <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Author</label>
+                    <input required value={form.author_name} onChange={e => setForm({...form, author_name: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Category</label>
+                    <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                      <option>News</option>
+                      <option>Features</option>
+                      <option>Sports</option>
+                      <option>Opinion</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Thumbnail</label>
+                  <div className="relative aspect-video bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
+                    {preview ? (
+                      <>
+                        <img src={preview} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                          <button type="button" onClick={() => { setImageFile(null); setPreview(""); }} className="bg-white p-2 rounded-full text-red-500"><X size={20}/></button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center p-6">
+                        <ImageIcon className="mx-auto text-gray-300 mb-2" size={32} />
+                        <p className="text-xs text-gray-400">Click to upload image</p>
+                      </div>
+                    )}
+                    <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Excerpt</label>
+                <textarea rows="2" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Content</label>
+                <textarea rows="6" value={form.content} onChange={e => setForm({...form, content: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+
+              <button 
+                disabled={saving}
+                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:bg-gray-300 shadow-xl shadow-blue-100"
+              >
+                {saving ? <Loader2 className="animate-spin" size={20} /> : 'Publish Article'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE DIALOG */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[60] p-4">
+          <div className="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Article?</h2>
+            <p className="text-gray-500 mb-6">This will permanently remove the story from the bulletin.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:bg-gray-50 rounded-xl">Cancel</button>
+              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 shadow-lg shadow-red-100">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
