@@ -62,11 +62,27 @@ export default function Gallery() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [viewer, viewerIndex, currentAlbum]);
 
+  // 🦴 SKELETON COMPONENT FOR LOADING STATE
+  const SkeletonAlbum = () => (
+    <div className="flex flex-col animate-pulse">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-gray-200 shadow-sm">
+        <div className="absolute inset-x-0 bottom-0 p-8 space-y-4">
+          <div className="h-8 bg-gray-300 rounded-lg w-3/4"></div>
+          <div className="flex gap-2">
+            <div className="w-12 h-12 rounded-lg bg-gray-300"></div>
+            <div className="w-12 h-12 rounded-lg bg-gray-300"></div>
+            <div className="w-12 h-12 rounded-lg bg-gray-300"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#F9F9F7] text-dark font-sans selection:bg-accent/30">
       <Navbar />
 
-      {/* 🔷 EDITORIAL HEADER (Mirrors News & Multimedia) */}
+      {/* 🔷 EDITORIAL HEADER */}
       <section className="bg-primary text-white pt-24 pb-16 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 pointer-events-none select-none uppercase font-black text-[15rem] leading-none -bottom-10 -left-10">
           GALLERY
@@ -88,7 +104,7 @@ export default function Gallery() {
         </div>
       </section>
 
-      {/* 🔥 SEARCH BAR (Sticky Sync) */}
+      {/* 🔥 SEARCH BAR */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="relative w-full md:w-96 group">
@@ -98,20 +114,25 @@ export default function Gallery() {
               placeholder="Search albums..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-light border-none rounded-full py-3 pl-12 pr-6 focus:ring-2 focus:ring-primary/10 font-bold text-sm"
+              className="w-full bg-light border-none rounded-full py-3 pl-12 pr-6 focus:ring-2 focus:ring-primary/10 font-bold text-sm transition-all"
             />
           </div>
           <div className="hidden md:flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
-            <Camera size={14} /> {filteredEvents.length} Albums
+            <Camera size={14} /> {loading ? "..." : filteredEvents.length} Albums
           </div>
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto p-6 py-12">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-4">
-            <div className="w-10 h-10 border-4 border-primary border-t-accent rounded-full animate-spin"></div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-primary">Developing Photos...</p>
+          <div className="space-y-10">
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 border-2 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Developing Photos...</p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonAlbum key={i} />)}
+            </div>
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-[2.5rem] border-2 border-dashed border-gray-200">
@@ -123,7 +144,6 @@ export default function Gallery() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             {filteredEvents.map((event) => (
               <div key={event.id} className="group flex flex-col">
-                {/* LARGE COVER */}
                 <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-dark shadow-sm group-hover:shadow-2xl transition-all duration-500">
                    <img
                     src={event.images?.[0]}
@@ -132,12 +152,10 @@ export default function Gallery() {
                     alt={event.title}
                   />
                   
-                  {/* PHOTO COUNT BADGE */}
                   <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md text-[10px] font-black px-3 py-1 rounded-full shadow-sm">
                     {event.images?.length} PHOTOS
                   </div>
 
-                  {/* TITLE OVERLAY */}
                   <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
                     <h2 className="text-white text-2xl font-black leading-tight tracking-tight">
                       {event.title}
@@ -166,12 +184,11 @@ export default function Gallery() {
         )}
       </main>
 
-      {/* 🖼 LIGHTBOX VIEWER (High-end sync) */}
+      {/* 🖼 LIGHTBOX VIEWER */}
       {viewer && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-dark/98 backdrop-blur-xl" onClick={() => setViewer(null)} />
           
-          {/* CONTROLS */}
           <button onClick={() => setViewer(null)} className="absolute top-8 right-8 text-white/50 hover:text-accent transition-colors z-[110]">
             <X size={32} />
           </button>

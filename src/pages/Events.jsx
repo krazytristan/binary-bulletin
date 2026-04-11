@@ -2,13 +2,25 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Calendar, MapPin, Clock, ArrowRight, Ticket, Search, Sparkles } from "lucide-react";
+import { 
+  Calendar, 
+  MapPin, 
+  Clock, 
+  ArrowRight, 
+  Ticket, 
+  Search, 
+  Sparkles, 
+  X,
+  Share2,
+  Info
+} from "lucide-react";
 
 export default function Events() {
   const [events, setEvents] = useState([]);
   const [featured, setFeatured] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState(null); // State for Full Details Modal
 
   useEffect(() => {
     fetchEvents();
@@ -23,7 +35,6 @@ export default function Events() {
       .order("event_date", { ascending: true });
 
     if (!error && data) {
-      // Find the first event that is today or in the future to feature
       const today = new Date().toISOString().split('T')[0];
       const futureEvents = data.filter(e => e.event_date >= today);
       
@@ -46,7 +57,7 @@ export default function Events() {
     <div className="min-h-screen bg-[#F9F9F7] text-dark font-sans selection:bg-accent/30">
       <Navbar />
 
-      {/* 🔷 EDITORIAL HEADER (Sync with News/Multimedia/Gallery) */}
+      {/* 🔷 EDITORIAL HEADER */}
       <section className="bg-primary text-white pt-24 pb-16 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 pointer-events-none select-none uppercase font-black text-[15rem] leading-none -bottom-10 -left-10">
           EVENTS
@@ -68,7 +79,7 @@ export default function Events() {
         </div>
       </section>
 
-      {/* 🔥 SEARCH BAR (Sticky Sync) */}
+      {/* 🔥 SEARCH BAR */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="relative w-full md:w-96 group">
@@ -105,7 +116,7 @@ export default function Events() {
                     alt={featured.title}
                   />
                   <div className="absolute top-8 left-8 bg-accent text-dark px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                    <Sparkles size={14} /> Headline Event
+                    <span className="animate-pulse w-2 h-2 bg-dark rounded-full"></span> Headline Event
                   </div>
                 </div>
                 <div className="lg:w-1/2 p-8 md:p-12 flex flex-col justify-center">
@@ -125,10 +136,14 @@ export default function Events() {
                     </div>
                     <div>
                       <p className="text-[9px] font-black uppercase text-gray-400 mb-1">Schedule</p>
-                      <p className="text-sm font-bold flex items-center gap-1"><Clock size={14} className="text-accent" /> {featured.time || "See Details"}</p>
+                      <p className="text-sm font-bold flex items-center gap-1"><Clock size={14} className="text-accent" /> {featured.event_time || "See Details"}</p>
                     </div>
                   </div>
-                  <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-dark text-white w-fit px-8 py-4 rounded-full hover:bg-primary transition-colors">
+                  {/* Updated: View Details Trigger */}
+                  <button 
+                    onClick={() => setSelectedEvent(featured)}
+                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-dark text-white w-fit px-8 py-4 rounded-full hover:bg-primary transition-all active:scale-95 shadow-lg shadow-dark/10"
+                  >
                     View Full Details <ArrowRight size={16} />
                   </button>
                 </div>
@@ -146,7 +161,8 @@ export default function Events() {
                 filteredEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="group bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
+                    onClick={() => setSelectedEvent(event)}
+                    className="group bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
                   >
                     <div className="mb-6 flex justify-between items-start">
                       <div className="bg-light p-3 rounded-2xl group-hover:bg-accent transition-colors">
@@ -180,6 +196,84 @@ export default function Events() {
           </>
         )}
       </main>
+
+      {/* 🖼️ EVENT DETAILS MODAL (Pop-up) */}
+      {selectedEvent && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setSelectedEvent(null)}></div>
+          
+          <div className="relative bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300">
+            {/* Close Button */}
+            <button 
+              onClick={() => setSelectedEvent(null)}
+              className="absolute top-6 right-6 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white md:text-dark md:bg-gray-100 md:hover:bg-gray-200 p-2 rounded-full transition-all"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="flex flex-col md:flex-row">
+              {/* Image Side */}
+              <div className="md:w-1/2 h-64 md:h-auto sticky top-0">
+                <img 
+                  src={selectedEvent.image_url || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070"} 
+                  className="w-full h-full object-cover" 
+                  alt={selectedEvent.title}
+                />
+              </div>
+
+              {/* Content Side */}
+              <div className="md:w-1/2 p-8 md:p-12">
+                <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-widest mb-4">
+                  <Sparkles size={14} className="text-accent" /> Campus Event
+                </div>
+                
+                <h2 className="text-3xl md:text-4xl font-black tracking-tighter leading-tight mb-6 italic">
+                  {selectedEvent.title}
+                </h2>
+
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-light p-2.5 rounded-xl"><Calendar size={18} className="text-primary" /></div>
+                    <div>
+                      <p className="text-[9px] font-black text-gray-400 uppercase">When</p>
+                      <p className="text-sm font-bold">{new Date(selectedEvent.event_date).toLocaleDateString("en-GB", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-light p-2.5 rounded-xl"><Clock size={18} className="text-primary" /></div>
+                    <div>
+                      <p className="text-[9px] font-black text-gray-400 uppercase">Time</p>
+                      <p className="text-sm font-bold">{selectedEvent.event_time || "TBA"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-light p-2.5 rounded-xl"><MapPin size={18} className="text-primary" /></div>
+                    <div>
+                      <p className="text-[9px] font-black text-gray-400 uppercase">Where</p>
+                      <p className="text-sm font-bold">{selectedEvent.location || "AMA Lipa Campus"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="prose prose-sm mb-8">
+                  <p className="text-gray-500 font-medium leading-relaxed">
+                    {selectedEvent.description}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-4 pt-8 border-t border-gray-100">
+                  <button className="flex-1 bg-primary text-white text-[10px] font-black uppercase tracking-widest py-4 rounded-full hover:bg-dark transition-colors flex items-center justify-center gap-2">
+                    Add to Calendar
+                  </button>
+                  <button className="p-4 bg-gray-100 text-dark rounded-full hover:bg-gray-200 transition-colors">
+                    <Share2 size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

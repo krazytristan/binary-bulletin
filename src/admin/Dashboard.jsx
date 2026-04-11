@@ -40,14 +40,19 @@ export default function Dashboard() {
   }, []);
 
   const fetchStats = async () => {
-    const fetchCount = (table) => 
-      supabase.from(table).select("*", { count: "exact", head: true });
+    const fetchCount = (table, filterRead = false) => {
+      let query = supabase.from(table).select("*", { count: "exact", head: true });
+      if (filterRead) {
+        query = query.eq("is_read", false);
+      }
+      return query;
+    };
 
     const [art, eve, ann, msg] = await Promise.all([
       fetchCount("articles"),
       fetchCount("events"),
       fetchCount("announcements"),
-      fetchCount("contacts"),
+      fetchCount("messages", true),
     ]);
 
     setStats({
@@ -81,7 +86,7 @@ export default function Dashboard() {
     { label: "Articles", value: stats.articles, icon: <FileText size={20}/>, color: "text-blue-600", bg: "bg-blue-50" },
     { label: "Events", value: stats.events, icon: <Calendar size={20}/>, color: "text-purple-600", bg: "bg-purple-50" },
     { label: "Announcements", value: stats.announcements, icon: <Megaphone size={20}/>, color: "text-orange-600", bg: "bg-orange-50" },
-    { label: "Messages", value: stats.messages, icon: <Mail size={20}/>, color: "text-green-600", bg: "bg-green-50" },
+    { label: "New Messages", value: stats.messages, icon: <Mail size={20}/>, color: "text-green-600", bg: "bg-green-50" },
   ];
 
   return (
@@ -91,7 +96,7 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Overview</h1>
-          <p className="text-gray-500">Here's what's happening with Binary Bulletin today.</p>
+          <p className="text-gray-500">Here's what's happening with THE BINARY BULLETIN today.</p>
         </div>
         <div className="flex gap-3">
           <Link to="/admin/announcements" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
@@ -116,9 +121,11 @@ export default function Dashboard() {
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500">{stat.label}</h3>
-              <p className="text-2xl font-bold text-gray-900">
-                {loading ? <span className="inline-block w-8 h-6 bg-gray-100 animate-pulse rounded" /> : stat.value}
-              </p>
+              {loading ? (
+                <div className="h-7 w-12 bg-gray-100 animate-pulse rounded mt-1" />
+              ) : (
+                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+              )}
             </div>
           </div>
         ))}
@@ -138,7 +145,7 @@ export default function Dashboard() {
           <div className="min-h-[300px]">
             {loading ? (
               <div className="p-6 space-y-4">
-                {[1, 2, 3].map((n) => (
+                {[1, 2, 3, 4, 5].map((n) => (
                   <div key={n} className="flex gap-4 animate-pulse">
                     <div className="w-10 h-10 bg-gray-100 rounded-lg" />
                     <div className="flex-1 space-y-2 py-1">

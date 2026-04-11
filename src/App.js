@@ -23,6 +23,7 @@ import AdminTheBinar from "./admin/pages/AdminTheBinar";
 import AdminEvents from "./admin/pages/Events";
 import AdminAnnouncements from "./admin/pages/Announcements";
 import Messages from "./admin/pages/Messages";
+import Settings from "./admin/pages/Settings";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
           <Route path="events" element={<AdminEvents />} />
           <Route path="announcements" element={<AdminAnnouncements />} />
           <Route path="messages" element={<Messages />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* 404 */}

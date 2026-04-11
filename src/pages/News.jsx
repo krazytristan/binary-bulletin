@@ -51,6 +51,20 @@ export default function News() {
     return `${article.image_url}?t=${cacheBuster}`;
   };
 
+  // 🦴 SKELETON COMPONENT FOR LOADING
+  const SkeletonCard = () => (
+    <div className="flex flex-col animate-pulse">
+      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl mb-5 bg-gray-200"></div>
+      <div className="space-y-3">
+        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+        <div className="h-6 bg-gray-200 rounded w-full"></div>
+        <div className="h-6 bg-gray-200 rounded w-2/3"></div>
+        <div className="h-3 bg-gray-200 rounded w-full mt-4"></div>
+        <div className="h-3 bg-gray-200 rounded w-full"></div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#F9F9F7] text-dark font-sans selection:bg-accent/30">
       <Navbar />
@@ -115,9 +129,14 @@ export default function News() {
         {/* 📰 NEWS FEED */}
         <div className="lg:col-span-8">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-32 space-y-4">
-              <div className="w-10 h-10 border-4 border-gray-200 border-t-primary rounded-full animate-spin"></div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Syncing Database</p>
+            <div className="space-y-12">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-gray-200 border-t-primary rounded-full animate-spin"></div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Syncing Database...</p>
+              </div>
+              <div className="grid md:grid-cols-2 gap-x-8 gap-y-12">
+                {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonCard key={i} />)}
+              </div>
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-gray-200">

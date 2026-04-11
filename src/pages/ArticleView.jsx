@@ -7,39 +7,52 @@ import Footer from "../components/Footer";
 export default function ArticleView() {
   const { id } = useParams();
 
+  // --- DATA STATES ---
   const [article, setArticle] = useState(null);
   const [related, setRelated] = useState([]);
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState("");
 
+  // --- UI STATES ---
+  const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState(0);
   const [liked, setLiked] = useState(false);
-
   const [bookmarked, setBookmarked] = useState(false);
-
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    fetchArticle();
-    fetchComments();
-    fetchLikes();
-    checkBookmark();
+    setLoading(true);
+    window.scrollTo(0, 0);
+
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          fetchArticle(),
+          fetchComments(),
+          fetchLikes(),
+          checkBookmark(),
+        ]);
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [id]);
 
-  // 🔥 SCROLL PROGRESS
+  // 🔥 READING PROGRESS
   const handleScroll = () => {
-    const total =
-      document.documentElement.scrollHeight -
-      document.documentElement.clientHeight;
-
+    const total = document.documentElement.scrollHeight - document.documentElement.clientHeight;
     const current = window.scrollY;
     setProgress((current / total) * 100);
   };
 
-  // 🔥 FETCH ARTICLE
+  // 🔥 FETCH CONTENT
   const fetchArticle = async () => {
     const { data } = await supabase
       .from("articles")
@@ -49,282 +62,208 @@ export default function ArticleView() {
 
     if (data) {
       setArticle(data);
-
+      // Fetch related items from same category
       const { data: relatedData } = await supabase
         .from("articles")
         .select("*")
         .eq("category", data.category)
         .neq("id", id)
-        .limit(3);
-
+        .limit(4);
       setRelated(relatedData || []);
     }
   };
 
-  // 🖼 IMAGE FIX
   const getImage = (a) => {
     if (!a?.image_url) return "https://picsum.photos/800/400";
-
     const t = new Date(a.updated_at || a.created_at).getTime();
     return `${a.image_url}?t=${t}`;
   };
 
-  // 👍 FETCH LIKES
+  // 🔥 INTERACTION LOGIC
   const fetchLikes = async () => {
-    const { data } = await supabase
-      .from("likes")
-      .select("*")
-      .eq("article_id", id);
-
+    const { data } = await supabase.from("likes").select("*").eq("article_id", id);
     setLikes(data?.length || 0);
   };
 
   const handleLike = async () => {
     if (liked) return;
-
-    await supabase.from("likes").insert({
-      article_id: id,
-    });
-
+    await supabase.from("likes").insert({ article_id: id });
     setLikes((prev) => prev + 1);
     setLiked(true);
   };
 
-  // 🔖 BOOKMARK
   const checkBookmark = async () => {
-    const { data } = await supabase
-      .from("bookmarks")
-      .select("*")
-      .eq("article_id", id);
-
+    const { data } = await supabase.from("bookmarks").select("*").eq("article_id", id);
     if (data?.length > 0) setBookmarked(true);
   };
 
   const toggleBookmark = async () => {
     if (bookmarked) {
-      await supabase
-        .from("bookmarks")
-        .delete()
-        .eq("article_id", id);
-
+      await supabase.from("bookmarks").delete().eq("article_id", id);
       setBookmarked(false);
     } else {
-      await supabase.from("bookmarks").insert({
-        article_id: id,
-      });
-
+      await supabase.from("bookmarks").insert({ article_id: id });
       setBookmarked(true);
     }
   };
 
-  // 💬 COMMENTS
+  // 🔥 COMMENTS LOGIC
   const fetchComments = async () => {
     const { data } = await supabase
       .from("comments")
       .select("*")
       .eq("article_id", id)
       .order("created_at", { ascending: false });
-
     setComments(data || []);
   };
 
   const addComment = async () => {
-    if (!comment) return;
-
-    await supabase.from("comments").insert({
-      article_id: id,
-      text: comment,
-    });
-
+    if (!comment.trim()) return;
+    await supabase.from("comments").insert({ article_id: id, text: comment });
     setComment("");
     fetchComments();
   };
 
-  // 🔗 SHARE
-  const shareFB = () => {
-    const url = window.location.href;
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
-  };
-
-  const copyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    alert("Link copied!");
-  };
+  const shareFB = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`);
+  const copyLink = () => { navigator.clipboard.writeText(window.location.href); alert("Link copied!"); };
 
   return (
-    <div className="min-h-screen bg-light font-sans">
-
+    <div className="min-h-screen bg-white font-sans text-slate-900">
       <Navbar />
 
-      {/* 🔥 PROGRESS BAR */}
-      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
-        <div
-          className="h-1 bg-primary"
-          style={{ width: `${progress}%` }}
-        />
+      {/* Progress Line */}
+      <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 z-50">
+        <div className="h-full bg-blue-600 transition-all duration-150" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
+        
+        {loading ? (
+          <div className="space-y-6 animate-pulse">
+            <div className="h-4 bg-gray-200 w-24 rounded" />
+            <div className="h-10 bg-gray-200 w-full rounded" />
+            <div className="h-64 md:h-96 bg-gray-200 w-full rounded-2xl" />
+          </div>
+        ) : article && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            
+            {/* --- LEFT: MAIN CONTENT --- */}
+            <main className="lg:col-span-8">
+              <header>
+                <Link to="/news" className="text-xs font-bold text-blue-600 uppercase tracking-tighter hover:underline">
+                  ← Back to Feed
+                </Link>
+                <div className="mt-4">
+                  <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">
+                    {article.category}
+                  </span>
+                  <h1 className="text-2xl md:text-5xl font-black mt-3 leading-tight tracking-tight">
+                    {article.title}
+                  </h1>
+                </div>
 
-        {!article && (
-          <p className="text-center text-gray-500">Loading...</p>
-        )}
-
-        {article && (
-          <>
-            {/* CATEGORY */}
-            <span className="text-xs text-secondary font-semibold uppercase">
-              {article.category}
-            </span>
-
-            {/* TITLE */}
-            <h1 className="text-3xl font-bold mt-2">
-              {article.title}
-            </h1>
-
-            {/* DATE */}
-            <p className="text-sm text-gray-400 mt-1">
-              {new Date(article.created_at).toLocaleDateString()}
-            </p>
-
-            {/* IMAGE */}
-            <img
-              src={getImage(article)}
-              className="w-full h-80 object-cover rounded-xl mt-6"
-            />
-
-            {/* AUTHOR */}
-            <div className="mt-6 flex items-center gap-3">
-            <img
-                src={
-                article.author_image ||
-                "https://i.pravatar.cc/40"
-                }
-                className="w-10 h-10 rounded-full object-cover"
-            />
-            <div>
-                <p className="text-sm font-semibold">
-                {article.author_name || "Campus Writer"}
-                </p>
-                <p className="text-xs text-gray-400">
-                The Binary Bulletin
-                </p>
-            </div>
-            </div>
-            {/* ACTIONS */}
-            <div className="flex gap-4 mt-6 flex-wrap">
-
-              <button
-                onClick={handleLike}
-                className={`px-4 py-2 rounded ${
-                  liked ? "bg-primary text-white" : "bg-gray-200"
-                }`}
-              >
-                👍 {likes}
-              </button>
-
-              <button
-                onClick={toggleBookmark}
-                className={`px-4 py-2 rounded ${
-                  bookmarked
-                    ? "bg-yellow-400 text-black"
-                    : "bg-gray-200"
-                }`}
-              >
-                🔖 {bookmarked ? "Saved" : "Save"}
-              </button>
-
-              <button
-                onClick={shareFB}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Share
-              </button>
-
-              <button
-                onClick={copyLink}
-                className="bg-gray-300 px-4 py-2 rounded"
-              >
-                Copy Link
-              </button>
-
-            </div>
-
-            {/* EXCERPT */}
-            <p className="mt-6 italic border-l-4 border-primary pl-4">
-              {article.excerpt}
-            </p>
-
-            {/* CONTENT */}
-            <div className="mt-6 space-y-4 text-gray-800 leading-relaxed">
-              {article.content?.split("\n").map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
-
-            {/* 💬 COMMENTS */}
-            <section className="mt-12">
-              <h2 className="font-bold mb-3">Comments</h2>
-
-              <div className="flex gap-2 mb-4">
-                <input
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Write a comment..."
-                  className="flex-1 border p-2 rounded"
-                />
-                <button
-                  onClick={addComment}
-                  className="bg-primary text-white px-4 rounded"
-                >
-                  Post
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {comments.map((c) => (
-                  <div key={c.id} className="bg-white p-3 rounded shadow">
-                    <p className="text-sm">{c.text}</p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(c.created_at).toLocaleString()}
-                    </p>
+                <div className="flex items-center gap-3 mt-6 pb-6 border-b border-gray-50">
+                  <img src={article.author_image || "https://i.pravatar.cc/100"} className="w-10 h-10 rounded-full object-cover" alt="Author" />
+                  <div className="text-sm">
+                    <p className="font-bold text-slate-800">{article.author_name || "Campus Writer"}</p>
+                    <p className="text-gray-400 text-xs">{new Date(article.created_at).toLocaleDateString()}</p>
                   </div>
-                ))}
+                </div>
+              </header>
+
+              <img src={getImage(article)} className="w-full h-auto max-h-[500px] object-cover rounded-2xl mt-6 shadow-sm" alt="Cover" />
+
+              {/* ACTION BAR */}
+              <div className="flex gap-2 md:gap-3 mt-6 flex-wrap">
+                <button onClick={handleLike} className={`px-4 py-2 rounded-xl font-bold text-sm transition ${liked ? "bg-red-50 text-red-600" : "bg-gray-100"}`}>
+                  {liked ? "❤️" : "🤍"} {likes}
+                </button>
+                <button onClick={toggleBookmark} className={`px-4 py-2 rounded-xl font-bold text-sm transition ${bookmarked ? "bg-blue-50 text-blue-600" : "bg-gray-100"}`}>
+                  🔖 {bookmarked ? "Saved" : "Save"}
+                </button>
+                <button onClick={shareFB} className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Share</button>
+                <button onClick={copyLink} className="bg-slate-800 text-white px-4 py-2 rounded-xl font-bold text-sm">Link</button>
               </div>
-            </section>
 
-            {/* 🔥 RELATED */}
-            <section className="mt-12">
-              <h2 className="font-bold mb-3">Related Articles</h2>
+              {/* ARTICLE TEXT */}
+              <article className="mt-8">
+                <p className="text-lg md:text-xl text-slate-500 italic border-l-4 border-blue-600 pl-5 mb-8 leading-relaxed">
+                  {article.excerpt}
+                </p>
+                <div className="text-slate-800 leading-relaxed space-y-6 text-base md:text-lg">
+                  {article.content?.split("\n").map((p, i) => (
+                    p.trim() && <p key={i}>{p}</p>
+                  ))}
+                </div>
+              </article>
+            </main>
 
-              <div className="grid md:grid-cols-3 gap-4">
-                {related.map((r) => (
-                  <Link key={r.id} to={`/article/${r.id}`}>
-                    <div className="bg-white rounded shadow hover:shadow-lg transition">
-                      <img
-                        src={getImage(r)}
-                        className="h-32 w-full object-cover"
-                      />
-                      <p className="p-2 text-sm font-semibold">
-                        {r.title}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+            {/* --- RIGHT: SIDEBAR --- */}
+            <aside className="lg:col-span-4 space-y-8 mt-12 lg:mt-0">
+              <div className="lg:sticky lg:top-24 space-y-10">
+                
+                {/* RELATED NEWS COMPONENT */}
+                <section className="bg-slate-50 p-5 md:p-6 rounded-3xl border border-gray-100">
+                  <h3 className="font-black text-lg mb-6 flex items-center gap-2">
+                    <span className="w-1 h-5 bg-blue-600 rounded-full"></span>
+                    Related News
+                  </h3>
+                  <div className="space-y-8">
+                    {related.map((r) => (
+                      <Link key={r.id} to={`/article/${r.id}`} className="group block">
+                        <div className="space-y-3">
+                          <img src={getImage(r)} className="w-full h-40 object-cover rounded-xl group-hover:opacity-90 transition shadow-sm" alt="Thumbnail" />
+                          <div>
+                            <h4 className="font-bold text-sm md:text-base leading-snug group-hover:text-blue-600 transition line-clamp-2">
+                              {r.title}
+                            </h4>
+                            <p className="text-xs text-slate-500 line-clamp-2 mt-2 leading-relaxed">
+                              {r.excerpt}
+                            </p>
+                            <div className="flex items-center justify-between mt-3 text-[10px] font-black text-slate-400 uppercase tracking-tighter pt-2 border-t border-gray-100">
+                              <span>{r.author_name || "Staff"}</span>
+                              <span>{new Date(r.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+
+                {/* DISCUSSION COMPONENT */}
+                <section className="bg-white p-5 md:p-6 rounded-3xl border border-gray-100 shadow-sm">
+                  <h3 className="font-black text-lg mb-4 text-slate-900">Discussion</h3>
+                  <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-1">
+                    {comments.map((c) => (
+                      <div key={c.id} className="bg-slate-50 p-4 rounded-2xl">
+                        <p className="text-sm text-slate-700 leading-snug">{c.text}</p>
+                        <p className="text-[10px] text-slate-400 mt-2 font-bold text-right uppercase">
+                          {new Date(c.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                    {comments.length === 0 && <p className="text-xs text-gray-400 text-center py-4 italic">No comments yet.</p>}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      className="w-full p-4 bg-slate-50 rounded-2xl text-sm border-none focus:ring-1 focus:ring-blue-600 outline-none"
+                      rows="2"
+                    />
+                    <button onClick={addComment} className="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition">
+                      Post Comment
+                    </button>
+                  </div>
+                </section>
+
               </div>
-            </section>
+            </aside>
 
-            {/* BACK */}
-            <Link
-              to="/news"
-              className="inline-block mt-10 text-secondary text-sm"
-            >
-              ← Back to News
-            </Link>
-
-          </>
+          </div>
         )}
-
       </div>
 
       <Footer />

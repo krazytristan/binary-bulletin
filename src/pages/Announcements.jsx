@@ -181,6 +181,22 @@ export default function Announcements() {
     }
   }, [toast]);
 
+  // --- LOADING COMPONENTS ---
+  const SkeletonGrid = () => (
+    <div className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm animate-pulse">
+      <div className="h-3 w-20 bg-gray-200 rounded mb-4"></div>
+      <div className="h-8 w-3/4 bg-gray-200 rounded mb-4"></div>
+      <div className="h-20 w-full bg-gray-100 rounded mb-8"></div>
+      <div className="flex justify-between items-center border-t border-gray-50 pt-6">
+        <div className="flex gap-4">
+          <div className="w-10 h-4 bg-gray-200 rounded"></div>
+          <div className="w-10 h-4 bg-gray-200 rounded"></div>
+        </div>
+        <div className="w-12 h-4 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#F9F9F7] text-[#1a1a1a] font-sans selection:bg-yellow-200">
       <Navbar />
@@ -212,13 +228,18 @@ export default function Announcements() {
               className="w-full bg-[#F3F4F6] border-none rounded-full py-3 pl-12 pr-6 focus:ring-2 focus:ring-[#1E3A8A]/10 font-bold text-sm outline-none" 
             />
           </div>
-          <div className="hidden md:flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A]"><Bell size={14} /> Feed Active</div>
+          <div className="hidden md:flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A]"><Bell size={14} /> {loading ? "Syncing..." : "Feed Active"}</div>
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto p-6 py-12">
         {loading ? (
-          <div className="flex justify-center py-20"><div className="w-10 h-10 border-4 border-[#1E3A8A] border-t-[#F59E0B] rounded-full animate-spin"></div></div>
+          <div className="space-y-16">
+            <div className="bg-white rounded-[2.5rem] h-[400px] animate-pulse bg-gray-100 border border-gray-100"></div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {[1, 2, 3, 4, 5, 6].map(i => <SkeletonGrid key={i} />)}
+            </div>
+          </div>
         ) : (
           <>
             {/* FEATURED HEADLINE (Latest Post) */}
@@ -265,9 +286,10 @@ export default function Announcements() {
                     {new Date(a.created_at).toLocaleDateString()}
                   </span>
                   <h3 className="text-2xl font-black tracking-tight leading-tight mb-4 group-hover:text-[#1E3A8A] transition-colors">{a.title}</h3>
-                  <p className="text-gray-500 text-sm font-medium leading-relaxed mb-8 flex-1 line-clamp-3 whitespace-pre-line">
-                    {a.content}
+                  <p className="text-gray-500 text-sm font-medium leading-relaxed mb-8 flex-1 whitespace-pre-line">
+                    {expanded[a.id] ? a.content : (a.content.substring(0, 150) + (a.content.length > 150 ? "..." : ""))}
                   </p>
+                  
                   <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                     <div className="flex gap-4">
                       <button onClick={() => handleLike(a.id)} className={`flex items-center gap-1 text-[10px] font-black transition-colors ${likedMap[a.id] ? 'text-red-500' : 'text-gray-400'}`}>
@@ -277,13 +299,22 @@ export default function Announcements() {
                         <MessageCircle size={18} /> {commentsCount[a.id] || 0}
                       </button>
                     </div>
-                    <div className="flex gap-3 text-gray-300">
-                      <Bookmark 
-                        size={18} 
-                        onClick={() => handleBookmark(a.id)} 
-                        className={`cursor-pointer transition-colors ${bookmarks[a.id] ? 'text-[#F59E0B] fill-current' : 'hover:text-black'}`} 
-                      />
-                      <Share2 size={18} className="hover:text-black cursor-pointer transition-colors" onClick={() => handleShare(a.id)} />
+                    
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => setExpanded(p => ({ ...p, [a.id]: !p[a.id] }))} 
+                            className="text-[9px] font-black uppercase tracking-widest text-[#1E3A8A] hover:opacity-70"
+                        >
+                            {expanded[a.id] ? "Less" : "Read Full"}
+                        </button>
+                        <div className="flex gap-2 text-gray-300">
+                          <Bookmark 
+                            size={18} 
+                            onClick={() => handleBookmark(a.id)} 
+                            className={`cursor-pointer transition-colors ${bookmarks[a.id] ? 'text-[#F59E0B] fill-current' : 'hover:text-black'}`} 
+                          />
+                          <Share2 size={18} className="hover:text-black cursor-pointer transition-colors" onClick={() => handleShare(a.id)} />
+                        </div>
                     </div>
                   </div>
                 </article>
