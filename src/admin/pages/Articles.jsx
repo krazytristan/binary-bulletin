@@ -256,6 +256,8 @@ export default function Articles() {
                       <option>Features</option>
                       <option>Sports</option>
                       <option>Opinion</option>
+                      <option>Literary</option>
+                      <option>Editorial</option>
                     </select>
                   </div>
                 </div>
