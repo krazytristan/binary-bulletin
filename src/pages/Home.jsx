@@ -159,7 +159,7 @@ export default function Home() {
       {/* --- HERO SECTION --- */}
       <section className="relative h-[85vh] flex items-center overflow-hidden bg-[#1E3A8A]">
         <div className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b" className="w-full h-full object-cover opacity-50 grayscale" alt="Campus"/>
+          <img src="ama-bg.jpg" className="w-full h-full object-cover opacity-50 grayscale" alt="Campus"/>
           <div className="absolute inset-0 bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A]/60 to-transparent"></div>
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-6 w-full text-white">
