@@ -1,20 +1,21 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import { 
   Search, 
-  Filter, 
   Calendar, 
   ArrowRight, 
   TrendingUp, 
   Newspaper, 
   Hash, 
-  RefreshCcw,
   ChevronUp,
-  Clock,
-  User
+  User,
+  ChevronRight,
+  Bookmark,
+  Share2,
+  Clock 
 } from "lucide-react";
 
 export default function News() {
@@ -23,12 +24,15 @@ export default function News() {
   const [category, setCategory] = useState("All");
   const [loading, setLoading] = useState(true);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const isInitialRender = useRef(true);
 
   useEffect(() => {
-    fetchArticles();
+    if (isInitialRender.current) {
+      fetchArticles();
+      isInitialRender.current = false;
+    }
     const handleScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener("scroll", handleScroll);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -49,86 +53,61 @@ export default function News() {
   };
 
   const filtered = useMemo(() => {
-    const searchRegex = new RegExp(search, "gi");
+    const term = search.toLowerCase();
     return articles.filter((a) => {
-      const matchesSearch = !search || a.title?.match(searchRegex) || a.excerpt?.match(searchRegex);
+      const matchesSearch = !search || 
+        a.title?.toLowerCase().includes(term) || 
+        a.excerpt?.toLowerCase().includes(term);
       const matchesCategory = category === "All" || a.category === category;
       return matchesSearch && matchesCategory;
     });
   }, [articles, search, category]);
 
-  const trending = useMemo(() => articles.slice(0, 5), [articles]);
+  const latest = filtered[0];
+  const remaining = filtered.slice(1);
 
-  const getImage = (article) => {
-    const fallback = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1000";
-    if (!article?.image_url) return fallback;
-    const cacheBuster = new Date(article.updated_at || article.created_at).getTime();
-    return `${article.image_url}?t=${cacheBuster}`;
+  const getImage = (url) => {
+    return url || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1000";
   };
 
-  const SkeletonCard = () => (
-    <div className="flex flex-col animate-pulse">
-      <div className="aspect-[16/10] rounded-xl mb-5 bg-gray-200"></div>
-      <div className="space-y-3">
-        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-        <div className="h-6 bg-gray-200 rounded w-full"></div>
-        <div className="h-4 bg-gray-100 rounded w-2/3"></div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-light text-dark font-sans selection:bg-secondary/20 overflow-x-hidden">
+    <div className="min-h-screen bg-[#FDFDFB] text-[#1a1a1a] font-sans selection:bg-[#1E3A8A] selection:text-white overflow-x-hidden antialiased">
       <Navbar />
 
-      {/* 🔷 EDITORIAL HEADER (NO TOUCH) */}
-      <section className="bg-primary text-white pt-28 pb-12 md:pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 pointer-events-none select-none uppercase font-black text-[9rem] md:text-[15rem] leading-none -bottom-5 md:-bottom-10 -left-5 md:-left-10">
-          ARCHIVE
-        </div>
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div className="animate-in fade-in slide-in-from-left duration-700">
-              <span className="bg-accent text-dark px-3 py-1 text-[10px] font-black uppercase tracking-widest mb-4 inline-block">
-                The Binary Bulletin
-              </span>
-              <h1 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter uppercase italic leading-[0.85]">
-                Digital <br /> Journalism
-              </h1>
-            </div>
-            <div className="max-w-xs border-l-2 border-accent pl-6 py-2">
-              <p className="text-white/70 font-medium text-xs md:text-sm leading-relaxed">
-                Exploring the intersection of campus life, technology, and student perspectives.
-              </p>
-            </div>
+      {/* --- EDITORIAL HEADER --- */}
+      <header className="pt-24 md:pt-28 pb-4 border-b border-black/10">
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-end">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#1E3A8A] mb-1">NexGen Gazette</p>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none">Journal</h1>
+          </div>
+          <div className="text-right hidden sm:block">
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Vol. 2026 — Ed. 04</p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Global Access // Digital Edition</p>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* 🔥 SEARCH & FILTER BAR */}
-      <div className="sticky top-0 z-[40] bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex flex-col lg:flex-row gap-4 lg:items-center justify-between">
-          <div className="relative w-full lg:w-96 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
-            <input
-              type="text"
-              placeholder="Search news, topics, or authors..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 pl-12 pr-6 focus:ring-2 focus:ring-primary/5 focus:border-primary outline-none font-medium text-sm transition-all"
+      {/* --- UTILITY BAR --- */}
+      <nav className="sticky top-0 z-40 bg-[#FDFDFB]/95 backdrop-blur-md border-b border-black/5 h-12 flex items-center">
+        <div className="max-w-7xl mx-auto px-6 w-full flex items-center justify-between gap-8">
+          <div className="flex items-center gap-4 flex-1">
+            <Search className="text-gray-400" size={14} />
+            <input 
+              type="text" 
+              placeholder="SEARCH ARCHIVES..." 
+              value={search} 
+              onChange={(e) => setSearch(e.target.value)} 
+              className="bg-transparent border-none w-full text-[10px] font-bold tracking-[0.1em] outline-none placeholder:text-gray-300" 
             />
           </div>
-
-          <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto no-scrollbar pb-1 lg:pb-0 touch-pan-x">
-            <Filter size={16} className="text-gray-400 flex-shrink-0 mr-1" />
-            {["All", "News", "Sports", "Opinion", "Feature", "Editorial", "Literary"].map((cat) => (
+          <div className="hidden md:flex items-center gap-4">
+            {["All", "News", "Sports", "Opinion", "Feature", "Editorial"].map((cat) => (
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
-                className={`px-4 py-2 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                  category === cat 
-                  ? "bg-primary text-white shadow-md shadow-primary/20" 
-                  : "bg-white text-gray-500 border border-gray-200 hover:border-primary/30 hover:text-primary"
+                className={`text-[9px] font-black uppercase tracking-widest transition-colors ${
+                  category === cat ? "text-[#1E3A8A]" : "text-gray-400 hover:text-black"
                 }`}
               >
                 {cat}
@@ -136,170 +115,156 @@ export default function News() {
             ))}
           </div>
         </div>
-      </div>
+      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 grid lg:grid-cols-12 gap-12 mt-12 mb-20">
-        
-        {/* 📰 MAIN FEED */}
-        <div className="lg:col-span-8 order-1">
-          <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-              <Newspaper size={18} /> Latest Stories
-            </h2>
-            <p className="text-gray-400 text-[11px] font-medium">{filtered.length} articles available</p>
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        {loading ? (
+          <div className="space-y-8 animate-pulse">
+            <div className="h-96 bg-gray-100 border border-black/5" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map(i => <div key={i} className="h-64 bg-gray-100" />)}
+            </div>
           </div>
-
-          {loading ? (
-            <div className="grid sm:grid-cols-2 gap-8">
-              {[1, 2, 3, 4].map((i) => <SkeletonCard key={i} />)}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-24 bg-white rounded-2xl border border-gray-100 px-6">
-              <div className="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                 <Search size={32} className="text-gray-300" />
-              </div>
-              <h3 className="text-lg font-bold text-dark mb-2">No results for "{search}"</h3>
-              <p className="text-gray-500 text-sm mb-8">Try adjusting your filters or search keywords.</p>
-              <button 
-                onClick={() => {setSearch(""); setCategory("All")}}
-                className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest bg-primary text-white px-8 py-4 rounded-lg hover:bg-secondary transition-colors"
-              >
-                <RefreshCcw size={14} /> Clear All Filters
-              </button>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-12">
-              {filtered.map((article) => (
-                <Link key={article.id} to={`/article/${article.id}`} className="group flex flex-col bg-white rounded-xl overflow-hidden border border-transparent hover:border-gray-100 hover:shadow-card transition-all duration-300">
-                  <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
-                    <img
-                      src={getImage(article)}
-                      alt={article.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute bottom-4 left-4">
-                      <span className="bg-primary text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider shadow-lg">
-                        {article.category || "General"}
-                      </span>
-                    </div>
+        ) : (
+          <div className="space-y-16">
+            {/* --- LEAD STORY (WITH AUTHOR & IMAGE) --- */}
+            {latest && !search && (
+              <article className="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-black/10 group">
+                <div className="lg:col-span-7 p-8 md:p-12 border-b lg:border-b-0 lg:border-r border-black/10 flex flex-col justify-center">
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="bg-[#1E3A8A] text-white text-[8px] font-black px-2 py-0.5 uppercase tracking-widest">{latest.category}</span>
+                    <time className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{new Date(latest.created_at).toDateString()}</time>
                   </div>
-                  <div className="p-6 flex-grow space-y-3">
-                    <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                      <span className="flex items-center gap-1.5"><Calendar size={12} className="text-secondary" /> {new Date(article.created_at).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                    </div>
-                    <h2 className="text-xl font-bold leading-snug text-dark group-hover:text-primary transition-colors line-clamp-2">
-                      {article.title}
+                  <Link to={`/article/${latest.id}`}>
+                    <h2 className="text-3xl md:text-6xl font-black leading-[0.9] tracking-tighter mb-6 uppercase group-hover:text-[#1E3A8A] transition-colors italic">
+                      {latest.title}
                     </h2>
-                    <p className="text-gray-500 text-sm line-clamp-3 font-medium leading-relaxed">
-                      {article.excerpt || "Dive into this story from our digital journalism archives."}
-                    </p>
-                    <div className="pt-4 flex items-center text-[11px] font-bold uppercase tracking-widest text-primary border-t border-gray-50 group-hover:gap-4 gap-2 transition-all">
-                      Read Article <ArrowRight size={14} />
+                  </Link>
+                  <p className="text-sm md:text-base text-gray-500 font-medium leading-relaxed mb-8 line-clamp-3">
+                    {latest.excerpt || latest.content}
+                  </p>
+                  
+                  {/* Author Meta */}
+                  <div className="flex items-center justify-between pt-6 border-t border-black/5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border border-black/10 bg-gray-50">
+                        {latest.author_image ? (
+                          <img src={latest.author_image} alt={latest.author_name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-300"><User size={20}/></div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1">{latest.author_name || "Staff Writer"}</p>
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Contributor</p>
+                      </div>
                     </div>
+                    <Link to={`/article/${latest.id}`} className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
+                      Full Story <ArrowRight size={14} />
+                    </Link>
                   </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+                </div>
+                <div className="lg:col-span-5 bg-gray-50 overflow-hidden min-h-[400px]">
+                  <img 
+                    src={getImage(latest.image_url)} 
+                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" 
+                    alt="Article Lead" 
+                  />
+                </div>
+              </article>
+            )}
 
-        {/* 🔥 SIDEBAR */}
-        <aside className="lg:col-span-4 space-y-8 order-2">
-          {/* Trending Section Updated */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 text-dark">
-              <TrendingUp className="text-secondary" size={16} /> Most Popular
-            </h3>
-            <div className="space-y-10">
-              {trending.map((t, i) => (
-                <Link key={t.id} to={`/article/${t.id}`} className="block group">
-                  <div className="flex gap-4 items-start mb-4">
-                    <span className="text-2xl font-black text-gray-100 group-hover:text-secondary transition-colors w-6 leading-none">
-                      {i + 1}
-                    </span>
-                    <div className="space-y-2 flex-1">
-                      <span className="text-[9px] font-bold text-secondary uppercase tracking-widest block">{t.category}</span>
-                      <h4 className="text-sm font-bold leading-tight text-dark group-hover:text-primary transition-colors line-clamp-2">{t.title}</h4>
-                      <p className="text-gray-500 text-[11px] font-medium line-clamp-2 leading-relaxed">
-                        {t.excerpt}
-                      </p>
-                    </div>
+            {/* --- SECONDARY GRID (WITH ARTICLE IMAGES & AUTHORS) --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-black/10 border border-black/10">
+              {(search ? filtered : remaining).map((a) => (
+                <article key={a.id} className="bg-[#FDFDFB] flex flex-col hover:bg-white transition-colors group">
+                  {/* Article Image */}
+                  <div className="aspect-[16/10] overflow-hidden border-b border-black/10 bg-gray-100">
+                    <img 
+                      src={getImage(a.image_url)} 
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105" 
+                      alt="Thumbnail" 
+                    />
                   </div>
                   
-                  {/* Author & Meta Data Section */}
-                  <div className="flex items-center justify-between pl-10">
-                    <div className="flex items-center gap-2">
-                      {t.author_image ? (
-                        <img 
-                          src={t.author_image} 
-                          alt={t.author_name} 
-                          className="w-5 h-5 rounded-full object-cover border border-gray-100 shadow-sm"
-                        />
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
-                          <User size={10} className="text-gray-400" />
-                        </div>
-                      )}
-                      <span className="text-[10px] font-bold text-dark/70 uppercase tracking-tight">
-                        {t.author_name || "Staff Writer"}
-                      </span>
+                  <div className="p-6 flex flex-col flex-1">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-[8px] font-black text-[#F59E0B] uppercase tracking-[0.2em]">{a.category}</span>
+                      <Bookmark size={12} className="text-gray-200" />
                     </div>
-                    <div className="flex items-center gap-1 text-[9px] font-medium text-gray-400">
-                      <Calendar size={10} />
-                      {new Date(t.created_at).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}
+                    
+                    <Link to={`/article/${a.id}`} className="flex-1">
+                      <h3 className="text-sm font-black uppercase leading-tight tracking-tight mb-3 line-clamp-2 group-hover:text-[#1E3A8A]">
+                        {a.title}
+                      </h3>
+                      <p className="text-[12px] text-gray-500 font-medium leading-relaxed mb-6 line-clamp-2">
+                        {a.excerpt || a.content}
+                      </p>
+                    </Link>
+
+                    {/* Compact Author Footer */}
+                    <div className="pt-4 border-t border-black/5 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full overflow-hidden bg-gray-100 border border-black/5">
+                          {a.author_image ? (
+                            <img src={a.author_image} className="w-full h-full object-cover" alt="Author" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-300"><User size={10}/></div>
+                          )}
+                        </div>
+                        <span className="text-[9px] font-bold uppercase tracking-tighter text-gray-600">{a.author_name || "Staff"}</span>
+                      </div>
+                      <span className="text-[8px] font-bold text-gray-300 uppercase">{new Date(a.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
-                </Link>
+                </article>
               ))}
             </div>
           </div>
-
-          {/* Tag Cloud Section */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-             <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 text-dark">
-               <Hash size={16} className="text-primary" /> Browse Topics
-             </h3>
-             <div className="flex flex-wrap gap-2">
-                {["ICT", "Titans", "Lipa City", "AI", "Enrollment", "Campus", "Tech", "Sports"].map(tag => (
-                  <button 
-                    key={tag}
-                    onClick={() => setSearch(tag)}
-                    className="text-[10px] font-bold bg-gray-50 text-gray-600 border border-gray-100 px-3 py-1.5 rounded hover:bg-primary hover:text-white hover:border-primary transition-all uppercase"
-                  >
-                    {tag}
-                  </button>
-                ))}
-             </div>
-          </div>
-
-          {/* Newsletter Box */}
-          <div className="bg-primary rounded-2xl p-8 text-white relative overflow-hidden shadow-xl">
-             <div className="relative z-10">
-               <h3 className="text-lg font-bold mb-2">Stay Updated</h3>
-               <p className="text-white/70 text-xs mb-6 leading-relaxed">Get the latest campus stories delivered straight to your feed.</p>
-               <Link to="/contact" className="inline-block w-full text-center bg-white text-primary text-[10px] font-black uppercase tracking-widest py-3 rounded hover:bg-secondary hover:text-white transition-all">
-                 Join the Newsletter
-               </Link>
-             </div>
-             <Newspaper className="absolute -right-4 -bottom-4 text-white/5 w-32 h-32 rotate-12" />
-          </div>
-        </aside>
+        )}
       </main>
 
-      {/* Floating Scroll Top */}
+      {/* --- SIDEBAR TOPICS --- */}
+      <section className="max-w-7xl mx-auto px-6 pb-20">
+        <div className="border-t border-black/10 pt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2">
+             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-[#1E3A8A]">Historical Tags</h3>
+             <div className="flex flex-wrap gap-2">
+              {["ICT", "Titans", "Lipa City", "AI", "Campus", "Tech", "Sports"].map(tag => (
+                <button 
+                  key={tag}
+                  onClick={() => setSearch(tag)}
+                  className="text-[10px] font-bold border border-black/10 px-4 py-2 hover:bg-black hover:text-white transition-all uppercase tracking-widest"
+                >
+                  #{tag}
+                </button>
+              ))}
+             </div>
+          </div>
+          <div className="bg-[#1E3A8A] p-8 text-white flex flex-col justify-between aspect-square lg:aspect-auto">
+             <div>
+               <h3 className="text-xl font-black uppercase leading-none mb-4 tracking-tighter">Nexus Edition</h3>
+               <p className="text-xs text-white/70 font-medium mb-8">Access the full digital archive and receive weekly editorial highlights.</p>
+             </div>
+             <Link to="/contact" className="text-[10px] font-black uppercase tracking-widest bg-white text-[#1E3A8A] py-3 text-center hover:bg-[#F59E0B] hover:text-white transition-colors">
+               Join the Newsletter
+             </Link>
+          </div>
+        </div>
+      </section>
+
       <button 
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className={`fixed bottom-8 right-8 z-50 bg-primary text-white p-4 rounded-full shadow-2xl hover:bg-secondary hover:-translate-y-1 active:scale-95 transition-all duration-500 ${showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
+        className={`fixed bottom-8 right-8 z-50 bg-black text-white p-4 rounded-none shadow-2xl transition-all duration-500 ${showScrollTop ? 'opacity-100' : 'opacity-0'}`}
       >
-        <ChevronUp size={24} />
+        <ChevronUp size={20} />
       </button>
 
       <Footer />
+      
       <style dangerouslySetInnerHTML={{ __html: `
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       `}} />
     </div>
   );

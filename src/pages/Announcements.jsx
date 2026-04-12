@@ -10,14 +10,11 @@ import {
   Search, 
   X, 
   Send, 
-  Bell, 
   ChevronRight, 
-  ArrowUpRight,
-  Maximize2
 } from "lucide-react";
 
 export default function Announcements() {
-  // --- STATE & LOGIC ---
+  // --- STATE ---
   const [announcements, setAnnouncements] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [latest, setLatest] = useState(null);
@@ -38,6 +35,7 @@ export default function Announcements() {
   const [search, setSearch] = useState("");
   const isInitialRender = useRef(true);
 
+  // --- INITIALIZATION ---
   useEffect(() => {
     if (isInitialRender.current) {
       const init = async () => {
@@ -50,6 +48,16 @@ export default function Announcements() {
     }
   }, []);
 
+  // --- SEARCH FILTER ---
+  useEffect(() => {
+    const term = search.toLowerCase();
+    const filteredList = announcements.filter(a => 
+      a.title.toLowerCase().includes(term) || a.content.toLowerCase().includes(term)
+    );
+    setFiltered(filteredList);
+  }, [search, announcements]);
+
+  // --- DATA FETCHING ---
   const fetchAnnouncements = async (currentUser) => {
     setLoading(true);
     const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
@@ -79,6 +87,7 @@ export default function Announcements() {
     setBookmarks(p => ({ ...p, [id]: !!b }));
   };
 
+  // --- ACTIONS ---
   const handleLike = async (id) => {
     const wasLiked = likedMap[id];
     setLikedMap(p => ({ ...p, [id]: !p[id] }));
@@ -90,18 +99,23 @@ export default function Announcements() {
   };
 
   const handleBookmark = async (id) => {
-    if (!user) return setToast("Access Denied: Login Required");
+    if (!user) return setToast("LOGIN REQUIRED");
     const isBookmarked = bookmarks[id];
     if (isBookmarked) await supabase.from("announcement_bookmarks").delete().eq("announcement_id", id).eq("user_id", user.id);
     else await supabase.from("announcement_bookmarks").insert({ announcement_id: id, user_id: user.id });
     setBookmarks(p => ({ ...p, [id]: !p[id] }));
     setToast(isBookmarked ? "REMOVED FROM ARCHIVE" : "SAVED TO ARCHIVE");
+    setTimeout(() => setToast(""), 3000);
   };
 
   const handleShare = (id) => {
-    navigator.clipboard.writeText(`${window.location.origin}/announcements/${id}`).then(() => setToast("LINK COPIED"));
+    navigator.clipboard.writeText(`${window.location.origin}/announcements/${id}`).then(() => {
+      setToast("LINK COPIED");
+      setTimeout(() => setToast(""), 3000);
+    });
   };
 
+  // --- COMMENT LOGIC ---
   const fetchComments = async (id) => {
     const { data } = await supabase.from("announcement_comments").select("*").eq("announcement_id", id).order("created_at", { ascending: true });
     setComments(data || []);
@@ -110,9 +124,15 @@ export default function Announcements() {
   const handleComment = async () => {
     const content = editingComment ? editValue : newComment;
     if (!content.trim() || !selectedForComments) return;
+
     if (editingComment) {
       const { error } = await supabase.from("announcement_comments").update({ comment: content }).eq("id", editingComment.id);
-      if (!error) { setEditingComment(null); setEditValue(""); fetchComments(selectedForComments.id); setToast("COMMENT UPDATED"); }
+      if (!error) {
+        setEditingComment(null);
+        setEditValue("");
+        fetchComments(selectedForComments.id);
+        setToast("COMMENT UPDATED");
+      }
     } else {
       const { error } = await supabase.from("announcement_comments").insert({ 
         announcement_id: selectedForComments.id, 
@@ -120,8 +140,25 @@ export default function Announcements() {
         comment: content,
         parent_id: replyTo?.id || null 
       });
-      if (!error) { setNewComment(""); setReplyTo(null); fetchComments(selectedForComments.id); getCounts(selectedForComments.id); }
+      if (!error) {
+        setNewComment("");
+        setReplyTo(null);
+        fetchComments(selectedForComments.id);
+        getCounts(selectedForComments.id);
+      }
     }
+    setTimeout(() => setToast(""), 3000);
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!user) return;
+    const { error } = await supabase.from("announcement_comments").delete().eq("id", commentId).eq("user_id", user.id);
+    if (!error) {
+      fetchComments(selectedForComments.id);
+      getCounts(selectedForComments.id);
+      setToast("COMMENT DELETED");
+    }
+    setTimeout(() => setToast(""), 3000);
   };
 
   return (
@@ -165,13 +202,13 @@ export default function Announcements() {
         {loading ? (
           <div className="space-y-8">
             <div className="h-96 bg-gray-50 animate-pulse border border-black/5" />
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[1, 2, 3].map(i => <div key={i} className="h-48 bg-gray-50 animate-pulse border border-black/5" />)}
             </div>
           </div>
         ) : (
           <div className="space-y-16">
-            {/* FEATURED: HIGH-DENSITY EDITORIAL */}
+            {/* FEATURED */}
             {latest && !search && (
               <article className="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-black/10 hover:border-black/30 transition-colors group">
                 <div className="lg:col-span-7 p-8 md:p-12 border-b lg:border-b-0 lg:border-r border-black/10">
@@ -182,7 +219,7 @@ export default function Announcements() {
                   <h2 className="text-3xl md:text-5xl font-black leading-[0.95] tracking-tighter mb-6 uppercase cursor-pointer group-hover:text-[#1E3A8A] transition-colors" onClick={() => setSelectedForReading(latest)}>
                     {latest.title}
                   </h2>
-                  <p className="text-sm md:text-base text-gray-500 font-medium leading-relaxed mb-8 line-clamp-3">
+                  <p className="text-sm md:text-base text-gray-500 font-medium leading-relaxed mb-8 line-clamp-3 whitespace-pre-line">
                     {latest.content}
                   </p>
                   <div className="flex items-center gap-6 pt-6 border-t border-black/5">
@@ -205,7 +242,7 @@ export default function Announcements() {
               </article>
             )}
 
-            {/* SECONDARY GRID: COMPACT BLOCKS */}
+            {/* SECONDARY GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-black/10 border border-black/10">
               {filtered.map((a) => (
                 <article key={a.id} className="bg-[#FDFDFB] p-6 flex flex-col hover:bg-white transition-colors group">
@@ -233,26 +270,22 @@ export default function Announcements() {
         )}
       </main>
 
-      {/* READING MODAL (CONCENTRATED TYPOGRAPHY) */}
+      {/* READING MODAL */}
       {selectedForReading && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-0 md:p-12">
           <div className="absolute inset-0 bg-white/98 backdrop-blur-xl" onClick={() => setSelectedForReading(null)} />
-          <div className="bg-white w-full max-w-3xl h-full md:h-auto md:max-h-[90vh] overflow-y-auto relative z-10 p-8 md:p-16 flex flex-col border border-black/5 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="bg-white w-full max-w-3xl h-full md:h-auto md:max-h-[90vh] overflow-y-auto relative z-10 p-8 md:p-16 flex flex-col border border-black/5 shadow-2xl">
             <button onClick={() => setSelectedForReading(null)} className="fixed top-6 right-6 p-2 text-gray-400 hover:text-black"><X size={24}/></button>
-            
             <header className="mb-10 text-center">
               <p className="text-[9px] font-black uppercase tracking-[0.5em] text-[#1E3A8A] mb-4">Official Publication</p>
               <h2 className="text-2xl md:text-4xl font-black tracking-tighter leading-none mb-4 uppercase">{selectedForReading.title}</h2>
-              <time className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{new Date(selectedForReading.created_at).toDateString()} — Archive Ref: #{selectedForReading.id.substring(0,6)}</time>
+              <time className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{new Date(selectedForReading.created_at).toDateString()} — Ref: #{selectedForReading.id.substring(0,6)}</time>
             </header>
-
             <div className="prose prose-sm max-w-none">
               <p className="text-gray-800 text-[15px] md:text-[16px] leading-[1.8] whitespace-pre-line font-medium text-justify">
                 {selectedForReading.content}
               </p>
             </div>
-
-            {/* MODAL ACTIONS FOOTER */}
             <footer className="mt-12 pt-8 border-t border-black/5 grid grid-cols-2 md:grid-cols-4 gap-4">
                <button onClick={() => handleLike(selectedForReading.id)} className={`text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 ${likedMap[selectedForReading.id] ? 'text-red-500' : 'text-gray-400'}`}>
                  <Heart size={16} fill={likedMap[selectedForReading.id] ? "currentColor" : "none"}/> Like
@@ -274,33 +307,54 @@ export default function Announcements() {
       {/* COMMENTS DRAWER */}
       {selectedForComments && (
         <div className="fixed inset-0 z-[120] flex items-center justify-end">
-          <div className="absolute inset-0 bg-black/10 backdrop-blur-sm" onClick={() => setSelectedForComments(null)} />
+          <div className="absolute inset-0 bg-black/10 backdrop-blur-sm" onClick={() => { setSelectedForComments(null); setEditingComment(null); setReplyTo(null); }} />
           <div className="bg-white w-full max-w-sm h-full relative z-10 flex flex-col border-l border-black/10 animate-in slide-in-from-right duration-300">
             <div className="p-6 border-b flex justify-between items-center">
               <h2 className="text-[10px] font-black uppercase tracking-widest">Public Commentary</h2>
               <button onClick={() => setSelectedForComments(null)} className="p-1 hover:bg-gray-100 rounded-full"><X size={16}/></button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {comments.map((c) => (
-                <div key={c.id} className="space-y-2">
-                  <p className="text-[9px] font-black uppercase text-gray-400 tracking-tighter">
-                    {c.user_id ? `User // ${c.user_id.substring(0,6)}` : "Guest Participant"}
-                  </p>
+                <div key={c.id} className={`group space-y-2 ${c.parent_id ? 'ml-6 border-l-2 border-gray-100 pl-4' : ''}`}>
+                  <div className="flex justify-between items-center">
+                    <p className="text-[9px] font-black uppercase text-gray-400 tracking-tighter">
+                      {c.user_id === user?.id ? "Your Entry" : (c.user_id ? `User // ${c.user_id.substring(0,6)}` : "Guest")}
+                    </p>
+                    <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <button onClick={() => setReplyTo(c)} className="text-[8px] font-black text-gray-300 hover:text-black uppercase">Reply</button>
+                       {user && c.user_id === user.id && (
+                         <>
+                           <button onClick={() => { setEditingComment(c); setEditValue(c.comment); }} className="text-[8px] font-black text-gray-300 hover:text-blue-600 uppercase">Edit</button>
+                           <button onClick={() => handleDeleteComment(c.id)} className="text-[8px] font-black text-gray-300 hover:text-red-600 uppercase">Delete</button>
+                         </>
+                       )}
+                    </div>
+                  </div>
                   <p className="text-[13px] text-gray-700 font-medium leading-relaxed">{c.comment}</p>
                 </div>
               ))}
+              {comments.length === 0 && <p className="text-[10px] text-center text-gray-300 font-bold py-10">NO COMMENTS YET</p>}
             </div>
 
             <div className="p-6 border-t bg-gray-50">
-              <div className="relative">
+              {(replyTo || editingComment) && (
+                <div className="mb-2 flex justify-between items-center bg-[#1E3A8A] text-white p-2 text-[8px] font-black uppercase tracking-widest">
+                  <span>{editingComment ? 'Editing' : 'Replying'}</span>
+                  <button onClick={() => { setEditingComment(null); setReplyTo(null); }}><X size={10}/></button>
+                </div>
+              )}
+              <div className="relative flex items-center">
                 <input 
                   value={editingComment ? editValue : newComment} 
                   onChange={(e) => editingComment ? setEditValue(e.target.value) : setNewComment(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleComment()}
                   placeholder="ADD TO DISCUSSION..." 
-                  className="w-full bg-white border border-black/10 p-3 text-[11px] font-bold outline-none focus:border-[#1E3A8A]" 
+                  className="w-full bg-white border border-black/10 p-3 pr-10 text-[11px] font-bold outline-none focus:border-[#1E3A8A]" 
                 />
+                <button onClick={handleComment} className="absolute right-3 text-gray-400 hover:text-black">
+                  <Send size={16} />
+                </button>
               </div>
             </div>
           </div>
