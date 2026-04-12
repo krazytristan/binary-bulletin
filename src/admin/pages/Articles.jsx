@@ -292,7 +292,7 @@ export default function Articles() {
                     <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Category</label>
                     <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                       <option>News</option>
-                      <option>Features</option>
+                      <option>Feature</option>
                       <option>Sports</option>
                       <option>Opinion</option>
                       <option>Literary</option>
