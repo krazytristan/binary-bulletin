@@ -169,8 +169,8 @@ export default function Announcements() {
       <div className="pt-24 md:pt-28 pb-4 border-b border-black/10">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-end">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#1E3A8A] mb-1">NexGen Gazette</p>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none">Journal</h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#1E3A8A] mb-1">Official Campus</p>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none">Announcements</h1>
           </div>
           <div className="text-right hidden sm:block">
             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Vol. 2026 — Ed. 04</p>

@@ -64,7 +64,7 @@ export default function Events() {
               Campus Intelligence
             </p>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none">
-              The Binary Bulletin
+              The Binary Bulletin Events
             </h1>
           </div>
           <div className="text-right hidden sm:block">

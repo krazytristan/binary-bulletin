@@ -74,7 +74,7 @@ export default function Gallery() {
               Visual Archives
             </p>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none">
-              The Binary Bulletin
+              The Binary Bulletin Gallery
             </h1>
           </div>
           <div className="text-right hidden sm:block">

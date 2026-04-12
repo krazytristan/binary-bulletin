@@ -46,7 +46,7 @@ export default function About() {
               Official Institutional Publication
             </p>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none">
-              The Binary Bulletin
+              About The Binary Bulletin
             </h1>
           </div>
           <div className="text-right hidden sm:block">
