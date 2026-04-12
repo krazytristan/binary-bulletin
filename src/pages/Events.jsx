@@ -11,8 +11,7 @@ import {
   Search, 
   Sparkles, 
   X,
-  Share2,
-  Info
+  Share2
 } from "lucide-react";
 
 export default function Events() {
@@ -20,7 +19,7 @@ export default function Events() {
   const [featured, setFeatured] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedEvent, setSelectedEvent] = useState(null); // State for Full Details Modal
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     fetchEvents();
@@ -54,139 +53,139 @@ export default function Events() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F9F9F7] text-dark font-sans selection:bg-accent/30">
+    <div className="min-h-screen bg-light text-dark font-sans selection:bg-primary selection:text-white antialiased">
       <Navbar />
 
-      {/* 🔷 EDITORIAL HEADER */}
-      <section className="bg-primary text-white pt-24 pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 pointer-events-none select-none uppercase font-black text-[15rem] leading-none -bottom-10 -left-10">
-          EVENTS
-        </div>
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <span className="bg-accent text-dark px-3 py-1 text-[10px] font-black uppercase tracking-widest mb-4 inline-block">
-                Campus Bulletin
-              </span>
-              <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase italic leading-[0.9]">
-                Upcoming <br /> Engagements
-              </h1>
-            </div>
-            <p className="max-w-xs text-white/60 font-medium border-l border-white/20 pl-6 text-sm">
-              Your guide to the activities, seminars, and celebrations happening across AMA Lipa.
+      {/* COMPACT TOP NAV / HEADER */}
+      <div className="pt-24 md:pt-28 pb-4 border-b border-dark/10">
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-end">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-1">
+              Campus Intelligence
             </p>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none">
+              The Binary Bulletin
+            </h1>
           </div>
-        </div>
-      </section>
-
-      {/* 🔥 SEARCH BAR */}
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="relative w-full md:w-96 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
-            <input
-              type="text"
-              placeholder="Search event schedule..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-light border-none rounded-full py-3 pl-12 pr-6 focus:ring-2 focus:ring-primary/10 font-bold text-sm"
-            />
-          </div>
-          <div className="hidden md:flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
-            <Ticket size={14} /> {filteredEvents.length + (featured ? 1 : 0)} Total Listings
+          <div className="text-right hidden sm:block">
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Bulletin Schedule</p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Active Engagements</p>
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto p-6 py-12">
+      {/* SEARCH BAR (STICKY) */}
+      <nav className="sticky top-0 z-30 bg-light/95 backdrop-blur-md border-b border-dark/5 h-14 flex items-center">
+        <div className="max-w-7xl mx-auto px-6 w-full flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="relative w-full md:w-80 group">
+            <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={14} />
+            <input
+              type="text"
+              placeholder="Search Schedule..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-transparent border-none py-2 pl-6 pr-4 focus:ring-0 font-bold text-[11px] uppercase tracking-wider placeholder:text-gray-300 transition-all"
+            />
+          </div>
+          <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-primary">
+            <Ticket size={12} /> {filteredEvents.length + (featured ? 1 : 0)} Active Listings
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-7xl mx-auto px-6 py-12">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
-            <div className="w-10 h-10 border-4 border-primary border-t-accent rounded-full animate-spin"></div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-primary">Checking Calendar...</p>
+            <div className="w-8 h-8 border-2 border-dark/10 border-t-primary animate-spin"></div>
+            <p className="text-[9px] font-black uppercase tracking-widest text-primary">Synchronizing Calendar...</p>
           </div>
         ) : (
           <>
             {/* 🌟 FEATURED "COVER STORY" EVENT */}
             {featured && (
-              <div className="group relative bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100 mb-20 flex flex-col lg:flex-row transition-all duration-500 hover:shadow-2xl">
-                <div className="lg:w-1/2 relative h-80 lg:h-auto overflow-hidden">
+              <section className="border border-dark/10 bg-white grid grid-cols-1 lg:grid-cols-12 mb-16 shadow-card">
+                <div className="lg:col-span-7 relative h-80 lg:h-auto overflow-hidden bg-dark">
                   <img
                     src={featured.image_url || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070"}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-700 cursor-pointer"
                     alt={featured.title}
+                    onClick={() => setSelectedEvent(featured)}
                   />
-                  <div className="absolute top-8 left-8 bg-accent text-dark px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                    <span className="animate-pulse w-2 h-2 bg-dark rounded-full"></span> Headline Event
+                  <div className="absolute top-0 left-0 bg-accent text-dark px-4 py-2 text-[9px] font-black uppercase tracking-widest">
+                    Headline Listing
                   </div>
                 </div>
-                <div className="lg:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                  <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6">
-                    <span className="flex items-center gap-1"><Calendar size={14} className="text-accent" /> {new Date(featured.event_date).toLocaleDateString("en-GB", { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                <div className="lg:col-span-5 p-8 md:p-12 flex flex-col justify-center border-l border-dark/5">
+                  <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-primary mb-6">
+                    <span className="flex items-center gap-2">
+                      <Calendar size={12} /> {new Date(featured.event_date).toLocaleDateString("en-GB", { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </span>
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-none mb-6 group-hover:text-primary transition-colors">
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tighter leading-none mb-6 uppercase">
                     {featured.title}
                   </h2>
-                  <p className="text-gray-500 text-base font-medium leading-relaxed mb-8 line-clamp-4">
+                  <p className="text-[13px] text-gray-500 font-medium leading-relaxed mb-8 line-clamp-3 text-justify">
                     {featured.description}
                   </p>
-                  <div className="grid grid-cols-2 gap-4 mb-8 py-6 border-y border-gray-100">
-                    <div>
-                      <p className="text-[9px] font-black uppercase text-gray-400 mb-1">Venue</p>
-                      <p className="text-sm font-bold flex items-center gap-1"><MapPin size={14} className="text-accent" /> {featured.location || "Main Campus"}</p>
+                  
+                  <div className="grid grid-cols-2 gap-px bg-dark/10 border border-dark/10 mb-8">
+                    <div className="bg-white p-4">
+                      <p className="text-[8px] font-black uppercase text-gray-400 mb-1">Venue</p>
+                      <p className="text-[11px] font-bold uppercase flex items-center gap-2"><MapPin size={12} className="text-accent" /> {featured.location || "Main Campus"}</p>
                     </div>
-                    <div>
-                      <p className="text-[9px] font-black uppercase text-gray-400 mb-1">Schedule</p>
-                      <p className="text-sm font-bold flex items-center gap-1"><Clock size={14} className="text-accent" /> {featured.event_time || "See Details"}</p>
+                    <div className="bg-white p-4">
+                      <p className="text-[8px] font-black uppercase text-gray-400 mb-1">Schedule</p>
+                      <p className="text-[11px] font-bold uppercase flex items-center gap-2"><Clock size={12} className="text-accent" /> {featured.event_time || "TBA"}</p>
                     </div>
                   </div>
-                  {/* Updated: View Details Trigger */}
+
                   <button 
                     onClick={() => setSelectedEvent(featured)}
-                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-dark text-white w-fit px-8 py-4 rounded-full hover:bg-primary transition-all active:scale-95 shadow-lg shadow-dark/10"
+                    className="flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] bg-dark text-white w-full py-4 hover:bg-primary transition-all active:scale-95"
                   >
-                    View Full Details <ArrowRight size={16} />
+                    View Operational Data <ArrowRight size={14} />
                   </button>
                 </div>
-              </div>
+              </section>
             )}
 
             {/* 🎉 SUBSEQUENT EVENTS GRID */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-dark/10 border border-dark/10">
               {filteredEvents.length === 0 && !featured ? (
-                <div className="col-span-full text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-gray-200">
-                  <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">No matches found in the archive</p>
+                <div className="col-span-full text-center py-20 bg-white">
+                  <Calendar size={32} className="mx-auto text-gray-200 mb-4" />
+                  <p className="text-gray-400 font-black uppercase tracking-widest text-[9px]">No Active Listings Found</p>
                 </div>
               ) : (
                 filteredEvents.map((event) => (
                   <div
                     key={event.id}
                     onClick={() => setSelectedEvent(event)}
-                    className="group bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
+                    className="group bg-white p-8 hover:bg-gray-50 transition-all duration-300 flex flex-col cursor-pointer relative"
                   >
-                    <div className="mb-6 flex justify-between items-start">
-                      <div className="bg-light p-3 rounded-2xl group-hover:bg-accent transition-colors">
-                        <Calendar className="text-primary" size={24} />
+                    <div className="mb-8 flex justify-between items-start">
+                      <div className="border border-dark/10 p-2 group-hover:bg-primary group-hover:text-white transition-colors">
+                        <Calendar size={20} />
                       </div>
-                      <span className="text-[10px] font-black text-gray-300 group-hover:text-primary transition-colors">
-                        {new Date(event.event_date).getFullYear()}
+                      <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">
+                        Ref: {new Date(event.event_date).getFullYear()}
                       </span>
                     </div>
                     
-                    <h3 className="text-xl font-black leading-tight tracking-tight mb-4 group-hover:text-primary transition-colors">
+                    <h3 className="text-lg font-black leading-none tracking-tight uppercase mb-4 group-hover:text-primary transition-colors">
                       {event.title}
                     </h3>
 
-                    <p className="text-gray-500 text-xs font-medium leading-relaxed mb-8 line-clamp-3">
+                    <p className="text-[12px] text-gray-400 font-medium leading-relaxed mb-8 line-clamp-3 text-justify">
                       {event.description}
                     </p>
 
-                    <div className="mt-auto space-y-3 pt-6 border-t border-gray-50">
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                        <Clock size={12} className="text-accent" /> {new Date(event.event_date).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}
+                    <div className="mt-auto space-y-2 pt-6 border-t border-dark/5">
+                      <div className="flex items-center gap-2 text-[9px] font-black text-dark uppercase tracking-widest">
+                        <Clock size={11} className="text-accent" /> {new Date(event.event_date).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                        <MapPin size={12} className="text-accent" /> {event.location || "TBA"}
+                      <div className="flex items-center gap-2 text-[9px] font-black text-dark uppercase tracking-widest">
+                        <MapPin size={11} className="text-accent" /> {event.location || "TBA"}
                       </div>
                     </div>
                   </div>
@@ -197,78 +196,74 @@ export default function Events() {
         )}
       </main>
 
-      {/* 🖼️ EVENT DETAILS MODAL (Pop-up) */}
+      {/* 🖼️ EVENT DETAILS MODAL */}
       {selectedEvent && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-dark/80 backdrop-blur-md" onClick={() => setSelectedEvent(null)}></div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6">
+          <div className="absolute inset-0 bg-dark/95 backdrop-blur-md" onClick={() => setSelectedEvent(null)}></div>
           
-          <div className="relative bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="relative bg-white w-full max-w-5xl max-h-full md:max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col md:flex-row border border-white/10">
             {/* Close Button */}
             <button 
               onClick={() => setSelectedEvent(null)}
-              className="absolute top-6 right-6 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white md:text-dark md:bg-gray-100 md:hover:bg-gray-200 p-2 rounded-full transition-all"
+              className="absolute top-6 right-6 z-10 bg-dark text-white p-2 hover:bg-primary transition-all"
             >
               <X size={20} />
             </button>
 
-            <div className="flex flex-col md:flex-row">
-              {/* Image Side */}
-              <div className="md:w-1/2 h-64 md:h-auto sticky top-0">
-                <img 
-                  src={selectedEvent.image_url || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070"} 
-                  className="w-full h-full object-cover" 
-                  alt={selectedEvent.title}
-                />
+            {/* Image Side */}
+            <div className="md:w-1/2 h-64 md:h-auto bg-dark border-r border-dark/5">
+              <img 
+                src={selectedEvent.image_url || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070"} 
+                className="w-full h-full object-cover grayscale opacity-80" 
+                alt={selectedEvent.title}
+              />
+            </div>
+
+            {/* Content Side */}
+            <div className="md:w-1/2 p-8 md:p-16 flex flex-col">
+              <div className="flex items-center gap-2 text-primary font-black text-[9px] uppercase tracking-[0.4em] mb-4">
+                <Sparkles size={14} className="text-accent" /> Registry Record
+              </div>
+              
+              <h2 className="text-3xl md:text-4xl font-black tracking-tighter leading-none mb-10 uppercase">
+                {selectedEvent.title}
+              </h2>
+
+              <div className="grid grid-cols-1 gap-4 mb-10">
+                <div className="flex items-center gap-4 border-b border-dark/5 pb-4">
+                  <div className="bg-light p-3 border border-dark/5 text-primary"><Calendar size={18} /></div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Timeline</p>
+                    <p className="text-xs font-bold uppercase tracking-tight">{new Date(selectedEvent.event_date).toLocaleDateString("en-GB", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 border-b border-dark/5 pb-4">
+                  <div className="bg-light p-3 border border-dark/5 text-primary"><Clock size={18} /></div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Standard Time</p>
+                    <p className="text-xs font-bold uppercase tracking-tight">{selectedEvent.event_time || "TBA"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 border-b border-dark/5 pb-4">
+                  <div className="bg-light p-3 border border-dark/5 text-primary"><MapPin size={18} /></div>
+                  <div>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Operational Venue</p>
+                    <p className="text-xs font-bold uppercase tracking-tight">{selectedEvent.location || "AMA Lipa Campus"}</p>
+                  </div>
+                </div>
               </div>
 
-              {/* Content Side */}
-              <div className="md:w-1/2 p-8 md:p-12">
-                <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-widest mb-4">
-                  <Sparkles size={14} className="text-accent" /> Campus Event
-                </div>
-                
-                <h2 className="text-3xl md:text-4xl font-black tracking-tighter leading-tight mb-6 italic">
-                  {selectedEvent.title}
-                </h2>
+              <p className="text-[13px] text-gray-500 font-medium leading-relaxed mb-12 text-justify">
+                {selectedEvent.description}
+              </p>
 
-                <div className="space-y-4 mb-8">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-light p-2.5 rounded-xl"><Calendar size={18} className="text-primary" /></div>
-                    <div>
-                      <p className="text-[9px] font-black text-gray-400 uppercase">When</p>
-                      <p className="text-sm font-bold">{new Date(selectedEvent.event_date).toLocaleDateString("en-GB", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="bg-light p-2.5 rounded-xl"><Clock size={18} className="text-primary" /></div>
-                    <div>
-                      <p className="text-[9px] font-black text-gray-400 uppercase">Time</p>
-                      <p className="text-sm font-bold">{selectedEvent.event_time || "TBA"}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="bg-light p-2.5 rounded-xl"><MapPin size={18} className="text-primary" /></div>
-                    <div>
-                      <p className="text-[9px] font-black text-gray-400 uppercase">Where</p>
-                      <p className="text-sm font-bold">{selectedEvent.location || "AMA Lipa Campus"}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="prose prose-sm mb-8">
-                  <p className="text-gray-500 font-medium leading-relaxed">
-                    {selectedEvent.description}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-4 pt-8 border-t border-gray-100">
-                  <button className="flex-1 bg-primary text-white text-[10px] font-black uppercase tracking-widest py-4 rounded-full hover:bg-dark transition-colors flex items-center justify-center gap-2">
-                    Add to Calendar
-                  </button>
-                  <button className="p-4 bg-gray-100 text-dark rounded-full hover:bg-gray-200 transition-colors">
-                    <Share2 size={18} />
-                  </button>
-                </div>
+              <div className="mt-auto grid grid-cols-5 gap-4">
+                <button className="col-span-4 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] py-5 hover:bg-dark transition-colors flex items-center justify-center gap-3">
+                  Commit to Calendar
+                </button>
+                <button className="col-span-1 border border-dark/10 flex items-center justify-center hover:bg-gray-50 transition-colors">
+                  <Share2 size={18} />
+                </button>
               </div>
             </div>
           </div>

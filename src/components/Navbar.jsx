@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-// Moved outside to prevent re-creation on every render
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "News", path: "/news" },
-  { name: "The Binary Online", path: "/thebinar" }, // Fixed potential typo
+  { name: "The Binary Online", path: "/thebinar" },
   { name: "Gallery", path: "/gallery" },
   { name: "Events", path: "/events" },
   { name: "Announcements", path: "/announcements" },
@@ -17,7 +16,6 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
-  // Close mobile menu if window is resized to desktop width
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setMenuOpen(false);
@@ -27,17 +25,17 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-primary/90 text-white shadow-lg border-b border-white/10">
+    <nav className="sticky top-0 z-50 backdrop-blur-md bg-primary/95 text-white shadow-card border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
         
         {/* 🔷 LOGO */}
-        <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img
             src="/binary-logo.png"
             alt="Binary Bulletin Logo"
             className="h-10 w-10 object-contain"
           />
-          <h1 className="font-bold text-lg tracking-wide hidden sm:block">
+          <h1 className="font-bold text-lg tracking-wide hidden sm:block text-light">
             Binary Bulletin
           </h1>
         </Link>
@@ -56,13 +54,13 @@ export default function Navbar() {
                   className={`transition-colors duration-200 ${
                     isActive
                       ? "text-secondary font-semibold"
-                      : "hover:text-secondary/80"
+                      : "text-light hover:text-secondary"
                   }`}
                 >
                   {link.name}
                 </span>
 
-                {/* 🔥 UNDERLINE ANIMATION */}
+                {/* 🔥 UNDERLINE ANIMATION (using secondary) */}
                 <span
                   className={`absolute left-0 bottom-0 h-[2px] bg-secondary transition-all duration-300 ${
                     isActive ? "w-full" : "w-0 group-hover:w-full"
@@ -75,7 +73,7 @@ export default function Navbar() {
 
         {/* 📱 MOBILE BUTTON */}
         <button
-          className="md:hidden text-2xl transition p-2 focus:outline-none flex items-center justify-center"
+          className="md:hidden text-2xl p-2 focus:outline-none flex items-center justify-center text-light hover:text-secondary transition-colors"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-expanded={menuOpen}
           aria-label="Toggle navigation menu"
@@ -98,7 +96,7 @@ export default function Navbar() {
           menuOpen ? "max-h-[100vh] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="bg-primary/95 border-t border-white/5 px-6 py-4 space-y-1 shadow-inner">
+        <div className="bg-primary border-t border-white/5 px-6 py-4 space-y-1 shadow-inner">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path;
 
@@ -107,10 +105,10 @@ export default function Navbar() {
                 key={link.path}
                 to={link.path}
                 onClick={() => setMenuOpen(false)}
-                className={`block py-4 px-3 transition-all duration-200 ${
+                className={`block py-4 px-3 transition-all duration-200 rounded-xl ${
                   isActive
-                    ? "text-secondary font-bold bg-white/10 rounded-lg"
-                    : "hover:text-secondary hover:bg-white/5 rounded-lg"
+                    ? "text-secondary font-bold bg-white/10"
+                    : "text-light hover:text-secondary hover:bg-white/5"
                 }`}
               >
                 {link.name}
