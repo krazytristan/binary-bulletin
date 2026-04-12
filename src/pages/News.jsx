@@ -101,7 +101,7 @@ export default function News() {
               className="bg-transparent border-none w-full text-[10px] font-bold tracking-[0.1em] outline-none placeholder:text-gray-300" 
             />
           </div>
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-6">
             {["All", "News", "Sports", "Opinion", "Feature", "Editorial"].map((cat) => (
               <button
                 key={cat}
@@ -127,7 +127,7 @@ export default function News() {
           </div>
         ) : (
           <div className="space-y-16">
-            {/* --- LEAD STORY (WITH AUTHOR & IMAGE) --- */}
+            {/* --- LEAD STORY (TITLES RESIZED & NO ITALICS) --- */}
             {latest && !search && (
               <article className="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-black/10 group">
                 <div className="lg:col-span-7 p-8 md:p-12 border-b lg:border-b-0 lg:border-r border-black/10 flex flex-col justify-center">
@@ -136,7 +136,7 @@ export default function News() {
                     <time className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{new Date(latest.created_at).toDateString()}</time>
                   </div>
                   <Link to={`/article/${latest.id}`}>
-                    <h2 className="text-3xl md:text-6xl font-black leading-[0.9] tracking-tighter mb-6 uppercase group-hover:text-[#1E3A8A] transition-colors italic">
+                    <h2 className="text-2xl md:text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight mb-6 uppercase group-hover:text-[#1E3A8A] transition-colors">
                       {latest.title}
                     </h2>
                   </Link>
@@ -156,15 +156,15 @@ export default function News() {
                       </div>
                       <div>
                         <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1">{latest.author_name || "Staff Writer"}</p>
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Contributor</p>
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Journalist</p>
                       </div>
                     </div>
                     <Link to={`/article/${latest.id}`} className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
-                      Full Story <ArrowRight size={14} />
+                      Read Article <ArrowRight size={14} />
                     </Link>
                   </div>
                 </div>
-                <div className="lg:col-span-5 bg-gray-50 overflow-hidden min-h-[400px]">
+                <div className="lg:col-span-5 bg-gray-50 overflow-hidden min-h-[350px]">
                   <img 
                     src={getImage(latest.image_url)} 
                     className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" 
@@ -174,11 +174,10 @@ export default function News() {
               </article>
             )}
 
-            {/* --- SECONDARY GRID (WITH ARTICLE IMAGES & AUTHORS) --- */}
+            {/* --- SECONDARY GRID --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-black/10 border border-black/10">
               {(search ? filtered : remaining).map((a) => (
                 <article key={a.id} className="bg-[#FDFDFB] flex flex-col hover:bg-white transition-colors group">
-                  {/* Article Image */}
                   <div className="aspect-[16/10] overflow-hidden border-b border-black/10 bg-gray-100">
                     <img 
                       src={getImage(a.image_url)} 
@@ -202,7 +201,6 @@ export default function News() {
                       </p>
                     </Link>
 
-                    {/* Compact Author Footer */}
                     <div className="pt-4 border-t border-black/5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 rounded-full overflow-hidden bg-gray-100 border border-black/5">
@@ -228,7 +226,7 @@ export default function News() {
       <section className="max-w-7xl mx-auto px-6 pb-20">
         <div className="border-t border-black/10 pt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2">
-             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-[#1E3A8A]">Historical Tags</h3>
+             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-[#1E3A8A]">Archive Index</h3>
              <div className="flex flex-wrap gap-2">
               {["ICT", "Titans", "Lipa City", "AI", "Campus", "Tech", "Sports"].map(tag => (
                 <button 
@@ -241,13 +239,13 @@ export default function News() {
               ))}
              </div>
           </div>
-          <div className="bg-[#1E3A8A] p-8 text-white flex flex-col justify-between aspect-square lg:aspect-auto">
+          <div className="bg-[#1E3A8A] p-8 text-white flex flex-col justify-between">
              <div>
-               <h3 className="text-xl font-black uppercase leading-none mb-4 tracking-tighter">Nexus Edition</h3>
-               <p className="text-xs text-white/70 font-medium mb-8">Access the full digital archive and receive weekly editorial highlights.</p>
+               <h3 className="text-xl font-black uppercase leading-none mb-4 tracking-tighter">Newsletter</h3>
+               <p className="text-xs text-white/70 font-medium mb-8">Receive weekly highlights and editorial deep-dives directly.</p>
              </div>
              <Link to="/contact" className="text-[10px] font-black uppercase tracking-widest bg-white text-[#1E3A8A] py-3 text-center hover:bg-[#F59E0B] hover:text-white transition-colors">
-               Join the Newsletter
+               Subscribe
              </Link>
           </div>
         </div>
