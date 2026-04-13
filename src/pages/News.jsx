@@ -102,7 +102,7 @@ export default function News() {
             />
           </div>
           <div className="hidden md:flex items-center gap-6">
-            {["All", "News", "Sports", "Opinion", "Feature", "Editorial"].map((cat) => (
+            {["All", "News", "Sports", "Opinion", "Feature", "Editorial", "Literary"].map((cat) => (
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
