@@ -47,10 +47,11 @@ export default function ArticleView() {
         setRelated(relData || []);
       }
 
-      // Fetch Interactions
+      // Fetch Interactions 
+      // UPDATED: Table names changed to match your database schema
       const [likesRes, commentsRes, bookmarkRes] = await Promise.all([
         supabase.from("likes").select("*").eq("article_id", id),
-        supabase.from("comments").select("*").eq("article_id", id).order("created_at", { ascending: false }),
+        supabase.from("article_comments").select("*").eq("article_id", id).order("created_at", { ascending: false }),
         supabase.from("bookmarks").select("*").eq("article_id", id)
       ]);
 
@@ -95,15 +96,26 @@ export default function ArticleView() {
 
   const addComment = async () => {
     if (!comment.trim()) return;
-    const { error } = await supabase.from("comments").insert({ article_id: id, text: comment });
+    
+    // UPDATED: Table name is 'article_comments' and the field is 'content'
+    const { error } = await supabase
+      .from("article_comments")
+      .insert({ 
+        article_id: id, 
+        content: comment, 
+        user_name: "Anonymous Reader" 
+      });
+
     if (!error) {
       setComment("");
       const { data } = await supabase
-        .from("comments")
+        .from("article_comments")
         .select("*")
         .eq("article_id", id)
         .order("created_at", { ascending: false });
       setComments(data || []);
+    } else {
+      console.error("Comment error:", error);
     }
   };
 
@@ -270,9 +282,10 @@ export default function ArticleView() {
                 <div className="space-y-6 mb-8 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                   {comments.map((c) => (
                     <div key={c.id} className="border-b border-white/10 pb-4">
-                      <p className="text-xs text-gray-300 leading-relaxed font-medium uppercase tracking-tighter">{c.text}</p>
+                      {/* UPDATED: Displays 'content' field */}
+                      <p className="text-xs text-gray-300 leading-relaxed font-medium uppercase tracking-tighter">{c.content}</p>
                       <div className="flex justify-between items-center mt-3">
-                        <span className="text-[8px] font-black uppercase tracking-widest text-[#F59E0B]">Verified Reader</span>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-[#F59E0B]">{c.user_name || "Reader"}</span>
                         <span className="text-[8px] text-gray-500 uppercase font-bold">{new Date(c.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>

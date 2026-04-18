@@ -32,13 +32,12 @@ export default function Articles() {
     author_name: "Campus Writer",
     author_image: "",
     image_url: "",
-    gallery: [], // Array for multiple image URLs
+    gallery: [], 
   });
 
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState("");
   
-  // States for Gallery
   const [galleryFiles, setGalleryFiles] = useState([]);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
 
@@ -46,7 +45,6 @@ export default function Articles() {
     fetchArticles();
   }, []);
 
-  // 📡 FETCH DATA
   const fetchArticles = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -58,7 +56,6 @@ export default function Articles() {
     setLoading(false);
   };
 
-  // 🖼️ HANDLE MAIN THUMBNAIL
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -68,7 +65,6 @@ export default function Articles() {
     }
   };
 
-  // 📸 HANDLE GALLERY IMAGES (Multiple)
   const handleGalleryChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
@@ -79,14 +75,30 @@ export default function Articles() {
   };
 
   const removeGalleryItem = (index) => {
+    // 1. Filter previews
+    const targetPreview = galleryPreviews[index];
     setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
-    // If it's a new file (not yet uploaded), remove from files array
-    setGalleryFiles(prev => prev.filter((_, i) => i !== index));
-    // If it's an existing URL, remove from form gallery
-    setForm(prev => ({
-      ...prev,
-      gallery: prev.gallery.filter((_, i) => i !== index)
-    }));
+
+    // 2. If it was a blob/preview, revoke it
+    if (targetPreview && targetPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(targetPreview);
+    }
+
+    // 3. Update the files array for new uploads
+    // We need to figure out if this index belongs to a new file or an existing URL
+    const existingGalleryCount = form.gallery ? form.gallery.length : 0;
+    
+    if (index < existingGalleryCount) {
+      // It's an existing URL in the database
+      setForm(prev => ({
+        ...prev,
+        gallery: prev.gallery.filter((_, i) => i !== index)
+      }));
+    } else {
+      // It's a newly added file
+      const fileIndex = index - existingGalleryCount;
+      setGalleryFiles(prev => prev.filter((_, i) => i !== fileIndex));
+    }
   };
 
   const uploadImage = async (file, folder = "article-thumbnails") => {
@@ -105,56 +117,64 @@ export default function Articles() {
     return data.publicUrl;
   };
 
-  // ✍️ SAVE LOGIC
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
 
-    // 1. Upload Main Thumbnail
-    let finalImageUrl = form.image_url;
-    if (imageFile) {
-      const uploadedUrl = await uploadImage(imageFile);
-      if (uploadedUrl) finalImageUrl = uploadedUrl;
+    try {
+      // 1. Upload Main Thumbnail
+      let finalImageUrl = form.image_url;
+      if (imageFile) {
+        const uploadedUrl = await uploadImage(imageFile, "article-thumbnails");
+        if (uploadedUrl) finalImageUrl = uploadedUrl;
+      }
+
+      // 2. Upload New Gallery Images
+      const newGalleryUrls = await Promise.all(
+        galleryFiles.map(file => uploadImage(file, "article-gallery"))
+      );
+      
+      const finalGallery = [
+        ...(form.gallery || []),
+        ...newGalleryUrls.filter(url => url !== null)
+      ];
+
+      const payload = {
+        title: form.title,
+        excerpt: form.excerpt,
+        content: form.content,
+        category: form.category,
+        author_name: form.author_name,
+        author_image: form.author_image,
+        image_url: finalImageUrl,
+        gallery: finalGallery,
+        updated_at: new Date(),
+      };
+
+      let error;
+      if (editing) {
+        const { error: err } = await supabase
+          .from("articles")
+          .update(payload)
+          .eq("id", editing.id);
+        error = err;
+      } else {
+        const { error: err } = await supabase
+          .from("articles")
+          .insert([payload]);
+        error = err;
+      }
+
+      if (!error) {
+        setModalOpen(false);
+        resetForm();
+        fetchArticles();
+      }
+    } catch (err) {
+      console.error("Save failed:", err);
+    } finally {
+      setSaving(false);
     }
-
-    // 2. Upload Gallery Images
-    const newGalleryUrls = await Promise.all(
-      galleryFiles.map(file => uploadImage(file, "article-gallery"))
-    );
-    
-    // Combine existing gallery URLs (from editing) with new ones
-    const finalGallery = [
-      ...(form.gallery || []),
-      ...newGalleryUrls.filter(url => url !== null)
-    ];
-
-    const payload = {
-      ...form,
-      image_url: finalImageUrl,
-      gallery: finalGallery,
-      updated_at: new Date(),
-    };
-
-    let error;
-    if (editing) {
-      const { error: err } = await supabase
-        .from("articles")
-        .update(payload)
-        .eq("id", editing.id);
-      error = err;
-    } else {
-      const { error: err } = await supabase
-        .from("articles")
-        .insert([payload]);
-      error = err;
-    }
-
-    if (!error) {
-      setModalOpen(false);
-      resetForm();
-      fetchArticles();
-    }
-    setSaving(false);
   };
 
   const resetForm = () => {
@@ -171,9 +191,9 @@ export default function Articles() {
     setEditing(null);
     setImageFile(null);
     setGalleryFiles([]);
-    if (preview && !preview.startsWith('http')) URL.revokeObjectURL(preview);
+    if (preview && preview.startsWith('blob:')) URL.revokeObjectURL(preview);
     setPreview("");
-    galleryPreviews.forEach(p => { if(!p.startsWith('http')) URL.revokeObjectURL(p)});
+    galleryPreviews.forEach(p => { if(p.startsWith('blob:')) URL.revokeObjectURL(p)});
     setGalleryPreviews([]);
   };
 
@@ -356,7 +376,7 @@ export default function Articles() {
                       <>
                         <img src={preview} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                          <button type="button" onClick={() => { setImageFile(null); setPreview(""); }} className="bg-white p-2 rounded-full text-red-500"><X size={20}/></button>
+                          <button type="button" onClick={() => { setImageFile(null); setPreview(""); setForm({...form, image_url: ""})}} className="bg-white p-2 rounded-full text-red-500"><X size={20}/></button>
                         </div>
                       </>
                     ) : (
@@ -408,9 +428,10 @@ export default function Articles() {
 
               <button 
                 disabled={saving}
+                type="submit"
                 className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:bg-gray-300 shadow-xl shadow-blue-100"
               >
-                {saving ? <Loader2 className="animate-spin" size={20} /> : 'Publish Article'}
+                {saving ? <Loader2 className="animate-spin" size={20} /> : (editing ? 'Update Article' : 'Publish Article')}
               </button>
             </form>
           </div>
