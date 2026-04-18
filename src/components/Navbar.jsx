@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabase";
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "News", path: "/news" },
-  { name: "The Binary Online", path: "/thebinar" }, // Matches your App.js
+  { name: "The Binary Online", path: "/thebinar" }, 
   { name: "Gallery", path: "/gallery" },
   { name: "Events", path: "/events" },
   { name: "Announcements", path: "/announcements" },
@@ -63,7 +63,7 @@ export default function Navbar() {
           ...i, 
           category: "News", 
           icon: <FileText size={14}/>, 
-          link: `/article/${i.id}` // FIXED: Changed from /news/ to /article/ to match App.js
+          link: `/article/${i.id}` 
         })),
         ...(events.data || []).map(i => ({ 
           ...i, 
@@ -131,26 +131,32 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* RESULTS DROPDOWN */}
+          {/* UPDATED RESULTS DROPDOWN (GLASSMORPISM) */}
           {showResults && searchQuery.length > 1 && (
-            <div className="absolute top-full mt-2 left-0 right-0 bg-[#121212] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="max-h-[350px] overflow-y-auto p-2">
+            <div className="absolute top-full mt-2 left-0 right-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="max-h-[350px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-white/20">
                 {results.length > 0 ? (
                   results.map((res, index) => (
                     <button 
                       key={index} 
                       onClick={() => handleNavigate(res.link)}
-                      className="w-full flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl transition-colors border-b border-white/5 last:border-0 text-left"
+                      className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors border-b border-white/5 last:border-0 text-left group"
                     >
-                      <div className="p-2 bg-white/5 text-secondary rounded-lg">{res.icon}</div>
+                      <div className="p-2 bg-white/10 text-secondary group-hover:bg-secondary group-hover:text-primary rounded-lg transition-colors">
+                        {res.icon}
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-light truncate">{res.title}</p>
-                        <p className="text-[10px] text-light/40 uppercase tracking-widest">{res.category}</p>
+                        <p className="text-xs font-bold text-white truncate">{res.title}</p>
+                        <p className="text-[10px] text-white/50 uppercase tracking-widest">{res.category}</p>
                       </div>
                     </button>
                   ))
                 ) : (
-                  !isSearching && <p className="text-xs text-center py-6 text-light/40 italic">No matches found</p>
+                  !isSearching && (
+                    <div className="text-center py-8">
+                      <p className="text-xs text-white/40 italic">No matches found</p>
+                    </div>
+                  )
                 )}
               </div>
             </div>

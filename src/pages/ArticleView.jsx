@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 import { 
   Heart, Bookmark, Share2, Link as LinkIcon, 
   ChevronLeft, MessageSquare, Calendar, User,
-  ArrowRight, Zap, Quote
+  Zap, Quote, Images as ImagesIcon
 } from "lucide-react";
 
 export default function ArticleView() {
@@ -171,7 +171,7 @@ export default function ArticleView() {
               </div>
             </header>
 
-            {/* Featured Image */}
+            {/* Featured Lead Image */}
             <div className="mt-10 relative group bg-gray-100 overflow-hidden border border-black/10">
               <img src={article?.image_url} className="w-full h-auto max-h-[600px] object-cover grayscale hover:grayscale-0 transition-all duration-1000" alt="Cover" />
             </div>
@@ -183,7 +183,7 @@ export default function ArticleView() {
                   "{article?.excerpt}"
                 </p>
                 
-                <div className="prose prose-lg max-w-none text-[#1a1a1a] leading-[1.8] space-y-8 font-serif">
+                <div className="prose prose-lg max-w-none text-[#1a1a1a] leading-[1.8] space-y-8 font-serif mb-16">
                   {article?.content?.split("\n").map((paragraph, i) => (
                     paragraph.trim() && (
                       <p key={i} className={i === 0 ? "first-letter:text-6xl first-letter:font-black first-letter:mr-3 first-letter:float-left first-letter:mt-2 first-letter:text-[#1E3A8A]" : ""}>
@@ -192,6 +192,35 @@ export default function ArticleView() {
                     )
                   ))}
                 </div>
+
+                {/* --- ARTICLE GALLERY (Supporting Photos) --- */}
+                {article?.gallery && article.gallery.length > 0 && (
+                  <section className="mt-20 border-t-2 border-black pt-12">
+                    <div className="flex items-center justify-between mb-8">
+                      <h3 className="font-black text-[11px] uppercase tracking-[0.4em] flex items-center gap-2">
+                        <ImagesIcon size={16} className="text-[#1E3A8A]" /> Visual Documentation
+                      </h3>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        {article.gallery.length} Exhibits
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {article.gallery.map((url, index) => (
+                        <div key={index} className={`relative overflow-hidden border border-black/10 bg-gray-50 group ${
+                          article.gallery.length === 1 ? 'md:col-span-2 h-[500px]' : 
+                          (index === 0 && article.gallery.length % 2 !== 0) ? 'md:col-span-2 h-[450px]' : 'h-[300px]'
+                        }`}>
+                          <img 
+                            src={url} 
+                            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 cursor-crosshair" 
+                            alt={`Gallery asset ${index + 1}`} 
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
                 {/* Footer Actions */}
                 <div className="mt-16 pt-8 border-t-2 border-black flex flex-wrap gap-4">
@@ -261,7 +290,7 @@ export default function ArticleView() {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="SYNC YOUR THOUGHTS..."
-                    className="w-full p-4 bg-white/5 border border-white/10 text-[10px] font-black tracking-widest text-white placeholder:text-white/20 outline-none focus:border-[#F59E0B] transition-colors"
+                    className="w-full p-4 bg-white/5 border border-white/10 text-[10px] font-black tracking-widest text-white placeholder:text-white/20 outline-none focus:border-[#F59E0B] transition-colors resize-none"
                     rows="3"
                   />
                   <button onClick={addComment} className="w-full bg-[#1E3A8A] text-white py-3 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all">

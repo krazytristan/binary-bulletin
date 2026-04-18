@@ -11,7 +11,8 @@ import {
   Loader2,
   Image as ImageIcon,
   User,
-  X
+  X,
+  Images
 } from "lucide-react";
 
 export default function Articles() {
@@ -29,12 +30,17 @@ export default function Articles() {
     content: "",
     category: "News",
     author_name: "Campus Writer",
-    author_image: "", // Added author_image field
+    author_image: "",
     image_url: "",
+    gallery: [], // Array for multiple image URLs
   });
 
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState("");
+  
+  // States for Gallery
+  const [galleryFiles, setGalleryFiles] = useState([]);
+  const [galleryPreviews, setGalleryPreviews] = useState([]);
 
   useEffect(() => {
     fetchArticles();
@@ -52,26 +58,46 @@ export default function Articles() {
     setLoading(false);
   };
 
-  // 🖼️ HANDLE IMAGE
+  // 🖼️ HANDLE MAIN THUMBNAIL
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (preview) URL.revokeObjectURL(preview); 
+      if (preview && !preview.startsWith('http')) URL.revokeObjectURL(preview); 
       setImageFile(file);
       setPreview(URL.createObjectURL(file));
     }
   };
 
-  const uploadImage = async () => {
-    if (!imageFile) return form.image_url;
+  // 📸 HANDLE GALLERY IMAGES (Multiple)
+  const handleGalleryChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setGalleryFiles(prev => [...prev, ...files]);
+      const newPreviews = files.map(file => URL.createObjectURL(file));
+      setGalleryPreviews(prev => [...prev, ...newPreviews]);
+    }
+  };
 
-    const fileExt = imageFile.name.split('.').pop();
+  const removeGalleryItem = (index) => {
+    setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+    // If it's a new file (not yet uploaded), remove from files array
+    setGalleryFiles(prev => prev.filter((_, i) => i !== index));
+    // If it's an existing URL, remove from form gallery
+    setForm(prev => ({
+      ...prev,
+      gallery: prev.gallery.filter((_, i) => i !== index)
+    }));
+  };
+
+  const uploadImage = async (file, folder = "article-thumbnails") => {
+    if (!file) return null;
+    const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `article-thumbnails/${fileName}`;
+    const filePath = `${folder}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("articles")
-      .upload(filePath, imageFile);
+      .upload(filePath, file);
 
     if (uploadError) return null;
 
@@ -84,11 +110,28 @@ export default function Articles() {
     e.preventDefault();
     setSaving(true);
 
-    const publicUrl = await uploadImage();
+    // 1. Upload Main Thumbnail
+    let finalImageUrl = form.image_url;
+    if (imageFile) {
+      const uploadedUrl = await uploadImage(imageFile);
+      if (uploadedUrl) finalImageUrl = uploadedUrl;
+    }
+
+    // 2. Upload Gallery Images
+    const newGalleryUrls = await Promise.all(
+      galleryFiles.map(file => uploadImage(file, "article-gallery"))
+    );
+    
+    // Combine existing gallery URLs (from editing) with new ones
+    const finalGallery = [
+      ...(form.gallery || []),
+      ...newGalleryUrls.filter(url => url !== null)
+    ];
 
     const payload = {
       ...form,
-      image_url: publicUrl,
+      image_url: finalImageUrl,
+      gallery: finalGallery,
       updated_at: new Date(),
     };
 
@@ -121,13 +164,17 @@ export default function Articles() {
       content: "", 
       category: "News", 
       author_name: "Campus Writer", 
-      author_image: "", // Reset field
-      image_url: "" 
+      author_image: "", 
+      image_url: "",
+      gallery: []
     });
     setEditing(null);
     setImageFile(null);
-    if (preview) URL.revokeObjectURL(preview);
+    setGalleryFiles([]);
+    if (preview && !preview.startsWith('http')) URL.revokeObjectURL(preview);
     setPreview("");
+    galleryPreviews.forEach(p => { if(!p.startsWith('http')) URL.revokeObjectURL(p)});
+    setGalleryPreviews([]);
   };
 
   const openEdit = (article) => {
@@ -138,10 +185,12 @@ export default function Articles() {
       content: article.content,
       category: article.category,
       author_name: article.author_name,
-      author_image: article.author_image || "", // Load existing author image
+      author_image: article.author_image || "",
       image_url: article.image_url,
+      gallery: article.gallery || [],
     });
     setPreview(article.image_url);
+    setGalleryPreviews(article.gallery || []);
     setModalOpen(true);
   };
 
@@ -248,7 +297,7 @@ export default function Articles() {
       {/* MODAL */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-          <div className="bg-white p-6 md:p-8 rounded-3xl w-full max-w-3xl shadow-2xl overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
+          <div className="bg-white p-6 md:p-8 rounded-3xl w-full max-w-4xl shadow-2xl overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-gray-900">{editing ? 'Edit' : 'New'} Article</h2>
               <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X /></button>
@@ -262,7 +311,6 @@ export default function Articles() {
                     <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                   
-                  {/* Author Details Group */}
                   <div className="grid grid-cols-1 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Author Name</label>
@@ -302,7 +350,7 @@ export default function Articles() {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Article Thumbnail</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Article Thumbnail (Main)</label>
                   <div className="relative aspect-video bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
                     {preview ? (
                       <>
@@ -314,11 +362,37 @@ export default function Articles() {
                     ) : (
                       <div className="text-center p-6">
                         <ImageIcon className="mx-auto text-gray-300 mb-2" size={32} />
-                        <p className="text-xs text-gray-400">Click to upload image</p>
+                        <p className="text-xs text-gray-400">Main cover image</p>
                       </div>
                     )}
                     <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
                   </div>
+                </div>
+              </div>
+
+              {/* GALLERY SECTION */}
+              <div className="space-y-4">
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1 flex items-center gap-2">
+                  <Images size={14} /> Supporting Photos (Gallery)
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {galleryPreviews.map((src, index) => (
+                    <div key={index} className="relative aspect-square rounded-xl overflow-hidden border border-gray-100 group">
+                      <img src={src} className="w-full h-full object-cover" />
+                      <button 
+                        type="button" 
+                        onClick={() => removeGalleryItem(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition group">
+                    <Plus className="text-gray-300 group-hover:text-blue-500" size={24} />
+                    <span className="text-[10px] text-gray-400 font-bold uppercase mt-1">Add Photo</span>
+                    <input type="file" multiple accept="image/*" onChange={handleGalleryChange} className="hidden" />
+                  </label>
                 </div>
               </div>
 

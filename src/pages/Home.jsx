@@ -209,21 +209,47 @@ export default function Home() {
                   </Link>
                 )}
             </div>
-            <div className="space-y-6">
-              <h2 className="font-black border-b border-black pb-1 text-[10px] uppercase tracking-[0.3em]">Voices</h2>
-              {categorized.opinion.slice(0, 4).map(a => (
-                <Link key={a.id} to={`/article/${a.id}`} className="block group border-b border-black/5 pb-4">
-                  <h4 className="font-bold leading-snug group-hover:text-[#1E3A8A] transition-colors mb-2 text-sm uppercase tracking-tight">{a.title}</h4>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">By {a.author_name || "Staff"}</span>
-                    <span className="text-[8px] text-gray-400 uppercase font-bold">{formatDate(a.created_at)}</span>
+
+          {/* VOICES SECTION (UPDATED WITH EXCERPT, IMAGES AND AUTHOR DETAILS) */}
+          <div className="space-y-6">
+            <h2 className="font-black border-b border-black pb-1 text-[10px] uppercase tracking-[0.3em]">Voices</h2>
+            {categorized.opinion.slice(0, 4).map(a => (
+              <Link key={a.id} to={`/article/${a.id}`} className="block group border-b border-black/5 pb-4">
+                <div className="flex gap-4 items-start">
+                  {/* Article Thumbnail */}
+                  <div className="w-16 h-16 flex-shrink-0 bg-gray-100 border border-black/5 overflow-hidden">
+                    <img 
+                      src={a.image_url} 
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
+                      alt="Thumbnail" 
+                    />
                   </div>
-                </Link>
-              ))}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold leading-tight group-hover:text-[#1E3A8A] transition-colors mb-1 text-sm uppercase tracking-tight truncate">
+                      {a.title}
+                    </h4>
+                    {/* Added Excerpt here */}
+                    <p className="text-[10px] text-gray-500 line-clamp-2 italic mb-2">
+                      "{a.excerpt}"
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <img 
+                        src={a.author_image || `https://ui-avatars.com/api/?name=${a.author_name}`} 
+                        className="w-4 h-4 rounded-full grayscale" 
+                        alt="author" 
+                      />
+                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                        By {a.author_name || "Staff"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
             </div>
           </div>
 
-          {/* COLUMN 2: LEAD STORY (Resized Headline) */}
+          {/* COLUMN 2: LEAD STORY */}
           <div className="lg:col-span-6 space-y-8">
             <h2 className="uppercase tracking-[0.5em] font-black text-[9px] text-[#F59E0B]">Featured Narrative</h2>
             {featured && (
@@ -341,15 +367,23 @@ export default function Home() {
           </section>
         </div>
 
-        {/* --- NEWSLETTER --- */}
-        <section className="bg-white border-4 border-black p-12 md:p-22 text-center my-22 relative overflow-hidden">
+        {/* --- NEWSLETTER (UPDATED RESPONSIVE FIX) --- */}
+        <section className="bg-white border-4 border-black p-8 md:p-22 text-center my-22 relative overflow-hidden">
           <div className="max-w-xl mx-auto space-y-6 relative z-10">
             <Newspaper size={48} className="mx-auto text-[#1E3A8A]" />
-            <h2 className="text-5xl font-black uppercase tracking-tighter">Stay Wired.</h2>
-            <p className="font-medium text-gray-600 italic text-lg">Get the Binary digest delivered to your campus inbox.</p>
-            <div className="flex flex-col md:flex-row gap-0 mt-8">
-              <input type="email" placeholder="CAMPUS EMAIL..." className="flex-grow border-2 border-black border-r-0 px-6 py-4 rounded-none font-black text-[10px] tracking-widest outline-none focus:bg-gray-50" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <button className="bg-black text-white px-10 py-4 font-black uppercase text-[10px] tracking-[0.2em] hover:bg-[#1E3A8A] transition-colors">Join Archive</button>
+            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter">Stay Wired.</h2>
+            <p className="font-medium text-gray-600 italic text-base md:text-lg">Get the Binary digest delivered to your campus inbox.</p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 mt-8">
+              <input 
+                type="email" 
+                placeholder="CAMPUS EMAIL..." 
+                className="flex-grow border-2 border-black px-6 py-4 rounded-none font-black text-[10px] tracking-widest outline-none focus:bg-gray-50 sm:border-r-0" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+              />
+              <button className="bg-black text-white px-10 py-4 font-black uppercase text-[10px] tracking-[0.2em] hover:bg-[#1E3A8A] transition-colors whitespace-nowrap">
+                Join Archive
+              </button>
             </div>
           </div>
         </section>
