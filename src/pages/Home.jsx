@@ -13,6 +13,8 @@ import {
 export default function Home() {
   const [articles, setArticles] = useState([]);
   const [featured, setFeatured] = useState(null);
+  const [announcements, setAnnouncements] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingStage, setLoadingStage] = useState(0);
   const [email, setEmail] = useState("");
@@ -28,6 +30,47 @@ export default function Home() {
     "Finalizing Edition..."
   ];
 
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setLoadingStage(0);
+      
+      const stageInterval = setInterval(() => {
+        setLoadingStage(prev => (prev < stages.length - 1 ? prev + 1 : prev));
+      }, 500);
+
+      // Fetch Articles, Announcements, and Events in parallel
+      const [articlesRes, annRes, eventsRes] = await Promise.all([
+        supabase.from("articles").select("*").order("created_at", { ascending: false }),
+        supabase.from("announcements").select("*").order("created_at", { ascending: false }).limit(3),
+        supabase.from("events").select("*").order("event_date", { ascending: true }).limit(3)
+      ]);
+
+      if (articlesRes.data) {
+        setArticles(articlesRes.data);
+        setFeatured(articlesRes.data[0]);
+      }
+      if (annRes.data) setAnnouncements(annRes.data);
+      if (eventsRes.data) setEvents(eventsRes.data);
+
+      clearInterval(stageInterval);
+    } catch (err) {
+      console.error("Data sync failed.", err);
+    } finally {
+      setTimeout(() => setLoading(false), 800);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+    document.title = "The Binary Bulletin | The Binary Journal";
+    
+    const consent = localStorage.getItem("bulletin_cookie_consent");
+    if (!consent) {
+      setTimeout(() => setShowCookies(true), 2500);
+    }
+  }, [fetchData]);
+
   // Auto-scroll logic for the Archive Carousel
   useEffect(() => {
     const interval = setInterval(() => {
@@ -42,42 +85,6 @@ export default function Home() {
     }, 4000);
     return () => clearInterval(interval);
   }, [articles]);
-
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const stageInterval = setInterval(() => {
-        setLoadingStage(prev => (prev < stages.length - 1 ? prev + 1 : prev));
-      }, 600);
-
-      const { data, error: fetchError } = await supabase
-        .from("articles")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (fetchError) throw fetchError;
-      
-      if (data && data.length > 0) {
-        setArticles(data);
-        setFeatured(data[0]);
-      }
-      clearInterval(stageInterval);
-    } catch (err) {
-      console.error("Failed to load publication.");
-    } finally {
-      setTimeout(() => setLoading(false), 1200);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-    document.title = "The Binary Bulletin | The Binary Journal";
-    
-    const consent = localStorage.getItem("bulletin_cookie_consent");
-    if (!consent) {
-      setTimeout(() => setShowCookies(true), 2500);
-    }
-  }, [fetchData]);
 
   const handleAcceptCookies = () => {
     localStorage.setItem("bulletin_cookie_consent", "true");
@@ -193,7 +200,7 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-6 py-18">
         <div className="grid lg:grid-cols-12 gap-10 mb-16">
-          {/* COLUMN 1: EDITORIAL INDEX */}
+          {/* COLUMN 1: EDITORIAL & VOICES */}
           <div className="lg:col-span-3 space-y-10 border-r border-black/10 pr-10 hidden lg:block">
             <div className="bg-[#FDFDFB] p-6 border border-black/10">
                 <div className="flex items-center gap-2 mb-4 text-[#1E3A8A]"><Quote size={20} fill="currentColor"/><h2 className="font-black uppercase text-[10px] tracking-[0.3em]">Editorial</h2></div>
@@ -210,42 +217,72 @@ export default function Home() {
                 )}
             </div>
 
-          {/* VOICES SECTION (UPDATED WITH EXCERPT, IMAGES AND AUTHOR DETAILS) */}
-          <div className="space-y-6">
-            <h2 className="font-black border-b border-black pb-1 text-[10px] uppercase tracking-[0.3em]">Voices</h2>
-            {categorized.opinion.slice(0, 4).map(a => (
-              <Link key={a.id} to={`/article/${a.id}`} className="block group border-b border-black/5 pb-4">
-                <div className="flex gap-4 items-start">
-                  {/* Article Thumbnail */}
-                  <div className="w-16 h-16 flex-shrink-0 bg-gray-100 border border-black/5 overflow-hidden">
-                    <img 
-                      src={a.image_url} 
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                      alt="Thumbnail" 
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold leading-tight group-hover:text-[#1E3A8A] transition-colors mb-1 text-sm uppercase tracking-tight truncate">
-                      {a.title}
-                    </h4>
-                    {/* Added Excerpt here */}
-                    <p className="text-[10px] text-gray-500 line-clamp-2 italic mb-2">
-                      "{a.excerpt}"
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <img 
-                        src={a.author_image || `https://ui-avatars.com/api/?name=${a.author_name}`} 
-                        className="w-4 h-4 rounded-full grayscale" 
-                        alt="author" 
-                      />
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                        By {a.author_name || "Staff"}
-                      </span>
+            <div className="space-y-6">
+              <h2 className="font-black border-b border-black pb-1 text-[10px] uppercase tracking-[0.3em]">Voices</h2>
+              {categorized.opinion.slice(0, 4).map(a => (
+                <Link key={a.id} to={`/article/${a.id}`} className="block group border-b border-black/5 pb-4">
+                  <div className="flex gap-4 items-start">
+                    <div className="w-16 h-16 flex-shrink-0 bg-gray-100 border border-black/5 overflow-hidden">
+                      <img src={a.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt="Thumbnail" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold leading-tight group-hover:text-[#1E3A8A] transition-colors mb-1 text-sm uppercase tracking-tight truncate">{a.title}</h4>
+                      <p className="text-[10px] text-gray-500 line-clamp-2 italic mb-2">"{a.excerpt}"</p>
+                      <div className="flex items-center gap-2">
+                        <img src={a.author_image || `https://ui-avatars.com/api/?name=${a.author_name}`} className="w-4 h-4 rounded-full grayscale" alt="author" />
+                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">By {a.author_name || "Staff"}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
+
+            {/* CAMPUS ANNOUNCEMENTS */}
+            <div className="space-y-6 pt-10">
+              <h2 className="font-black border-b border-black pb-1 text-[10px] uppercase flex items-center gap-2 tracking-[0.3em]">
+                <Newspaper size={14} className="text-[#F59E0B]"/> Bulletins
+              </h2>
+              <div className="space-y-4">
+                {announcements.map((ann) => (
+                  <div key={ann.id} className="p-4 bg-gray-50 border-l-2 border-[#1E3A8A]">
+                    <span className="text-[8px] font-black uppercase text-[#1E3A8A] tracking-widest block mb-1">{ann.category || "Official"}</span>
+                    <h4 className="text-[11px] font-black uppercase leading-tight mb-1">{ann.title}</h4>
+                    <p className="text-[10px] text-gray-500 line-clamp-2 italic">"{ann.content}"</p>
+                  </div>
+                ))}
+                <Link to="/announcements" className="text-[9px] font-black uppercase text-[#1E3A8A] flex items-center gap-1 hover:gap-2 transition-all">
+                  View All Bulletins <ChevronRight size={12}/>
+                </Link>
+              </div>
+            </div>
+
+            {/* UPCOMING EVENTS */}
+            <div className="space-y-6 pt-10">
+              <h2 className="font-black border-b border-black pb-1 text-[10px] uppercase flex items-center gap-2 tracking-[0.3em]">
+                <Calendar size={14} className="text-[#F59E0B]"/> Registry
+              </h2>
+              <div className="space-y-4">
+                {events.map((event) => (
+                  <div key={event.id} className="group cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-black text-white flex flex-col items-center justify-center flex-shrink-0">
+                        <span className="text-[10px] font-black leading-none">{new Date(event.event_date).getDate()}</span>
+                        <span className="text-[7px] uppercase font-bold">{new Date(event.event_date).toLocaleDateString('en-US', {month: 'short'})}</span>
+                      </div>
+                      <div>
+                        <h4 className="text-[11px] font-black uppercase leading-tight group-hover:text-[#1E3A8A] transition-colors">{event.title}</h4>
+                        <div className="flex items-center gap-2 text-[8px] text-gray-400 font-bold uppercase mt-1">
+                          <Clock size={10}/> {event.event_time || "TBA"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <Link to="/events" className="text-[9px] font-black uppercase text-[#1E3A8A] flex items-center gap-1 hover:gap-2 transition-all pt-2 block">
+                  Operational Schedule <ChevronRight size={12}/>
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -367,7 +404,7 @@ export default function Home() {
           </section>
         </div>
 
-        {/* --- NEWSLETTER (UPDATED RESPONSIVE FIX) --- */}
+        {/* --- NEWSLETTER --- */}
         <section className="bg-white border-4 border-black p-8 md:p-22 text-center my-22 relative overflow-hidden">
           <div className="max-w-xl mx-auto space-y-6 relative z-10">
             <Newspaper size={48} className="mx-auto text-[#1E3A8A]" />
