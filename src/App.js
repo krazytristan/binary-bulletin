@@ -1,4 +1,7 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+/* 🔐 AUTH GUARD */
+import ProtectedRoute from "./components/ProtectedRoute"; // Ensure this path is correct
 
 /* 🌐 PUBLIC PAGES */
 import Home from "./pages/Home";
@@ -16,7 +19,7 @@ import Login from "./admin/Login";
 import AdminLayout from "./admin/AdminLayout";
 import Dashboard from "./admin/Dashboard";
 
-/* 🧑‍💻 ADMIN PAGES */
+/* 🧑‍💻 ADMIN sub-PAGES */
 import Articles from "./admin/pages/Articles";
 import AdminGallery from "./admin/pages/AdminGallery";
 import AdminTheBinar from "./admin/pages/AdminTheBinar";
@@ -29,8 +32,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* PUBLIC */}
+        {/* --- PUBLIC ROUTES --- */}
         <Route path="/" element={<Home />} />
         <Route path="/news" element={<News />} />
         <Route path="/thebinar" element={<TheBinar />} />
@@ -41,23 +43,37 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/article/:id" element={<ArticleView />} />
 
-        {/* ADMIN */}
+        {/* --- AUTHENTICATION --- */}
+        {/* Keep this OUTSIDE the ProtectedRoute to avoid infinite redirect loops */}
         <Route path="/admin" element={<Login />} />
 
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="articles" element={<Articles />} />
-          <Route path="admingallery" element={<AdminGallery />} />
-          <Route path="adminthebinar" element={<AdminTheBinar />} />
-          <Route path="events" element={<AdminEvents />} />
-          <Route path="announcements" element={<AdminAnnouncements />} />
-          <Route path="messages" element={<Messages />} />
-          <Route path="settings" element={<Settings />} />
+        {/* --- PROTECTED ADMIN PANEL --- */}
+        <Route element={<ProtectedRoute />}>
+          {/* 
+              Note: We use a different parent path or a nested structure 
+              to ensure the Login page (/admin) doesn't clash with the Layout.
+          */}
+          <Route path="/admin-panel" element={<AdminLayout />}>
+            {/* Auto-redirect from /admin-panel to dashboard */}
+            <Route index element={<Navigate to="/admin-panel/dashboard" replace />} />
+            
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="articles" element={<Articles />} />
+            <Route path="admingallery" element={<AdminGallery />} />
+            <Route path="adminthebinar" element={<AdminTheBinar />} />
+            <Route path="events" element={<AdminEvents />} />
+            <Route path="announcements" element={<AdminAnnouncements />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
         </Route>
 
-        {/* 404 */}
-        <Route path="*" element={<div>Page Not Found</div>} />
-
+        {/* --- 404 HANDLING --- */}
+        <Route path="*" element={
+          <div className="flex items-center justify-center min-h-screen bg-[#05070a] text-white">
+            <h1 className="text-2xl font-mono">404 // TERMINAL_NOT_FOUND</h1>
+          </div>
+        } />
       </Routes>
     </BrowserRouter>
   );
