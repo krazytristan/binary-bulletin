@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { motion } from "framer-motion"; // <--- Add this line
 import { 
   LayoutDashboard, 
   FileText, 
@@ -7,68 +8,89 @@ import {
   Calendar, 
   Bell, 
   MessageSquare,
-  Shield, // <--- This must be here to fix the error
-  ArrowLeft
+  Shield,
+  ArrowLeft,
+  Sparkles
 } from "lucide-react";
 
 export default function Sidebar({ setSidebarOpen }) {
+  // Navigation Links - Ensure these match your App.jsx routes
   const links = [
-    { name: "Dashboard", path: "/admin/dashboard", icon: <LayoutDashboard size={20} /> },
-    { name: "Articles", path: "/admin/articles", icon: <FileText size={20} /> },
-    { name: "Gallery", path: "/admin/admingallery", icon: <ImageIcon size={20} /> },
-    { name: "The Binary Online", path: "/admin/adminthebinar", icon: <Video size={20} /> },
-    { name: "Events", path: "/admin/events", icon: <Calendar size={20} /> },
-    { name: "Announcements", path: "/admin/announcements", icon: <Bell size={20} /> },
-    { name: "Messages", path: "/admin/messages", icon: <MessageSquare size={20} /> },
-    { name: "Settings", path: "/admin/settings", icon: <Shield size={20} /> },
+    { name: "Dashboard", path: "/admin-panel/dashboard", icon: <LayoutDashboard size={18} /> },
+    { name: "Articles", path: "/admin-panel/articles", icon: <FileText size={18} /> },
+    { name: "Gallery", path: "/admin-panel/admingallery", icon: <ImageIcon size={18} /> },
+    { name: "The Binary", path: "/admin-panel/adminthebinar", icon: <Video size={18} /> },
+    { name: "Events", path: "/admin-panel/events", icon: <Calendar size={18} /> },
+    { name: "Announcements", path: "/admin-panel/announcements", icon: <Bell size={18} /> },
+    { name: "Messages", path: "/admin-panel/messages", icon: <MessageSquare size={18} /> },
+    { name: "Settings", path: "/admin-panel/settings", icon: <Shield size={18} /> },
   ];
 
   return (
-    <div className="w-64 h-full bg-white flex flex-col border-r border-gray-100">
+    <div className="w-full h-full bg-white flex flex-col">
       
-      {/* BRANDING / HEADER */}
+      {/* BRANDING SECTION */}
       <div className="p-8">
-        <h2 className="text-2xl font-black text-blue-600 tracking-tighter italic uppercase">
-          BINARY
-          <span className="text-gray-900 not-italic ml-1">BULLETIN</span>
-        </h2>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-          Campus Management
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-100">
+            <Sparkles size={16} className="text-white fill-current" />
+          </div>
+          <h2 className="text-xl font-black text-gray-900 tracking-tighter uppercase">
+            THE Binary
+          </h2>
+        </div>
+        <p className="text-[10px] font-black text-blue-600/50 uppercase tracking-[0.3em] ml-10">
+          Bulletin
         </p>
       </div>
 
       {/* NAVIGATION LINKS */}
-      <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+        <div className="mb-4 px-4">
+          <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Main Menu</p>
+        </div>
+        
         {links.map((link) => (
           <NavLink
             key={link.path}
             to={link.path}
             onClick={() => setSidebarOpen?.(false)}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 group ${
+              `flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-bold transition-all duration-300 group ${
                 isActive
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-100"
+                  ? "bg-blue-600 text-white shadow-xl shadow-blue-100 translate-x-1"
                   : "text-gray-500 hover:bg-gray-50 hover:text-blue-600"
               }`
             }
           >
-            <span className="flex-shrink-0 transition-transform group-hover:scale-110">
+            <span className={`flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}>
               {link.icon}
             </span>
             {link.name}
+            
+            {/* Active Indicator Pin */}
+            {({ isActive }) => isActive && (
+              <motion.div 
+                layoutId="active-pill"
+                className="ml-auto w-1.5 h-1.5 bg-white rounded-full" 
+              />
+            )}
           </NavLink>
         ))}
       </nav>
 
       {/* FOOTER ACTION */}
-      <div className="p-4 mt-auto border-t border-gray-50">
-        <NavLink
-          to="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all"
-        >
-          <ArrowLeft size={16} />
-          Back to Live Site
-        </NavLink>
+      <div className="p-6 mt-auto border-t border-gray-50 bg-gray-50/50">
+        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+          <p className="text-[10px] font-bold text-gray-400 uppercase mb-3 px-1">External Access</p>
+          <NavLink
+            to="/"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-black text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100"
+          >
+            <ArrowLeft size={14} />
+            Live Site
+          </NavLink>
+        </div>
       </div>
       
     </div>

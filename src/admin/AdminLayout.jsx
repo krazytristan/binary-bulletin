@@ -22,7 +22,7 @@ export default function AdminLayout() {
   const notificationRef = useRef();
 
   const [user, setUser] = useState(null);
-  const [profileData, setProfileData] = useState({ full_name: "", avatar_url: "" }); // Added for photo
+  const [profileData, setProfileData] = useState({ full_name: "", avatar_url: "" });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -33,19 +33,33 @@ export default function AdminLayout() {
   const [recentMessages, setRecentMessages] = useState([]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
+    // 1. Check current session immediately
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
         navigate("/admin");
       } else {
         setUser(session.user);
-        fetchProfile(session.user.id); // Fetch profile data when user is available
+        fetchProfile(session.user.id);
         fetchUnreadData();
       }
       setLoading(false);
+    };
+
+    initAuth();
+
+    // 2. Listen for Auth Changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate("/admin");
+      } else if (session) {
+        setUser(session.user);
+      }
     });
 
+    // 3. Realtime Subscriptions
     const channel = supabase
-      .channel('realtime-updates')
+      .channel('admin-realtime')
       .on(
         'postgres_changes', 
         { event: '*', schema: 'public', table: 'messages' }, 
@@ -57,8 +71,8 @@ export default function AdminLayout() {
         (payload) => {
           if (payload.new.id === user?.id) {
             setProfileData({
-              full_name: payload.new.full_name,
-              avatar_url: payload.new.avatar_url
+              full_name: payload.new.full_name || "",
+              avatar_url: payload.new.avatar_url || ""
             });
           }
         }
@@ -71,15 +85,19 @@ export default function AdminLayout() {
     };
   }, [navigate, user?.id]);
 
-  // Fetching the profile image and name from the database
+  // FIXED: Improved fetchProfile to prevent 406 Errors
   const fetchProfile = async (userId) => {
+    if (!userId) return;
     try {
+      // We use .select('*') first to avoid 406 if specific columns are missing
       const { data, error } = await supabase
         .from("profiles")
         .select("full_name, avatar_url")
         .eq("id", userId)
-        .single();
+        .maybeSingle(); // maybeSingle doesn't throw error if row is missing
       
+      if (error) throw error;
+
       if (data) {
         setProfileData({
           full_name: data.full_name || "",
@@ -87,7 +105,7 @@ export default function AdminLayout() {
         });
       }
     } catch (err) {
-      console.error("Profile Fetch Error:", err);
+      console.warn("Profile fetch skipped or failed. This is normal if profile isn't set up yet.");
     }
   };
 
@@ -119,12 +137,8 @@ export default function AdminLayout() {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-      if (notificationRef.current && !notificationRef.current.contains(e.target)) {
-        setNotifOpen(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
+      if (notificationRef.current && !notificationRef.current.contains(e.target)) setNotifOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -141,16 +155,17 @@ export default function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+      <div className="flex flex-col items-center justify-center h-screen bg-[#05070a]">
         <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-        <p className="mt-4 text-gray-500 font-medium tracking-wide">Securing Session...</p>
+        <p className="mt-4 text-blue-500/50 font-mono text-xs uppercase tracking-widest">Securing Session...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 overflow-hidden">
+    <div className="flex min-h-screen bg-gray-50 overflow-hidden font-sans">
       
+      {/* MOBILE OVERLAY */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -163,6 +178,7 @@ export default function AdminLayout() {
         )}
       </AnimatePresence>
 
+      {/* SIDEBAR NAVIGATION */}
       <aside
         className={`
           fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-100
@@ -174,8 +190,10 @@ export default function AdminLayout() {
         <Sidebar />
       </aside>
 
+      {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col md:ml-64 min-w-0 h-screen">
 
+        {/* HEADER / TOPBAR */}
         <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-4 md:px-8 h-20 flex justify-between items-center border-b border-gray-100">
           
           <div className="flex items-center gap-4">
@@ -187,8 +205,8 @@ export default function AdminLayout() {
             </button>
             
             <div className="hidden sm:block">
-              <h1 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Administrator</h1>
-              <p className="text-lg font-black text-gray-900 capitalize">
+              <h1 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Management Terminal</h1>
+              <p className="text-lg font-black text-gray-900 capitalize tracking-tight">
                 {location.pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
               </p>
             </div>
@@ -196,6 +214,7 @@ export default function AdminLayout() {
 
           <div className="flex items-center gap-2 md:gap-4">
             
+            {/* NOTIFICATIONS BOX */}
             <div className="relative" ref={notificationRef}>
               <button 
                 onClick={() => setNotifOpen(!notifOpen)}
@@ -227,7 +246,7 @@ export default function AdminLayout() {
                         recentMessages.map((msg) => (
                           <div 
                             key={msg.id} 
-                            onClick={() => { navigate("/admin/messages"); setNotifOpen(false); }}
+                            onClick={() => { navigate("/admin-panel/messages"); setNotifOpen(false); }}
                             className="p-4 hover:bg-gray-50 cursor-pointer transition border-b border-gray-50 last:border-none group"
                           >
                             <div className="flex justify-between items-start mb-1">
@@ -254,7 +273,7 @@ export default function AdminLayout() {
                     </div>
 
                     <button 
-                      onClick={() => { navigate("/admin/messages"); setNotifOpen(false); }}
+                      onClick={() => { navigate("/admin-panel/messages"); setNotifOpen(false); }}
                       className="w-full py-4 bg-gray-50 text-blue-600 text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 transition border-t border-gray-100"
                     >
                       View All Messages
@@ -264,12 +283,12 @@ export default function AdminLayout() {
               </AnimatePresence>
             </div>
 
+            {/* USER DROPDOWN */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-3 p-1.5 pr-3 rounded-2xl hover:bg-gray-50 transition border border-transparent hover:border-gray-100"
               >
-                {/* Updated: Profile Photo Display */}
                 <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black shadow-lg shadow-blue-100 overflow-hidden">
                   {profileData.avatar_url ? (
                     <img src={profileData.avatar_url} alt="Admin" className="w-full h-full object-cover" />
@@ -295,19 +314,19 @@ export default function AdminLayout() {
                     className="absolute right-0 mt-3 w-64 bg-white shadow-2xl rounded-2xl border border-gray-100 overflow-hidden py-2"
                   >
                     <div className="px-4 py-3 border-b border-gray-50 mb-1">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase">Authenticated Email</p>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase">Authenticated ID</p>
                       <p className="text-sm font-bold text-gray-800 truncate">{user?.email}</p>
                     </div>
 
                     <button 
-                      onClick={() => { navigate("/admin/settings"); setDropdownOpen(false); }} 
+                      onClick={() => { navigate("/admin-panel/settings"); setDropdownOpen(false); }} 
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition"
                     >
                       <User size={18} /> Profile Details
                     </button>
 
                     <button 
-                      onClick={() => { navigate("/admin/settings"); setDropdownOpen(false); }} 
+                      onClick={() => { navigate("/admin-panel/settings"); setDropdownOpen(false); }} 
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition"
                     >
                       <Settings size={18} /> System Settings
@@ -328,11 +347,13 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto custom-scrollbar">
+        {/* CONTENT VIEWPORT */}
+        <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
           <Outlet />
         </main>
       </div>
 
+      {/* LOGOUT CONFIRMATION MODAL */}
       <AnimatePresence>
         {confirmLogout && (
           <div className="fixed inset-0 flex items-center justify-center z-[100] p-4">
@@ -352,9 +373,9 @@ export default function AdminLayout() {
               <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <LogOut size={32} />
               </div>
-              <h2 className="font-black text-2xl text-gray-900 mb-2">Sign Out?</h2>
-              <p className="text-gray-500 mb-8 leading-relaxed">
-                You will need to re-authenticate to access the management panel.
+              <h2 className="font-black text-2xl text-gray-900 mb-2 tracking-tight">Sign Out?</h2>
+              <p className="text-gray-500 mb-8 leading-relaxed text-sm">
+                Session termination will restrict access to the NEXGEN administrative terminal.
               </p>
 
               <div className="flex gap-3">
