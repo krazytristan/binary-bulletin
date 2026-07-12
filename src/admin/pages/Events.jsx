@@ -347,7 +347,7 @@ export default function Events() {
 
       {/* DELETE DIALOG */}
       {deleteId && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[60] p-4">
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-60 p-4">
           <div className="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
             <h2 className="text-xl font-bold text-gray-900 mb-2 italic">Cancel Event?</h2>
             <p className="text-gray-500 mb-6">This will remove the event from the NexGen calendar permanently.</p>

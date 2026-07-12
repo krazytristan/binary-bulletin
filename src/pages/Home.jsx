@@ -121,7 +121,7 @@ export default function Home() {
     }) : "";
 
   if (loading) return (
-    <div className="fixed inset-0 z-[999] bg-white flex flex-col items-center justify-center p-6">
+    <div className="fixed inset-0 z-999 bg-white flex flex-col items-center justify-center p-6">
       <div className="max-w-xs w-full space-y-8 text-center font-sans">
         <div className="relative inline-block">
           <div className="w-24 h-24 border-2 border-gray-100 rounded-full"></div>
@@ -167,7 +167,7 @@ export default function Home() {
       <section className="relative h-[85vh] flex items-center overflow-hidden bg-[#1E3A8A]">
         <div className="absolute inset-0">
           <img src="ama-bg.jpg" className="w-full h-full object-cover opacity-50 grayscale" alt="Campus"/>
-          <div className="absolute inset-0 bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A]/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-linear-to-r from-[#1E3A8A] via-[#1E3A8A]/60 to-transparent"></div>
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-6 w-full text-white">
           <div className="max-w-2xl space-y-4">
@@ -176,7 +176,7 @@ export default function Home() {
              <p className="text-xl text-white/90 font-medium leading-relaxed border-l-4 border-[#F59E0B] pl-6 max-w-lg italic">Decoding stories, campus updates, and technological breakthroughs for the modern student.</p>
              <div className="flex flex-wrap gap-4 pt-8">
                <Link to="/news" className="bg-white text-[#1E3A8A] px-8 py-4 rounded-none font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#F59E0B] hover:text-white transition-all">Browse Archive</Link>
-               <div className="relative flex-grow max-w-xs">
+               <div className="relative grow max-w-xs">
                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" size={18} />
                  <input type="text" placeholder="SEARCH HEADLINES..." className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-none py-4 pl-12 pr-4 text-white outline-none placeholder:text-white/30 text-[10px] font-black tracking-widest" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                </div>
@@ -222,7 +222,7 @@ export default function Home() {
               {categorized.opinion.slice(0, 4).map(a => (
                 <Link key={a.id} to={`/article/${a.id}`} className="block group border-b border-black/5 pb-4">
                   <div className="flex gap-4 items-start">
-                    <div className="w-16 h-16 flex-shrink-0 bg-gray-100 border border-black/5 overflow-hidden">
+                    <div className="w-16 h-16 shrink-0 bg-gray-100 border border-black/5 overflow-hidden">
                       <img src={a.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt="Thumbnail" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -266,7 +266,7 @@ export default function Home() {
                 {events.map((event) => (
                   <div key={event.id} className="group cursor-pointer">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-black text-white flex flex-col items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 bg-black text-white flex flex-col items-center justify-center shrink-0">
                         <span className="text-[10px] font-black leading-none">{new Date(event.event_date).getDate()}</span>
                         <span className="text-[7px] uppercase font-bold">{new Date(event.event_date).toLocaleDateString('en-US', {month: 'short'})}</span>
                       </div>
@@ -291,7 +291,7 @@ export default function Home() {
             <h2 className="uppercase tracking-[0.5em] font-black text-[9px] text-[#F59E0B]">Featured Narrative</h2>
             {featured && (
               <Link to={`/article/${featured.id}`} className="group block">
-                <div className="relative aspect-[16/10] overflow-hidden border border-black/10 mb-6 bg-gray-100">
+                <div className="relative aspect-16/10 overflow-hidden border border-black/10 mb-6 bg-gray-100">
                   <img src={featured.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105" alt="Lead"/>
                   <div className="absolute top-4 left-4 bg-black text-white font-black text-[8px] px-2 py-0.5 uppercase tracking-[0.2em]">Front Page</div>
                 </div>
@@ -345,7 +345,7 @@ export default function Home() {
           <div ref={scrollRef} className="flex gap-6 overflow-x-auto no-scrollbar pb-6">
             {articles.map((a) => (
               <Link key={a.id} to={`/article/${a.id}`} className="min-w-[280px] md:min-w-[320px] group block">
-                <div className="aspect-[16/9] overflow-hidden mb-4 bg-gray-100 border border-black/10">
+                <div className="aspect-16/9 overflow-hidden mb-4 bg-gray-100 border border-black/10">
                   <img src={a.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" alt="article" />
                 </div>
                 <h4 className="font-black text-xs uppercase leading-tight group-hover:text-[#1E3A8A] mb-2 line-clamp-1 tracking-tight">{a.title}</h4>
@@ -369,8 +369,8 @@ export default function Home() {
             <div className="space-y-8">
               {categorized.opinion.slice(0, 3).map((a) => (
                 <Link key={a.id} to={`/article/${a.id}`} className="flex gap-4 group">
-                  <div className="w-24 h-24 flex-shrink-0 bg-gray-50 overflow-hidden border border-black/10"><img src={a.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="op" /></div>
-                  <div className="flex-grow">
+                  <div className="w-24 h-24 shrink-0 bg-gray-50 overflow-hidden border border-black/10"><img src={a.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="op" /></div>
+                  <div className="grow">
                     <h4 className="font-black text-sm uppercase leading-tight group-hover:text-[#F59E0B] transition-colors">{a.title}</h4>
                     <p className="text-[11px] text-gray-500 line-clamp-2 mt-1 italic">"{a.excerpt}"</p>
                     <div className="flex items-center gap-2 mt-2">
@@ -387,9 +387,9 @@ export default function Home() {
             <h2 className="text-3xl font-black uppercase text-[#1E3A8A] flex items-center gap-3 mb-8 tracking-tighter"><BookOpen size={24} className="text-[#F59E0B]" /> Literary</h2>
             <div className="grid grid-cols-2 gap-4">
               {categorized.literary.slice(0, 2).map((a) => (
-                <Link key={a.id} to={`/article/${a.id}`} className="relative aspect-[4/5] overflow-hidden group bg-black">
+                <Link key={a.id} to={`/article/${a.id}`} className="relative aspect-4/5 overflow-hidden group bg-black">
                   <img src={a.image_url} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000 grayscale group-hover:grayscale-0" alt="lit" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+                  <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent opacity-80"></div>
                   <div className="absolute bottom-0 p-6 w-full">
                     <h4 className="text-white font-black text-sm mb-1 leading-tight uppercase tracking-tight">{a.title}</h4>
                     <p className="text-[10px] text-white/60 line-clamp-2 italic mb-3">"{a.excerpt}"</p>
@@ -414,7 +414,7 @@ export default function Home() {
               <input 
                 type="email" 
                 placeholder="CAMPUS EMAIL..." 
-                className="flex-grow border-2 border-black px-6 py-4 rounded-none font-black text-[10px] tracking-widest outline-none focus:bg-gray-50 sm:border-r-0" 
+                className="grow border-2 border-black px-6 py-4 rounded-none font-black text-[10px] tracking-widest outline-none focus:bg-gray-50 sm:border-r-0" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
               />
@@ -428,7 +428,7 @@ export default function Home() {
 
       {/* --- COOKIE CONSENT --- */}
       {showCookies && (
-        <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:max-w-md z-[100] animate-slide-up">
+        <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:max-w-md z-100 animate-slide-up">
           <div className="bg-black text-white p-6 rounded-none shadow-2xl border border-white/10 backdrop-blur-xl space-y-4">
             <div className="flex items-start justify-between">
               <h3 className="text-xs font-black uppercase tracking-[0.3em] flex items-center gap-2"><ShieldCheck className="text-[#F59E0B]" size={16} /> Data Protocol</h3>

@@ -63,7 +63,7 @@ export default function Sidebar({ setSidebarOpen }) {
               }`
             }
           >
-            <span className={`flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}>
+            <span className={`shrink-0 transition-transform duration-300 group-hover:scale-110`}>
               {link.icon}
             </span>
             {link.name}

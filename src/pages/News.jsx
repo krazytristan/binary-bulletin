@@ -178,7 +178,7 @@ export default function News() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-black/10 border border-black/10">
               {(search ? filtered : remaining).map((a) => (
                 <article key={a.id} className="bg-[#FDFDFB] flex flex-col hover:bg-white transition-colors group">
-                  <div className="aspect-[16/10] overflow-hidden border-b border-black/10 bg-gray-100">
+                  <div className="aspect-16/10 overflow-hidden border-b border-black/10 bg-gray-100">
                     <img 
                       src={getImage(a.image_url)} 
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105" 

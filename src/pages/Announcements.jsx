@@ -272,7 +272,7 @@ export default function Announcements() {
 
       {/* READING MODAL */}
       {selectedForReading && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-0 md:p-12">
+        <div className="fixed inset-0 z-110 flex items-center justify-center p-0 md:p-12">
           <div className="absolute inset-0 bg-white/98 backdrop-blur-xl" onClick={() => setSelectedForReading(null)} />
           <div className="bg-white w-full max-w-3xl h-full md:h-auto md:max-h-[90vh] overflow-y-auto relative z-10 p-8 md:p-16 flex flex-col border border-black/5 shadow-2xl">
             <button onClick={() => setSelectedForReading(null)} className="fixed top-6 right-6 p-2 text-gray-400 hover:text-black"><X size={24}/></button>
@@ -306,7 +306,7 @@ export default function Announcements() {
 
       {/* COMMENTS DRAWER */}
       {selectedForComments && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-end">
+        <div className="fixed inset-0 z-120 flex items-center justify-end">
           <div className="absolute inset-0 bg-black/10 backdrop-blur-sm" onClick={() => { setSelectedForComments(null); setEditingComment(null); setReplyTo(null); }} />
           <div className="bg-white w-full max-w-sm h-full relative z-10 flex flex-col border-l border-black/10 animate-in slide-in-from-right duration-300">
             <div className="p-6 border-b flex justify-between items-center">
@@ -363,7 +363,7 @@ export default function Announcements() {
 
       {/* MINIMAL TOAST */}
       {toast && (
-        <div className="fixed bottom-8 left-8 bg-black text-white px-4 py-2 text-[9px] font-black tracking-[0.2em] z-[200] animate-in slide-in-from-left-4">
+        <div className="fixed bottom-8 left-8 bg-black text-white px-4 py-2 text-[9px] font-black tracking-[0.2em] z-200 animate-in slide-in-from-left-4">
           {toast}
         </div>
       )}

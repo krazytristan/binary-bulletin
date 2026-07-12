@@ -198,7 +198,7 @@ export default function Events() {
 
       {/* 🖼️ EVENT DETAILS MODAL */}
       {selectedEvent && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-0 md:p-6">
           <div className="absolute inset-0 bg-dark/95 backdrop-blur-md" onClick={() => setSelectedEvent(null)}></div>
           
           <div className="relative bg-white w-full max-w-5xl max-h-full md:max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col md:flex-row border border-white/10">

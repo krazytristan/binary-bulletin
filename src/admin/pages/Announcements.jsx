@@ -173,7 +173,7 @@ export default function AdminAnnouncements() {
 
       {/* 🔥 MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-100 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
             
             <div className="flex justify-between items-center p-6 border-b">

@@ -339,7 +339,7 @@ export default function Articles() {
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Author Profile Image URL</label>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
                             {form.author_image ? (
                                 <img src={form.author_image} className="w-full h-full object-cover" alt="Author" />
                             ) : (
@@ -440,7 +440,7 @@ export default function Articles() {
 
       {/* DELETE DIALOG */}
       {deleteId && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[60] p-4">
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-60 p-4">
           <div className="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
             <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Article?</h2>
             <p className="text-gray-500 mb-6">This will permanently remove the story from the bulletin.</p>

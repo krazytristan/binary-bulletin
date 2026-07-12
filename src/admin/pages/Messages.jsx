@@ -136,7 +136,7 @@ export default function Messages() {
                     {!msg.is_read && (
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600" />
                     )}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border ${
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${
                       msg.is_read ? "bg-gray-50 text-gray-400 border-gray-100" : "bg-blue-50 text-blue-600 border-blue-100"
                     }`}>
                       <User size={16} />

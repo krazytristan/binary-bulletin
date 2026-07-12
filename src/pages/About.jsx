@@ -128,7 +128,7 @@ export default function About() {
                 <div className="space-y-12 border-l border-dark/10 pl-8">
                   {/* STEP 1 */}
                   <div className="relative">
-                    <div className="absolute -left-[37px] top-1 w-2 h-2 bg-accent rounded-full" />
+                    <div className="absolute left-[-37px] top-1 w-2 h-2 bg-accent rounded-full" />
                     <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Ref: 2025.01 — Foundation</span>
                     <h3 className="text-lg font-black uppercase mt-1">Institutional Genesis</h3>
                     <p className="text-gray-500 text-[12px] mt-3 leading-relaxed font-medium">
@@ -138,7 +138,7 @@ export default function About() {
 
                   {/* STEP 2 */}
                   <div className="relative">
-                    <div className="absolute -left-[37px] top-1 w-2 h-2 bg-primary rounded-full" />
+                    <div className="absolute left-[-37px] top-1 w-2 h-2 bg-primary rounded-full" />
                     <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Ref: 2026.01 — Digital Migration</span>
                     <h3 className="text-lg font-black uppercase mt-1">Platform Expansion</h3>
                     <p className="text-gray-500 text-[12px] mt-3 leading-relaxed font-medium">
@@ -148,7 +148,7 @@ export default function About() {
 
                   {/* STEP 3 */}
                   <div className="relative">
-                    <div className="absolute -left-[37px] top-1 w-2 h-2 bg-secondary rounded-full" />
+                    <div className="absolute left-[-37px] top-1 w-2 h-2 bg-secondary rounded-full" />
                     <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Ref: 2026.04 — Modern Horizon</span>
                     <h3 className="text-lg font-black uppercase mt-1">Cloud Integration</h3>
                     <p className="text-gray-500 text-[12px] mt-3 leading-relaxed font-medium">

@@ -65,13 +65,13 @@ export default function Login() {
         <motion.div 
           animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.35, 0.2] }}
           transition={{ duration: 12, repeat: Infinity }}
-          className="absolute -top-[10%] -left-[10%] w-[80%] h-[60%] rounded-full bg-blue-900/20 blur-[120px]" 
+          className="absolute top-[-10%] left-[-10%] w-[80%] h-[60%] rounded-full bg-blue-900/20 blur-[120px]" 
         />
         <motion.div 
           initial={{ top: "-10%" }}
           animate={{ top: "110%" }}
           transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
-          className="absolute left-0 w-full h-[1px] bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.3)] z-10"
+          className="absolute left-0 w-full h-px bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.3)] z-10"
         />
       </div>
 
@@ -83,7 +83,7 @@ export default function Login() {
       >
         
         {/* LEFT: IDENTITY */}
-        <div className="flex flex-col justify-between p-10 md:p-14 bg-gradient-to-br from-blue-600/10 to-transparent border-b md:border-b-0 md:border-r border-white/5">
+        <div className="flex flex-col justify-between p-10 md:p-14 bg-linear-to-br from-blue-600/10 to-transparent border-b md:border-b-0 md:border-r border-white/5">
           <div className="relative">
             <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-10 shadow-xl shadow-blue-500/20">
               <CircuitBoard size={36} className="text-white" />

@@ -109,7 +109,7 @@ export default function Gallery() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-dark/10 border border-dark/10">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="aspect-[4/5] bg-white animate-pulse p-8 flex flex-col justify-end">
+              <div key={i} className="aspect-4/5 bg-white animate-pulse p-8 flex flex-col justify-end">
                 <div className="h-4 w-3/4 bg-gray-100 mb-4" />
                 <div className="h-3 w-1/2 bg-gray-50" />
               </div>
@@ -125,7 +125,7 @@ export default function Gallery() {
             {filteredEvents.map((event) => (
               <div key={event.id} className="group bg-white relative overflow-hidden flex flex-col">
                 <div 
-                  className="relative aspect-[4/5] overflow-hidden cursor-pointer"
+                  className="relative aspect-4/5 overflow-hidden cursor-pointer"
                   onClick={() => openViewer(event.images, 0)}
                 >
                   <img
@@ -178,22 +178,22 @@ export default function Gallery() {
 
       {/* 🖼 LIGHTBOX VIEWER */}
       {viewer && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+        <div className="fixed inset-0 z-100 flex items-center justify-center">
           <div className="absolute inset-0 bg-dark/95 backdrop-blur-md" onClick={() => setViewer(null)} />
           
-          <button onClick={() => setViewer(null)} className="absolute top-6 right-6 text-white/50 hover:text-accent transition-colors z-[110]">
+          <button onClick={() => setViewer(null)} className="absolute top-6 right-6 text-white/50 hover:text-accent transition-colors z-110">
             <X size={24} />
           </button>
           
-          <button onClick={prevImage} className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 hover:text-accent transition-colors z-[110]">
+          <button onClick={prevImage} className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 hover:text-accent transition-colors z-110">
             <ChevronLeft size={48} strokeWidth={1} />
           </button>
           
-          <button onClick={nextImage} className="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 hover:text-accent transition-colors z-[110]">
+          <button onClick={nextImage} className="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 hover:text-accent transition-colors z-110">
             <ChevronRight size={48} strokeWidth={1} />
           </button>
 
-          <div className="relative z-[105] flex flex-col items-center max-w-5xl w-full p-6">
+          <div className="relative z-105 flex flex-col items-center max-w-5xl w-full p-6">
             <img
               src={viewer}
               className="max-h-[75vh] w-auto border border-white/10 shadow-2xl object-contain animate-in zoom-in duration-300"

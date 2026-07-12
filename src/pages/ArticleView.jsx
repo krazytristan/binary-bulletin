@@ -136,7 +136,7 @@ export default function ArticleView() {
       <Navbar />
 
       {/* Reading Progress Header */}
-      <div className="fixed top-0 left-0 w-full h-1.5 bg-gray-100 z-[60]">
+      <div className="fixed top-0 left-0 w-full h-1.5 bg-gray-100 z-60">
         <div className="h-full bg-[#1E3A8A] transition-all duration-150" style={{ width: `${progress}%` }} />
       </div>
 

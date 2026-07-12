@@ -98,7 +98,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center gap-4">
         
         {/* LOGO */}
-        <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+        <Link to="/" className="flex items-center gap-3 shrink-0">
           <img src="/binary-logo.png" alt="Logo" className="h-9 w-9 object-contain" />
           <h1 className="font-bold text-lg hidden lg:block text-light uppercase">Binary Bulletin</h1>
         </Link>

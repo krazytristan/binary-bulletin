@@ -165,7 +165,7 @@ export default function Dashboard() {
                 {recentArticles.map((article) => (
                   <div key={article.id} className="p-4 flex justify-between items-center hover:bg-gray-50 transition group">
                     <div className="flex gap-4 items-center overflow-hidden">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 font-bold uppercase text-xs">
+                      <div className="shrink-0 w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 font-bold uppercase text-xs">
                         {article.title?.charAt(0) || "T"}
                       </div>
                       <div className="overflow-hidden">

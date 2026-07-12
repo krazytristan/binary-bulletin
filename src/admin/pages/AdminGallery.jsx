@@ -196,7 +196,7 @@ export default function AdminGallery() {
 
       {/* MODAL (Matches Dashboard Create Style) */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-950/20 backdrop-blur-sm" onClick={resetForm} />
           
           <div className="relative bg-white w-full max-w-xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
@@ -267,7 +267,7 @@ export default function AdminGallery() {
 
       {/* VIEWER DIALOG */}
       {viewerIndex !== null && (
-        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[200] p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-200 p-4 backdrop-blur-sm">
           <button onClick={() => setViewerIndex(null)} className="absolute top-8 right-8 text-white/50 hover:text-white transition"><X size={32} /></button>
           
           <button onClick={() => setViewerIndex(prev => (prev - 1 + currentAlbum.length) % currentAlbum.length)} className="absolute left-4 p-4 text-white/30 hover:text-white transition bg-white/5 rounded-full">
@@ -284,7 +284,7 @@ export default function AdminGallery() {
 
       {/* DELETE CONFIRMATION */}
       {deleteId && (
-        <div className="fixed inset-0 bg-gray-950/20 backdrop-blur-sm flex justify-center items-center z-[210] p-4">
+        <div className="fixed inset-0 bg-gray-950/20 backdrop-blur-sm flex justify-center items-center z-210 p-4">
           <div className="bg-white p-8 rounded-2xl text-center max-w-xs w-full shadow-2xl border border-gray-50">
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 size={24} />

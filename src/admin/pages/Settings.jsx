@@ -159,7 +159,7 @@ export default function Settings() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="relative group flex-shrink-0">
+            <div className="relative group shrink-0">
               <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400 overflow-hidden border border-gray-100 shadow-inner">
                 {previewImage || profile.avatar_url ? (
                   <img src={previewImage || profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
