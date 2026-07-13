@@ -94,67 +94,67 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-primary/95 text-white shadow-card border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center gap-4">
+    <nav className="sticky top-0 z-50 bg-[#FCFBF9] text-[#111827] font-sans border-b-2 border-black">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center gap-4">
         
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-3 shrink-0">
-          <img src="/binary-logo.png" alt="Logo" className="h-9 w-9 object-contain" />
-          <h1 className="font-bold text-lg hidden lg:block text-light uppercase">Binary Bulletin</h1>
+          <img src="/binary-logo.png" alt="Logo" className="h-8 w-8 object-contain" />
+          <h1 className="font-serif font-black text-xl hidden lg:block uppercase tracking-tight">The Binary Bulletin</h1>
         </Link>
 
         {/* DESKTOP LINKS */}
-        <div className="hidden lg:flex items-center gap-6 text-sm">
+        <div className="hidden lg:flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest">
           {navLinks.map((link) => (
             <Link key={link.path} to={link.path} className="relative group py-2">
-              <span className={`transition-colors ${location.pathname === link.path ? "text-secondary font-semibold" : "text-light hover:text-secondary"}`}>
+              <span className={`transition-colors ${location.pathname === link.path ? "text-[#1E3A8A]" : "text-gray-600 hover:text-black"}`}>
                 {link.name}
               </span>
-              <span className={`absolute left-0 bottom-0 h-[2px] bg-secondary transition-all ${location.pathname === link.path ? "w-full" : "w-0 group-hover:w-full"}`}></span>
+              <span className={`absolute left-0 bottom-0 h-[2px] bg-black transition-all ${location.pathname === link.path ? "w-full" : "w-0 group-hover:w-full"}`}></span>
             </Link>
           ))}
         </div>
 
         {/* SEARCH BAR */}
         <div className="relative flex-1 max-w-[180px] xs:max-w-[220px] sm:max-w-xs ml-auto lg:ml-0" ref={searchRef}>
-          <div className="relative">
+          <div className="relative group">
             <input
               type="text"
-              placeholder="Live search..."
+              placeholder="Search Archives..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery.length > 1 && setShowResults(true)}
-              className="w-full bg-white/10 border border-white/20 rounded-full py-1.5 pl-4 pr-10 text-xs sm:text-sm text-light placeholder:text-light/40 outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-all"
+              className="w-full bg-white border border-gray-300 rounded-none py-2 pl-4 pr-10 text-[10px] font-bold uppercase tracking-widest text-[#111827] placeholder:text-gray-400 outline-none focus:border-[#1E3A8A] transition-all"
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-light/50">
-              {isSearching ? <Loader2 size={16} className="animate-spin text-secondary" /> : <Search size={16} />}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#1E3A8A]">
+              {isSearching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             </div>
           </div>
 
-          {/* UPDATED RESULTS DROPDOWN (GLASSMORPISM) */}
+          {/* RESULTS DROPDOWN */}
           {showResults && searchQuery.length > 1 && (
-            <div className="absolute top-full mt-2 left-0 right-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="max-h-[350px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-white/20">
+            <div className="absolute top-full mt-2 left-0 right-0 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="max-h-[350px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-black/10">
                 {results.length > 0 ? (
                   results.map((res, index) => (
                     <button 
                       key={index} 
                       onClick={() => handleNavigate(res.link)}
-                      className="w-full flex items-center gap-3 p-3 hover:bg-white/10 rounded-xl transition-colors border-b border-white/5 last:border-0 text-left group"
+                      className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 text-left group"
                     >
-                      <div className="p-2 bg-white/10 text-secondary group-hover:bg-secondary group-hover:text-primary rounded-lg transition-colors">
+                      <div className="text-gray-400 group-hover:text-[#1E3A8A] transition-colors">
                         {res.icon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-white truncate">{res.title}</p>
-                        <p className="text-[10px] text-white/50 uppercase tracking-widest">{res.category}</p>
+                        <p className="text-xs font-serif font-bold text-[#111827] truncate">{res.title}</p>
+                        <p className="text-[9px] font-sans text-[#1E3A8A] uppercase tracking-widest font-bold">{res.category}</p>
                       </div>
                     </button>
                   ))
                 ) : (
                   !isSearching && (
                     <div className="text-center py-8">
-                      <p className="text-xs text-white/40 italic">No matches found</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">No matches found</p>
                     </div>
                   )
                 )}
@@ -163,16 +163,16 @@ export default function Navbar() {
           )}
         </div>
 
-        <button className="lg:hidden p-2 text-light" onClick={() => setMenuOpen(!menuOpen)}>
+        <button className="lg:hidden p-2 text-black" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <X size={26} /> : <Menu size={26} />}
         </button>
       </div>
 
       {/* MOBILE MENU */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${menuOpen ? "max-h-screen border-t border-white/5" : "max-h-0"}`}>
-        <div className="px-6 py-4 space-y-1 bg-primary">
+      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${menuOpen ? "max-h-screen border-t-2 border-black" : "max-h-0"}`}>
+        <div className="px-6 py-4 space-y-1 bg-white">
           {navLinks.map((link) => (
-            <Link key={link.path} to={link.path} onClick={() => setMenuOpen(false)} className={`block py-3.5 px-3 rounded-xl ${location.pathname === link.path ? "text-secondary font-bold bg-white/10" : "text-light hover:bg-white/5"}`}>
+            <Link key={link.path} to={link.path} onClick={() => setMenuOpen(false)} className={`block py-3.5 px-3 border-b border-gray-100 last:border-0 text-[11px] font-bold uppercase tracking-widest ${location.pathname === link.path ? "text-[#1E3A8A]" : "text-gray-600 hover:text-black"}`}>
               {link.name}
             </Link>
           ))}
