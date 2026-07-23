@@ -11,6 +11,11 @@ export default function Announcements() {
   const [search, setSearch] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [viewerImage, setViewerImage] = useState(null);
+  
+  // Touch swipe state
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  
   const isInitialRender = useRef(true);
 
   // Allow closing the lightbox with the Escape key
@@ -54,6 +59,31 @@ export default function Announcements() {
 
   const prevAnnouncement = () => {
     setActiveIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
+  };
+
+  const minSwipeDistance = 50;
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe && filtered.length > 1) {
+      nextAnnouncement();
+    }
+    if (isRightSwipe && filtered.length > 1) {
+      prevAnnouncement();
+    }
   };
 
   return (
@@ -100,7 +130,12 @@ export default function Announcements() {
             )}
 
             {/* Main Center Content */}
-            <article className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 md:p-12 w-full max-w-4xl min-h-[500px] flex flex-col z-0">
+            <article 
+              className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 md:p-12 w-full max-w-4xl min-h-[500px] flex flex-col z-0 relative"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b-2 border-black pb-6">
                 <h2 className="text-3xl md:text-4xl font-serif font-black uppercase tracking-tight leading-tight">
                   {filtered[activeIndex].title}
