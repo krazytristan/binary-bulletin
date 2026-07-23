@@ -2,13 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Search } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Announcements() {
   const [announcements, setAnnouncements] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
   const isInitialRender = useRef(true);
 
   useEffect(() => {
@@ -20,11 +21,11 @@ export default function Announcements() {
 
   useEffect(() => {
     const term = search.toLowerCase();
-    setFiltered(
-      announcements.filter(a => 
-        a.title.toLowerCase().includes(term) || a.content.toLowerCase().includes(term)
-      )
+    const newFiltered = announcements.filter(a => 
+      a.title.toLowerCase().includes(term) || a.content.toLowerCase().includes(term)
     );
+    setFiltered(newFiltered);
+    setActiveIndex(0); // reset index when search changes
   }, [search, announcements]);
 
   const fetchAnnouncements = async () => {
@@ -37,12 +38,20 @@ export default function Announcements() {
     setLoading(false);
   };
 
+  const nextAnnouncement = () => {
+    setActiveIndex((prev) => (prev + 1) % filtered.length);
+  };
+
+  const prevAnnouncement = () => {
+    setActiveIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
+  };
+
   return (
-    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-black selection:text-white flex flex-col">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        <header className="mb-12 border-b-2 border-black pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <main className="max-w-5xl mx-auto px-6 py-12 flex-1 w-full flex flex-col relative">
+        <header className="mb-12 border-b-2 border-black pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 shrink-0">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-4">Official Notices</p>
             <h1 className="text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter">Bulletins</h1>
@@ -61,37 +70,65 @@ export default function Announcements() {
         </header>
 
         {loading ? (
-          <div className="text-center font-serif italic text-gray-500 py-20">Loading bulletins...</div>
+          <div className="text-center font-serif italic text-gray-500 py-20 flex-1">Loading bulletins...</div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-20 border border-gray-300 bg-white flex-1">
+            <p className="font-serif italic text-gray-500 text-lg">No bulletins found.</p>
+          </div>
         ) : (
-          <div className="space-y-6">
-            {filtered.map((a) => (
-              <article key={a.id} className="bg-white border border-gray-300 p-8 md:p-10 hover:border-black transition-colors group">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-200 pb-4">
-                  <h2 className="text-2xl md:text-3xl font-serif font-black uppercase tracking-tight leading-tight group-hover:underline decoration-1 underline-offset-2">
-                    {a.title}
-                  </h2>
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-gray-500 shrink-0">
-                    {new Date(a.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                  </span>
-                </div>
-                
-                {a.image_url && (
-                  <div className="mb-8 aspect-[21/9] w-full overflow-hidden bg-gray-100 border border-gray-200">
-                    <img src={a.image_url} alt="Notice attachment" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
-                  </div>
-                )}
-                
-                <div className="prose prose-sm max-w-none font-serif text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">
-                  {a.content}
-                </div>
-              </article>
-            ))}
-
-            {filtered.length === 0 && (
-              <div className="text-center py-20 border border-gray-300 bg-white">
-                <p className="font-serif italic text-gray-500 text-lg">No bulletins found.</p>
-              </div>
+          <div className="relative flex items-center justify-center flex-1 w-full pb-10">
+            
+            {/* Prev Button */}
+            {filtered.length > 1 && (
+              <button 
+                onClick={prevAnnouncement}
+                className="absolute left-0 md:-left-12 z-10 p-3 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-colors"
+                aria-label="Previous"
+              >
+                <ChevronLeft size={24} />
+              </button>
             )}
+
+            {/* Main Center Content */}
+            <article className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 md:p-12 w-full max-w-4xl min-h-[500px] flex flex-col z-0">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b-2 border-black pb-6">
+                <h2 className="text-3xl md:text-4xl font-serif font-black uppercase tracking-tight leading-tight">
+                  {filtered[activeIndex].title}
+                </h2>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-black bg-gray-100 px-3 py-1 border border-gray-300 shrink-0">
+                  {new Date(filtered[activeIndex].created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+              
+              {filtered[activeIndex].image_url && (
+                <div className="mb-8 aspect-[21/9] w-full overflow-hidden border-2 border-black">
+                  <img src={filtered[activeIndex].image_url} alt="Notice attachment" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                </div>
+              )}
+              
+              <div className="prose prose-lg max-w-none font-serif text-gray-800 leading-relaxed whitespace-pre-wrap flex-1">
+                {filtered[activeIndex].content}
+              </div>
+
+              {/* Pagination indicator */}
+              {filtered.length > 1 && (
+                <div className="mt-12 pt-6 border-t border-gray-200 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                  Bulletin {activeIndex + 1} of {filtered.length}
+                </div>
+              )}
+            </article>
+
+            {/* Next Button */}
+            {filtered.length > 1 && (
+              <button 
+                onClick={nextAnnouncement}
+                className="absolute right-0 md:-right-12 z-10 p-3 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-colors"
+                aria-label="Next"
+              >
+                <ChevronRight size={24} />
+              </button>
+            )}
+
           </div>
         )}
       </main>
