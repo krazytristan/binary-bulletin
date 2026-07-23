@@ -237,7 +237,7 @@ export default function Articles() {
         </div>
         <button 
           onClick={() => { resetForm(); setModalOpen(true); }}
-          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100"
+          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-none font-bold hover:bg-gray-800 transition  shadow-blue-100"
         >
           <Plus size={20} /> New Article
         </button>
@@ -251,14 +251,14 @@ export default function Articles() {
           placeholder="Search articles..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-none outline-none focus:ring-2 focus:ring-black/20 focus:border-black transition"
         />
       </div>
 
       {/* TABLE/LIST */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-100 rounded-none  overflow-hidden">
         {loading ? (
-          <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-blue-600" size={32} /></div>
+          <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-black" size={32} /></div>
         ) : filteredArticles.length === 0 ? (
           <div className="p-20 text-center text-gray-400">No articles found.</div>
         ) : (
@@ -278,12 +278,12 @@ export default function Articles() {
                   <tr key={article.id} className="hover:bg-gray-50/50 transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <img src={article.image_url || 'https://via.placeholder.com/150'} className="w-12 h-12 rounded-lg object-cover bg-gray-100" />
+                        <img src={article.image_url || 'https://via.placeholder.com/150'} className="w-12 h-12 rounded-none object-cover bg-gray-100" />
                         <span className="font-bold text-gray-900 line-clamp-1">{article.title}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[10px] font-black uppercase px-2 py-1 bg-blue-50 text-blue-600 rounded-md">
+                      <span className="text-[10px] font-black uppercase px-2 py-1 bg-blue-50 text-black rounded-none">
                         {article.category}
                       </span>
                     </td>
@@ -298,10 +298,10 @@ export default function Articles() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => openEdit(article)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                        <button onClick={() => openEdit(article)} className="p-2 text-gray-400 hover:text-black hover:bg-blue-50 rounded-none transition">
                           <Edit3 size={18} />
                         </button>
-                        <button onClick={() => setDeleteId(article.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                        <button onClick={() => setDeleteId(article.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-none transition">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -317,7 +317,7 @@ export default function Articles() {
       {/* MODAL */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-          <div className="bg-white p-6 md:p-8 rounded-3xl w-full max-w-4xl shadow-2xl overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
+          <div className="bg-white p-6 md:p-8 rounded-none w-full max-w-4xl  overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-gray-900">{editing ? 'Edit' : 'New'} Article</h2>
               <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X /></button>
@@ -328,13 +328,13 @@ export default function Articles() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Title</label>
-                    <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none" />
                   </div>
                   
-                  <div className="grid grid-cols-1 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div className="grid grid-cols-1 gap-4 p-4 bg-gray-50 rounded-none border border-gray-100">
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Author Name</label>
-                      <input required value={form.author_name} onChange={e => setForm({...form, author_name: e.target.value})} className="w-full p-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                      <input required value={form.author_name} onChange={e => setForm({...form, author_name: e.target.value})} className="w-full p-3 bg-white border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Author Profile Image URL</label>
@@ -350,7 +350,7 @@ export default function Articles() {
                           placeholder="https://example.com/photo.jpg" 
                           value={form.author_image} 
                           onChange={e => setForm({...form, author_image: e.target.value})} 
-                          className="flex-1 p-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                          className="flex-1 p-3 bg-white border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none text-sm" 
                         />
                       </div>
                     </div>
@@ -358,7 +358,7 @@ export default function Articles() {
 
                   <div>
                     <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Category</label>
-                    <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                    <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none">
                       <option>News</option>
                       <option>Feature</option>
                       <option>Sports</option>
@@ -371,7 +371,7 @@ export default function Articles() {
 
                 <div className="space-y-4">
                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Article Thumbnail (Main)</label>
-                  <div className="relative aspect-video bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
+                  <div className="relative aspect-video bg-gray-50 rounded-none border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
                     {preview ? (
                       <>
                         <img src={preview} className="w-full h-full object-cover" />
@@ -397,7 +397,7 @@ export default function Articles() {
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {galleryPreviews.map((src, index) => (
-                    <div key={index} className="relative aspect-square rounded-xl overflow-hidden border border-gray-100 group">
+                    <div key={index} className="relative aspect-square rounded-none overflow-hidden border border-gray-100 group">
                       <img src={src} className="w-full h-full object-cover" />
                       <button 
                         type="button" 
@@ -408,7 +408,7 @@ export default function Articles() {
                       </button>
                     </div>
                   ))}
-                  <label className="aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition group">
+                  <label className="aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition group">
                     <Plus className="text-gray-300 group-hover:text-blue-500" size={24} />
                     <span className="text-[10px] text-gray-400 font-bold uppercase mt-1">Add Photo</span>
                     <input type="file" multiple accept="image/*" onChange={handleGalleryChange} className="hidden" />
@@ -418,18 +418,18 @@ export default function Articles() {
 
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Excerpt</label>
-                <textarea rows="2" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
+                <textarea rows="2" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none resize-none" />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Content</label>
-                <textarea rows="6" value={form.content} onChange={e => setForm({...form, content: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                <textarea rows="6" value={form.content} onChange={e => setForm({...form, content: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none" />
               </div>
 
               <button 
                 disabled={saving}
                 type="submit"
-                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:bg-gray-300 shadow-xl shadow-blue-100"
+                className="w-full bg-black text-white py-4 rounded-none font-bold hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:bg-gray-300  shadow-blue-100"
               >
                 {saving ? <Loader2 className="animate-spin" size={20} /> : (editing ? 'Update Article' : 'Publish Article')}
               </button>
@@ -441,12 +441,12 @@ export default function Articles() {
       {/* DELETE DIALOG */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-60 p-4">
-          <div className="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+          <div className="bg-white p-8 rounded-none max-w-sm w-full text-center ">
             <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Article?</h2>
             <p className="text-gray-500 mb-6">This will permanently remove the story from the bulletin.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:bg-gray-50 rounded-xl">Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 shadow-lg shadow-red-100">Delete</button>
+              <button onClick={() => setDeleteId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:bg-gray-50 rounded-none">Cancel</button>
+              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-none hover:bg-red-600  shadow-red-100">Delete</button>
             </div>
           </div>
         </div>

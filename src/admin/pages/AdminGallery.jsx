@@ -141,7 +141,7 @@ export default function AdminGallery() {
         <div className="hidden md:flex gap-3">
           <button 
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition shadow-sm"
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-none text-sm font-medium hover:opacity-90 transition "
           >
             <PlusCircle size={16} /> New Album
           </button>
@@ -151,12 +151,12 @@ export default function AdminGallery() {
       {/* ALBUM GRID */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => <div key={i} className="h-64 bg-white rounded-2xl animate-pulse border border-gray-100 shadow-sm" />)}
+          {[1, 2, 3].map(i => <div key={i} className="h-64 bg-white rounded-none animate-pulse border border-gray-100 " />)}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((album) => (
-            <div key={album.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group">
+            <div key={album.id} className="bg-white rounded-none  border border-gray-100 overflow-hidden group">
               {/* Thumbnail */}
               <div className="relative h-48 overflow-hidden bg-gray-50">
                 <img
@@ -165,7 +165,7 @@ export default function AdminGallery() {
                   onClick={() => { setCurrentAlbum(album.images); setViewerIndex(0); }}
                   alt=""
                 />
-                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-[10px] font-bold text-gray-600 shadow-sm">
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-none text-[10px] font-bold text-gray-600 ">
                   {album.images?.length} PHOTOS
                 </div>
               </div>
@@ -199,7 +199,7 @@ export default function AdminGallery() {
         <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-950/20 backdrop-blur-sm" onClick={resetForm} />
           
-          <div className="relative bg-white w-full max-w-xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+          <div className="relative bg-white w-full max-w-xl rounded-none  flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-gray-50 flex justify-between items-center">
               <h2 className="text-lg font-bold text-gray-900">
                 {editing ? "Edit Album" : "Create New Album"}
@@ -214,7 +214,7 @@ export default function AdminGallery() {
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium outline-none focus:ring-2 focus:ring-primary/10 transition"
+                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-none text-sm font-medium outline-none focus:ring-2 focus:ring-primary/10 transition"
                   placeholder="e.g. Science Fair 2026"
                 />
               </div>
@@ -225,7 +225,7 @@ export default function AdminGallery() {
                   onDrop={(e) => { e.preventDefault(); processFiles(Array.from(e.dataTransfer.files)); }}
                   onDragOver={(e) => e.preventDefault()}
                   onClick={() => fileInputRef.current.click()}
-                  className="border-2 border-dashed border-gray-200 p-8 text-center rounded-xl cursor-pointer hover:bg-gray-50 transition"
+                  className="border-2 border-dashed border-gray-200 p-8 text-center rounded-none cursor-pointer hover:bg-gray-50 transition"
                 >
                   <Upload size={24} className="mx-auto text-gray-400 mb-2" />
                   <p className="text-sm text-gray-500 font-medium">Click to browse or drag and drop</p>
@@ -236,13 +236,13 @@ export default function AdminGallery() {
               {preview.length > 0 && (
                 <div className="grid grid-cols-4 gap-3">
                   {preview.map((img, i) => (
-                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-100 shadow-sm">
+                    <div key={i} className="relative aspect-square rounded-none overflow-hidden border border-gray-100 ">
                       <img src={img} className="h-full w-full object-cover" alt="" />
                       <button type="button" onClick={() => {
                         const newFiles = files.filter((_, idx) => idx !== i);
                         setFiles(newFiles);
                         setPreview(newFiles.map(f => URL.createObjectURL(f)));
-                      }} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-md">
+                      }} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-none">
                         <X size={10} />
                       </button>
                     </div>
@@ -256,7 +256,7 @@ export default function AdminGallery() {
               <button
                 disabled={actionLoading}
                 onClick={handleSubmit}
-                className="bg-primary text-white px-6 py-2 rounded-lg font-medium text-sm flex items-center gap-2 shadow-sm"
+                className="bg-primary text-white px-6 py-2 rounded-none font-medium text-sm flex items-center gap-2 "
               >
                 {actionLoading ? <Loader2 size={16} className="animate-spin" /> : "Save Album"}
               </button>
@@ -274,7 +274,7 @@ export default function AdminGallery() {
             <ChevronLeft size={40} />
           </button>
           
-          <img src={currentAlbum[viewerIndex]} className="max-h-[85vh] w-auto object-contain rounded-lg shadow-2xl" alt="" />
+          <img src={currentAlbum[viewerIndex]} className="max-h-[85vh] w-auto object-contain rounded-none " alt="" />
           
           <button onClick={() => setViewerIndex(prev => (prev + 1) % currentAlbum.length)} className="absolute right-4 p-4 text-white/30 hover:text-white transition bg-white/5 rounded-full">
             <ChevronRight size={40} />
@@ -285,7 +285,7 @@ export default function AdminGallery() {
       {/* DELETE CONFIRMATION */}
       {deleteId && (
         <div className="fixed inset-0 bg-gray-950/20 backdrop-blur-sm flex justify-center items-center z-210 p-4">
-          <div className="bg-white p-8 rounded-2xl text-center max-w-xs w-full shadow-2xl border border-gray-50">
+          <div className="bg-white p-8 rounded-none text-center max-w-xs w-full  border border-gray-50">
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 size={24} />
             </div>
@@ -293,7 +293,7 @@ export default function AdminGallery() {
             <p className="text-sm text-gray-500 mb-6">This record will be permanently removed.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)} className="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 transition">Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 py-2 bg-red-500 text-white text-sm font-bold rounded-lg shadow-lg shadow-red-100 active:scale-95 transition">Delete</button>
+              <button onClick={confirmDelete} className="flex-1 py-2 bg-red-500 text-white text-sm font-bold rounded-none  shadow-red-100 active:scale-95 transition">Delete</button>
             </div>
           </div>
         </div>

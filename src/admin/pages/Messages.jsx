@@ -101,17 +101,17 @@ export default function Messages() {
         <div className="flex justify-between items-end mb-6 px-2">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-              <Inbox className="text-blue-600" /> Communications
+              <Inbox className="text-black" /> Communications
             </h1>
             <p className="text-gray-500 text-sm mt-1">Manage and respond to inbound contact requests.</p>
           </div>
-          <div className="bg-white border border-gray-200 shadow-sm px-4 py-2 rounded-lg text-sm font-semibold text-gray-700">
-            <span className="text-blue-600">{messages.filter(m => !m.is_read).length}</span> Unread
+          <div className="bg-white border border-gray-200  px-4 py-2 rounded-none text-sm font-semibold text-gray-700">
+            <span className="text-black">{messages.filter(m => !m.is_read).length}</span> Unread
           </div>
         </div>
 
         {/* Main Interface Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 bg-white border border-gray-200 rounded-none  overflow-hidden flex-1">
           
           {/* Message List Panel */}
           <div className="lg:col-span-4 border-r border-gray-100 flex flex-col bg-white">
@@ -121,7 +121,7 @@ export default function Messages() {
             
             <div className="overflow-y-auto flex-1 divide-y divide-gray-50">
               {loading ? (
-                <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-blue-600" /></div>
+                <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-black" /></div>
               ) : messages.length === 0 ? (
                 <div className="p-10 text-center text-gray-400 text-sm italic">No records found.</div>
               ) : (
@@ -134,10 +134,10 @@ export default function Messages() {
                     }`}
                   >
                     {!msg.is_read && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600" />
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-black" />
                     )}
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${
-                      msg.is_read ? "bg-gray-50 text-gray-400 border-gray-100" : "bg-blue-50 text-blue-600 border-blue-100"
+                      msg.is_read ? "bg-gray-50 text-gray-400 border-gray-100" : "bg-blue-50 text-black border-blue-100"
                     }`}>
                       <User size={16} />
                     </div>
@@ -170,15 +170,15 @@ export default function Messages() {
                   <div className="flex items-center gap-2">
                     <button 
                       onClick={() => toggleReadStatus(selectedMessage.id, selectedMessage.is_read)}
-                      className="p-2 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 rounded-lg text-gray-500 transition-all active:scale-95"
+                      className="p-2 hover:bg-white hover: border border-transparent hover:border-gray-200 rounded-none text-gray-500 transition-all active:scale-95"
                       title="Mark as unread"
                     >
-                      {selectedMessage.is_read ? <Mail size={18} /> : <MailOpen size={18} className="text-blue-600" />}
+                      {selectedMessage.is_read ? <Mail size={18} /> : <MailOpen size={18} className="text-black" />}
                     </button>
                     <button 
                       onClick={() => deleteMessage(selectedMessage.id)}
                       disabled={deleting === selectedMessage.id}
-                      className="p-2 hover:bg-red-50 hover:border-red-100 border border-transparent rounded-lg text-gray-500 hover:text-red-600 transition-all disabled:opacity-50"
+                      className="p-2 hover:bg-red-50 hover:border-red-100 border border-transparent rounded-none text-gray-500 hover:text-red-600 transition-all disabled:opacity-50"
                     >
                       {deleting === selectedMessage.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
                     </button>
@@ -198,7 +198,7 @@ export default function Messages() {
                          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded">Verified Source</span>
                       </div>
                       <h2 className="text-3xl font-bold text-gray-900 leading-tight">{selectedMessage.name}</h2>
-                      <div className="flex items-center gap-2 text-blue-600 font-medium mt-1">
+                      <div className="flex items-center gap-2 text-black font-medium mt-1">
                         <AtSign size={14} />
                         <span className="text-sm underline underline-offset-4">{selectedMessage.email}</span>
                       </div>
@@ -214,7 +214,7 @@ export default function Messages() {
                   </header>
 
                   <div className="prose prose-blue max-w-none">
-                    <div className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap bg-gray-50/50 p-6 rounded-xl border border-gray-100">
+                    <div className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap bg-gray-50/50 p-6 rounded-none border border-gray-100">
                       {selectedMessage.message}
                     </div>
                   </div>
@@ -222,7 +222,7 @@ export default function Messages() {
                   <div className="mt-12 flex gap-4 no-print">
                     <a 
                       href={`mailto:${selectedMessage.email}`}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 active:scale-95 text-sm"
+                      className="bg-black text-white px-6 py-3 rounded-none font-bold hover:bg-gray-800 transition-all  shadow-blue-100 active:scale-95 text-sm"
                     >
                       Reply to Sender
                     </a>
@@ -231,7 +231,7 @@ export default function Messages() {
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-gray-50/20">
-                <div className="w-20 h-20 bg-white shadow-sm rounded-3xl flex items-center justify-center mb-4 border border-gray-100 text-gray-200">
+                <div className="w-20 h-20 bg-white  rounded-none flex items-center justify-center mb-4 border border-gray-100 text-gray-200">
                   <Mail size={40} strokeWidth={1.5} />
                 </div>
                 <h3 className="text-gray-900 font-bold text-lg">No message selected</h3>

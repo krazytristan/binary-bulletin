@@ -129,7 +129,7 @@ export default function AdminAnnouncements() {
 
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-md shadow-blue-200"
+          className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-none font-semibold transition-all  shadow-blue-200"
         >
           <Plus size={20} />
           New Announcement
@@ -138,11 +138,11 @@ export default function AdminAnnouncements() {
 
       {/* LISTING */}
       {fetching ? (
-        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-600" size={40} /></div>
+        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-black" size={40} /></div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {announcements.map((a) => (
-            <div key={a.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col group">
+            <div key={a.id} className="bg-white rounded-none border border-gray-100  overflow-hidden flex flex-col group">
               <div className="relative h-48 bg-gray-200">
                 {a.image_url ? (
                   <img src={a.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -150,17 +150,17 @@ export default function AdminAnnouncements() {
                   <div className="flex items-center justify-center h-full text-gray-400"><ImageIcon size={40} /></div>
                 )}
                 <div className="absolute top-3 right-3 flex gap-2">
-                  <button onClick={() => handleEdit(a)} className="p-2 bg-white/90 backdrop-blur shadow-sm rounded-full text-blue-600 hover:bg-blue-600 hover:text-white transition-colors">
+                  <button onClick={() => handleEdit(a)} className="p-2 bg-white/90 backdrop-blur  rounded-full text-black hover:bg-black hover:text-white transition-colors">
                     <Edit2 size={16} />
                   </button>
-                  <button onClick={() => handleDelete(a.id)} className="p-2 bg-white/90 backdrop-blur shadow-sm rounded-full text-red-600 hover:bg-red-600 hover:text-white transition-colors">
+                  <button onClick={() => handleDelete(a.id)} className="p-2 bg-white/90 backdrop-blur  rounded-full text-red-600 hover:bg-red-600 hover:text-white transition-colors">
                     <Trash2 size={16} />
                   </button>
                 </div>
               </div>
 
               <div className="p-5 flex-1 flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-black mb-2">
                   {new Date(a.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
                 </span>
                 <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-1">{a.title}</h3>
@@ -174,7 +174,7 @@ export default function AdminAnnouncements() {
       {/* 🔥 MODAL */}
       {modalOpen && (
         <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-100 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-white rounded-none  w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
             
             <div className="flex justify-between items-center p-6 border-b">
               <h2 className="text-xl font-bold text-gray-800">
@@ -191,7 +191,7 @@ export default function AdminAnnouncements() {
                   required
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full border-gray-200 border p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  className="w-full border-gray-200 border p-3 rounded-none focus:ring-2 focus:ring-black outline-none transition-all"
                   placeholder="Enter a catchy title..."
                 />
               </div>
@@ -203,7 +203,7 @@ export default function AdminAnnouncements() {
                   rows="5"
                   value={form.content}
                   onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  className="w-full border-gray-200 border p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
+                  className="w-full border-gray-200 border p-3 rounded-none focus:ring-2 focus:ring-black outline-none transition-all resize-none"
                   placeholder="Write the announcement details here..."
                 />
               </div>
@@ -212,10 +212,10 @@ export default function AdminAnnouncements() {
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Featured Image</label>
                 <div 
                   onClick={() => fileInputRef.current.click()}
-                  className="border-2 border-dashed border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all"
+                  className="border-2 border-dashed border-gray-200 rounded-none p-4 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all"
                 >
                   {preview ? (
-                    <img src={preview} alt="Preview" className="h-32 w-full object-cover rounded-lg" />
+                    <img src={preview} alt="Preview" className="h-32 w-full object-cover rounded-none" />
                   ) : (
                     <>
                       <ImageIcon className="text-gray-400 mb-2" size={32} />
@@ -236,14 +236,14 @@ export default function AdminAnnouncements() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-all"
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-none font-bold transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100"
+                  className="flex-1 px-4 py-3 bg-black hover:bg-gray-800 text-white rounded-none font-bold transition-all flex items-center justify-center gap-2  shadow-blue-100"
                 >
                   {loading && <Loader2 size={18} className="animate-spin" />}
                   {editing ? "Update Post" : "Publish Post"}

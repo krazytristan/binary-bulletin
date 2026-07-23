@@ -122,7 +122,7 @@ export default function Settings() {
   if (initialLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <Loader2 className="animate-spin text-blue-600" size={32} />
+        <Loader2 className="animate-spin text-black" size={32} />
       </div>
     );
   }
@@ -135,14 +135,14 @@ export default function Settings() {
       </div>
 
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl flex items-center gap-3">
+        <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-none flex items-center gap-3">
           <CheckCircle size={20} />
           <p className="text-sm font-medium">Database updated successfully!</p>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-center gap-3">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-none flex items-center gap-3">
           <AlertCircle size={20} />
           <p className="text-sm font-medium">{error}</p>
         </div>
@@ -152,15 +152,15 @@ export default function Settings() {
 
       <div className="grid gap-8">
         {/* Profile Section */}
-        <section className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+        <section className="bg-white p-8 rounded-none  border border-gray-100 space-y-6">
           <div className="flex items-center gap-2 pb-4 border-b border-gray-50">
-            <User size={20} className="text-blue-600" />
+            <User size={20} className="text-black" />
             <h2 className="text-lg font-bold text-gray-900">Profile Information</h2>
           </div>
 
           <div className="flex flex-col md:flex-row gap-8 items-start">
             <div className="relative group shrink-0">
-              <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400 overflow-hidden border border-gray-100 shadow-inner">
+              <div className="w-24 h-24 bg-gray-100 rounded-none flex items-center justify-center text-gray-400 overflow-hidden border border-gray-100 shadow-inner">
                 {previewImage || profile.avatar_url ? (
                   <img src={previewImage || profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
@@ -169,7 +169,7 @@ export default function Settings() {
               </div>
               <button 
                 onClick={() => fileInputRef.current.click()}
-                className="absolute -bottom-2 -right-2 p-2 bg-white shadow-lg border border-gray-100 rounded-xl text-blue-600 hover:scale-110 active:scale-95 transition-transform"
+                className="absolute -bottom-2 -right-2 p-2 bg-white  border border-gray-100 rounded-none text-black hover:scale-110 active:scale-95 transition-transform"
               >
                 <Camera size={16} />
               </button>
@@ -182,12 +182,12 @@ export default function Settings() {
                   type="text" 
                   value={profile.full_name}
                   onChange={(e) => setProfile({...profile, full_name: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-none text-sm focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black transition-all"
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
-                <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 border border-gray-100 rounded-xl text-sm text-gray-500 italic">
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 border border-gray-100 rounded-none text-sm text-gray-500 italic">
                   <Mail size={14} /> {profile.email}
                 </div>
               </div>
@@ -196,9 +196,9 @@ export default function Settings() {
         </section>
 
         {/* Staff Role Section */}
-        <section className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+        <section className="bg-white p-8 rounded-none  border border-gray-100 space-y-6">
           <div className="flex items-center gap-2 pb-4 border-b border-gray-50">
-            <Briefcase size={20} className="text-blue-600" />
+            <Briefcase size={20} className="text-black" />
             <h2 className="text-lg font-bold text-gray-900">Designation & Permissions</h2>
           </div>
 
@@ -208,7 +208,7 @@ export default function Settings() {
               <select 
                 value={profile.role}
                 onChange={(e) => setProfile({...profile, role: e.target.value})}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none cursor-pointer"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-none text-sm font-bold focus:ring-2 focus:ring-black/20 outline-none appearance-none cursor-pointer"
               >
                 <option value="Reader">Standard Reader</option>
                 <option value="News Writer">News Writer</option>
@@ -219,12 +219,12 @@ export default function Settings() {
               <p className="text-[10px] text-gray-400 font-medium px-1">Your role determines your access level to the publishing dashboard.</p>
             </div>
 
-            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 self-end">
+            <div className="bg-blue-50/50 p-4 rounded-none border border-blue-100 self-end">
                <div className="flex items-center gap-2 text-blue-700 mb-1">
                  <Shield size={14} />
                  <span className="text-xs font-bold uppercase tracking-tight">Access Level</span>
                </div>
-               <p className="text-xs text-blue-600 font-medium">
+               <p className="text-xs text-black font-medium">
                  {profile.role === "Editor in Chief" || profile.role === "Administrator" 
                    ? "Full publishing and user management privileges granted." 
                    : "Standard content submission privileges granted."}
@@ -237,7 +237,7 @@ export default function Settings() {
           <button 
             onClick={handleSave}
             disabled={loading}
-            className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 active:scale-95"
+            className="flex items-center gap-2 bg-black text-white px-8 py-3 rounded-none font-bold hover:bg-gray-800 transition-all  shadow-blue-100 disabled:opacity-50 active:scale-95"
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
             Synchronize Profile

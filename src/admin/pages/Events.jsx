@@ -194,7 +194,7 @@ export default function Events() {
         </div>
         <button 
           onClick={() => { resetForm(); setModalOpen(true); }}
-          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100"
+          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-none font-bold hover:bg-gray-800 transition  shadow-blue-100"
         >
           <Plus size={20} /> New Event
         </button>
@@ -208,14 +208,14 @@ export default function Events() {
           placeholder="Search events or venues..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-none outline-none focus:ring-2 focus:ring-black/20 focus:border-black transition"
         />
       </div>
 
       {/* TABLE/LIST */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-100 rounded-none  overflow-hidden">
         {loading ? (
-          <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-blue-600" size={32} /></div>
+          <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-black" size={32} /></div>
         ) : filteredEvents.length === 0 ? (
           <div className="p-20 text-center text-gray-400">No events scheduled.</div>
         ) : (
@@ -237,7 +237,7 @@ export default function Events() {
                         <img 
                           src={event.image_url || 'https://via.placeholder.com/150'} 
                           alt="" 
-                          className="w-12 h-12 rounded-lg object-cover bg-gray-100 border border-gray-100" 
+                          className="w-12 h-12 rounded-none object-cover bg-gray-100 border border-gray-100" 
                         />
                         <span className="font-bold text-gray-900 line-clamp-1">{event.title}</span>
                       </div>
@@ -260,10 +260,10 @@ export default function Events() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => openEdit(event)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                        <button onClick={() => openEdit(event)} className="p-2 text-gray-400 hover:text-black hover:bg-blue-50 rounded-none transition">
                           <Edit3 size={18} />
                         </button>
-                        <button onClick={() => setDeleteId(event.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                        <button onClick={() => setDeleteId(event.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-none transition">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -279,7 +279,7 @@ export default function Events() {
       {/* MODAL */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-          <div className="bg-white p-6 md:p-8 rounded-3xl w-full max-w-3xl shadow-2xl overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
+          <div className="bg-white p-6 md:p-8 rounded-none w-full max-w-3xl  overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-gray-900">{editing ? 'Edit' : 'New'} Event</h2>
               <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X /></button>
@@ -290,27 +290,27 @@ export default function Events() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Title</label>
-                    <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Date</label>
-                      <input type="date" required value={form.event_date} onChange={e => setForm({...form, event_date: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                      <input type="date" required value={form.event_date} onChange={e => setForm({...form, event_date: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none text-sm" />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Time</label>
-                      <input type="text" placeholder="10:00 AM" required value={form.event_time} onChange={e => setForm({...form, event_time: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                      <input type="text" placeholder="10:00 AM" required value={form.event_time} onChange={e => setForm({...form, event_time: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none text-sm" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Location</label>
-                    <input required value={form.location} onChange={e => setForm({...form, location: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <input required value={form.location} onChange={e => setForm({...form, location: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none" />
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Thumbnail</label>
-                  <div className="relative aspect-video bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
+                  <div className="relative aspect-video bg-gray-50 rounded-none border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
                     {preview ? (
                       <>
                         <img src={preview} className="w-full h-full object-cover" alt="Preview" />
@@ -331,12 +331,12 @@ export default function Events() {
 
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Description</label>
-                <textarea rows="4" value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Provide event details..." />
+                <textarea rows="4" value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none" placeholder="Provide event details..." />
               </div>
 
               <button 
                 disabled={saving}
-                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:bg-gray-300 shadow-xl shadow-blue-100"
+                className="w-full bg-black text-white py-4 rounded-none font-bold hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:bg-gray-300  shadow-blue-100"
               >
                 {saving ? <Loader2 className="animate-spin" size={20} /> : 'Publish Event'}
               </button>
@@ -348,12 +348,12 @@ export default function Events() {
       {/* DELETE DIALOG */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-60 p-4">
-          <div className="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+          <div className="bg-white p-8 rounded-none max-w-sm w-full text-center ">
             <h2 className="text-xl font-bold text-gray-900 mb-2 italic">Cancel Event?</h2>
             <p className="text-gray-500 mb-6">This will remove the event from the NexGen calendar permanently.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:bg-gray-50 rounded-xl">Back</button>
-              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 shadow-lg shadow-red-100">Delete</button>
+              <button onClick={() => setDeleteId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:bg-gray-50 rounded-none">Back</button>
+              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-none hover:bg-red-600  shadow-red-100">Delete</button>
             </div>
           </div>
         </div>
