@@ -122,7 +122,7 @@ export default function Announcements() {
             {filtered.length > 1 && (
               <button 
                 onClick={prevAnnouncement}
-                className="absolute left-0 md:-left-12 z-10 p-3 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-colors"
+                className="hidden md:block absolute -left-12 z-10 p-3 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-colors"
                 aria-label="Previous"
               >
                 <ChevronLeft size={24} />
@@ -173,7 +173,7 @@ export default function Announcements() {
             {filtered.length > 1 && (
               <button 
                 onClick={nextAnnouncement}
-                className="absolute right-0 md:-right-12 z-10 p-3 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-colors"
+                className="hidden md:block absolute -right-12 z-10 p-3 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-colors"
                 aria-label="Next"
               >
                 <ChevronRight size={24} />
