@@ -32,6 +32,7 @@ export default function Messages() {
     return () => {
       supabase.removeChannel(channel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMessages = async () => {
@@ -74,9 +75,9 @@ export default function Messages() {
       .eq("id", id);
 
     if (!error) {
-      setMessages(messages.map(m => m.id === id ? { ...m, is_read: !currentStatus } : m));
+      setMessages(prev => prev.map(m => m.id === id ? { ...m, is_read: !currentStatus } : m));
       if (selectedMessage?.id === id) {
-        setSelectedMessage({ ...selectedMessage, is_read: !currentStatus });
+        setSelectedMessage(prev => ({ ...prev, is_read: !currentStatus }));
       }
     }
   };
@@ -85,9 +86,14 @@ export default function Messages() {
     if (!window.confirm("Purge this transmission from the database?")) return;
     
     setDeleting(id);
-    const { error } = await supabase.from("messages").delete().eq("id", id);
-    if (!error) {
-      setMessages(messages.filter(m => m.id !== id));
+    const { data, error } = await supabase.from("messages").delete().eq("id", id).select();
+    
+    if (error) {
+      alert("Error deleting message: " + error.message);
+    } else if (data && data.length === 0) {
+      alert("Permission Denied: The database refused to delete the message. Please check the Row Level Security (RLS) DELETE policies for the 'messages' table in your Supabase dashboard to ensure authenticated users have delete access.");
+    } else {
+      setMessages(prev => prev.filter(m => m.id !== id));
       if (selectedMessage?.id === id) setSelectedMessage(null);
     }
     setDeleting(null);

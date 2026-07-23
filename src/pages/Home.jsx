@@ -116,12 +116,12 @@ export default function Home() {
   if (loading) return (
     <div className="fixed inset-0 z-50 bg-[#FCFBF9] flex flex-col items-center justify-center p-6">
       <div className="max-w-xs w-full space-y-8 text-center font-serif text-[#111827]">
-        <Newspaper className="mx-auto text-[#1E3A8A]" size={48} strokeWidth={1} />
+        <Newspaper className="mx-auto text-black" size={48} strokeWidth={1} />
         <div className="space-y-4">
           <h2 className="font-bold text-3xl uppercase tracking-widest border-b border-black pb-4">The Press</h2>
           <div className="h-[1px] bg-gray-300 w-full relative">
             <div 
-              className="absolute inset-y-0 left-0 bg-[#1E3A8A] transition-all duration-700 ease-in-out"
+              className="absolute inset-y-0 left-0 bg-black transition-all duration-700 ease-in-out"
               style={{ width: `${((loadingStage + 1) / STAGES.length) * 100}%` }}
             />
           </div>
@@ -134,7 +134,7 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans selection:bg-[#1E3A8A] selection:text-white antialiased">
+    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans selection:bg-black selection:text-white antialiased">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
@@ -146,7 +146,7 @@ export default function Home() {
               <span className="flex items-center gap-1"><MapPin size={12}/> Lipa City, PH</span>
               <span className="flex items-center gap-1"><CloudSun size={12}/> 29°C</span>
             </div>
-            <div className="mx-auto md:mx-0 text-[10px] font-sans uppercase tracking-[0.2em] text-[#1E3A8A] font-bold">
+            <div className="mx-auto md:mx-0 text-[10px] font-sans uppercase tracking-[0.2em] text-black font-bold">
               Digital Premiere Edition
             </div>
             <div className="flex gap-4 text-[10px] font-sans uppercase tracking-widest text-gray-600 hidden md:flex">
@@ -168,11 +168,11 @@ export default function Home() {
         {/* --- SEARCH BAR --- */}
         <div className="flex justify-end mb-10 border-b border-gray-200 pb-6">
           <div className="relative w-full md:w-72 group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#1E3A8A] transition-colors" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={16} />
             <input 
               type="text" 
               placeholder="Search Archives..." 
-              className="w-full bg-white border border-gray-300 rounded-none py-2.5 pl-10 pr-4 text-[#111827] outline-none focus:border-[#1E3A8A] font-sans text-xs uppercase tracking-widest placeholder:text-gray-400 transition-colors" 
+              className="w-full bg-white border border-gray-300 rounded-none py-2.5 pl-10 pr-4 text-[#111827] outline-none focus:border-black font-sans text-xs uppercase tracking-widest placeholder:text-gray-400 transition-colors" 
               value={searchQuery} 
               onChange={(e) => setSearchQuery(e.target.value)} 
             />
@@ -187,13 +187,13 @@ export default function Home() {
             
             {/* Editorial block */}
             <div className="border-b border-gray-300 pb-8">
-                <div className="flex items-center gap-2 mb-4 text-[#1E3A8A] border-t-2 border-black pt-2">
+                <div className="flex items-center gap-2 mb-4 text-black border-t-2 border-black pt-2">
                   <Quote size={16} fill="currentColor"/>
                   <h2 className="font-sans font-bold uppercase text-[10px] tracking-widest">Editorial</h2>
                 </div>
                 {categorized.editorial[0] && (
                   <Link to={`/article/${categorized.editorial[0].id}`} className="group block">
-                     <h3 className="font-serif text-2xl font-bold leading-tight mb-3 group-hover:text-[#1E3A8A] transition-colors">{categorized.editorial[0].title}</h3>
+                     <h3 className="font-serif text-2xl font-bold leading-tight mb-3 group-hover:text-black transition-colors">{categorized.editorial[0].title}</h3>
                      <p className="text-sm text-gray-700 leading-relaxed font-serif mb-4">"{categorized.editorial[0].excerpt}"</p>
                      <div className="flex items-center gap-3">
                         <img src={categorized.editorial[0].author_image || `https://ui-avatars.com/api/?name=Staff&background=111827&color=fff`} className="w-8 h-8 rounded-full grayscale" alt="author"/>
@@ -213,7 +213,7 @@ export default function Home() {
               <div className="flex flex-col gap-6">
                 {categorized.opinion.slice(0, 3).map(a => (
                   <Link key={a.id} to={`/article/${a.id}`} className="block group">
-                    <h4 className="font-serif font-bold text-lg leading-tight group-hover:text-[#1E3A8A] transition-colors mb-2">{a.title}</h4>
+                    <h4 className="font-serif font-bold text-lg leading-tight group-hover:text-black transition-colors mb-2">{a.title}</h4>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-sans text-gray-500 uppercase tracking-widest">By {a.author_name || "Staff"}</span>
                     </div>
@@ -224,13 +224,13 @@ export default function Home() {
 
             {/* Campus Announcements block */}
             <div className="space-y-6">
-              <h2 className="font-sans font-bold uppercase text-[10px] tracking-widest border-t-2 border-[#1E3A8A] pt-2 flex items-center gap-2 text-[#1E3A8A]">
+              <h2 className="font-sans font-bold uppercase text-[10px] tracking-widest border-t-2 border-black pt-2 flex items-center gap-2 text-black">
                 <Newspaper size={14}/> Bulletins
               </h2>
               <div className="space-y-5">
                 {announcements.map((ann) => (
                   <div key={ann.id} className="bg-white p-4 border border-gray-200 shadow-sm">
-                    <span className="text-[9px] font-sans font-bold uppercase text-[#1E3A8A] tracking-widest block mb-2">{ann.category || "Official"}</span>
+                    <span className="text-[9px] font-sans font-bold uppercase text-black tracking-widest block mb-2">{ann.category || "Official"}</span>
                     <h4 className="text-sm font-serif font-bold leading-tight mb-2">{ann.title}</h4>
                     <p className="text-xs text-gray-600 font-serif leading-relaxed line-clamp-3">{ann.content}</p>
                   </div>
@@ -248,7 +248,7 @@ export default function Home() {
             {featured && (
               <div className="block">
                 <Link to={`/article/${featured.id}`} className="group block">
-                  <h2 className="text-4xl md:text-5xl font-serif font-black leading-[1.1] mb-6 group-hover:text-[#1E3A8A] transition-colors text-center">{featured.title}</h2>
+                  <h2 className="text-4xl md:text-5xl font-serif font-black leading-[1.1] mb-6 group-hover:text-black transition-colors text-center">{featured.title}</h2>
                   
                   <div className="flex items-center justify-center gap-3 mb-8 text-[11px] font-sans uppercase tracking-widest">
                     <span className="font-bold text-black border-r border-gray-300 pr-3">By {featured.author_name || "Journal Staff"}</span>
@@ -262,11 +262,11 @@ export default function Home() {
                   
                   {/* Drop cap styling for excerpt */}
                   <p className="text-gray-800 text-lg md:text-xl leading-relaxed font-serif">
-                    <span className="float-left text-6xl font-black font-serif leading-none pr-3 pt-1 text-[#1E3A8A]">{featured.excerpt.charAt(0)}</span>
+                    <span className="float-left text-6xl font-black font-serif leading-none pr-3 pt-1 text-black">{featured.excerpt.charAt(0)}</span>
                     {featured.excerpt.slice(1)}...
                   </p>
                   
-                  <div className="flex items-center gap-2 mt-8 text-[#1E3A8A] font-sans font-bold text-[11px] uppercase tracking-widest group-hover:underline decoration-2 underline-offset-4">
+                  <div className="flex items-center gap-2 mt-8 text-black font-sans font-bold text-[11px] uppercase tracking-widest group-hover:underline decoration-2 underline-offset-4">
                     Continue Reading <ArrowRight size={14}/>
                   </div>
                 </Link>
@@ -282,8 +282,8 @@ export default function Home() {
             <div className="flex flex-col gap-8">
                 {filteredArticles.slice(1, 5).map((a) => (
                   <Link key={a.id} to={`/article/${a.id}`} className="block group border-b border-gray-200 pb-6 last:border-0">
-                    <span className="inline-block text-[#1E3A8A] font-sans font-bold text-[9px] uppercase tracking-widest mb-2">{a.category}</span>
-                    <h4 className="font-serif font-bold text-xl leading-tight group-hover:text-[#1E3A8A] transition-colors mb-3">{a.title}</h4>
+                    <span className="inline-block text-black font-sans font-bold text-[9px] uppercase tracking-widest mb-2">{a.category}</span>
+                    <h4 className="font-serif font-bold text-xl leading-tight group-hover:text-black transition-colors mb-3">{a.title}</h4>
                     <p className="text-sm font-serif text-gray-600 line-clamp-3 mb-3">"{a.excerpt}"</p>
                     <p className="text-[9px] font-sans uppercase tracking-widest text-gray-400 font-bold">{formatDate(a.created_at)}</p>
                   </Link>
@@ -311,8 +311,8 @@ export default function Home() {
                   <div className="aspect-[16/10] overflow-hidden bg-gray-200 mb-4 border border-gray-300">
                     <img src={a.image_url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-transform duration-700" alt="article" />
                   </div>
-                  <span className="block text-[9px] font-sans uppercase tracking-widest text-[#1E3A8A] font-bold mb-2">{a.category}</span>
-                  <h4 className="font-serif font-bold text-lg leading-tight group-hover:text-[#1E3A8A] transition-colors mb-2 line-clamp-2">{a.title}</h4>
+                  <span className="block text-[9px] font-sans uppercase tracking-widest text-black font-bold mb-2">{a.category}</span>
+                  <h4 className="font-serif font-bold text-lg leading-tight group-hover:text-black transition-colors mb-2 line-clamp-2">{a.title}</h4>
                   <span className="text-[10px] font-sans font-bold text-gray-400 uppercase tracking-widest">{formatDate(a.created_at)}</span>
                 </Link>
               </div>
@@ -354,7 +354,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-4 w-full md:w-auto">
                <button onClick={() => setShowCookies(false)} className="text-[10px] font-sans uppercase font-bold text-gray-500 hover:text-black tracking-widest px-4">Decline</button>
-               <button onClick={handleAcceptCookies} className="grow md:grow-0 bg-black text-white px-8 py-3 text-[10px] font-sans font-bold uppercase tracking-widest hover:bg-[#1E3A8A] transition-colors whitespace-nowrap border border-black">Accept</button>
+               <button onClick={handleAcceptCookies} className="grow md:grow-0 bg-black text-white px-8 py-3 text-[10px] font-sans font-bold uppercase tracking-widest hover:bg-black transition-colors whitespace-nowrap border border-black">Accept</button>
             </div>
           </div>
         </div>
