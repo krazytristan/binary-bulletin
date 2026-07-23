@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Search, Maximize2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback } from "react";
 
 export default function Gallery() {
   const [events, setEvents] = useState([]);
@@ -36,17 +37,17 @@ export default function Gallery() {
     setViewer(images[index]);
   };
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     const next = (viewerIndex + 1) % currentAlbum.length;
     setViewerIndex(next);
     setViewer(currentAlbum[next]);
-  };
+  }, [viewerIndex, currentAlbum]);
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     const prev = (viewerIndex - 1 + currentAlbum.length) % currentAlbum.length;
     setViewerIndex(prev);
     setViewer(currentAlbum[prev]);
-  };
+  }, [viewerIndex, currentAlbum]);
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -57,7 +58,7 @@ export default function Gallery() {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [viewer, viewerIndex, currentAlbum]);
+  }, [viewer, nextImage, prevImage]);
 
   return (
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-black selection:text-white">
@@ -104,7 +105,7 @@ export default function Gallery() {
                     >
                       <img 
                         src={img} 
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                         alt={`${event.title} ${idx + 1}`} 
                       />
                       <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
