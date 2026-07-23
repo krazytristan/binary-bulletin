@@ -229,11 +229,11 @@ export default function Home() {
               </h2>
               <div className="space-y-5">
                 {announcements.map((ann) => (
-                  <div key={ann.id} className="bg-white p-4 border border-gray-200 shadow-sm">
+                  <Link key={ann.id} to="/announcements" className="block bg-white p-4 border border-gray-200 shadow-sm group hover:border-black transition-colors">
                     <span className="text-[9px] font-sans font-bold uppercase text-black tracking-widest block mb-2">{ann.category || "Official"}</span>
-                    <h4 className="text-sm font-serif font-bold leading-tight mb-2">{ann.title}</h4>
+                    <h4 className="text-sm font-serif font-bold leading-tight mb-2 group-hover:underline decoration-1 underline-offset-2">{ann.title}</h4>
                     <p className="text-xs text-gray-600 font-serif leading-relaxed line-clamp-3">{ann.content}</p>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
