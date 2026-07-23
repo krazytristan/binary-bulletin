@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 
 export default function Announcements() {
   const [announcements, setAnnouncements] = useState([]);
@@ -10,7 +10,17 @@ export default function Announcements() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [viewerImage, setViewerImage] = useState(null);
   const isInitialRender = useRef(true);
+
+  // Allow closing the lightbox with the Escape key
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") setViewerImage(null);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
   useEffect(() => {
     if (isInitialRender.current) {
@@ -101,8 +111,14 @@ export default function Announcements() {
               </div>
               
               {filtered[activeIndex].image_url && (
-                <div className="mb-8 aspect-[21/9] w-full overflow-hidden border-2 border-black">
-                  <img src={filtered[activeIndex].image_url} alt="Notice attachment" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                <div 
+                  className="mb-8 aspect-[21/9] w-full overflow-hidden border-2 border-black relative cursor-pointer group"
+                  onClick={() => setViewerImage(filtered[activeIndex].image_url)}
+                >
+                  <img src={filtered[activeIndex].image_url} alt="Notice attachment" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Maximize2 className="text-white drop-shadow-md" size={32} />
+                  </div>
                 </div>
               )}
               
@@ -132,6 +148,22 @@ export default function Announcements() {
           </div>
         )}
       </main>
+
+      {/* FULL SCREEN IMAGE VIEWER */}
+      {viewerImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-md" onClick={() => setViewerImage(null)}>
+          <button onClick={() => setViewerImage(null)} className="absolute top-6 right-6 p-2 text-black hover:bg-gray-100 transition-colors z-10">
+            <X size={24} />
+          </button>
+          <div className="w-full max-w-6xl max-h-screen p-12 flex flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={viewerImage}
+              className="max-h-[85vh] w-auto border border-gray-300 shadow-2xl object-contain"
+              alt="Notice full view"
+            />
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
