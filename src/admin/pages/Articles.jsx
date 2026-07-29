@@ -111,7 +111,10 @@ export default function Articles() {
       .from("articles")
       .upload(filePath, file);
 
-    if (uploadError) return null;
+    if (uploadError) {
+      alert("Image upload failed: " + uploadError.message);
+      throw uploadError;
+    }
 
     const { data } = supabase.storage.from("articles").getPublicUrl(filePath);
     return data.publicUrl;
@@ -145,10 +148,10 @@ export default function Articles() {
         content: form.content,
         category: form.category,
         author_name: form.author_name,
-        author_image: form.author_image,
-        image_url: finalImageUrl,
-        gallery: finalGallery,
-        updated_at: new Date(),
+        author_image: form.author_image || null,
+        image_url: finalImageUrl || null,
+        gallery: finalGallery.length > 0 ? finalGallery : null,
+        updated_at: new Date().toISOString(),
       };
 
       let error;
@@ -169,9 +172,13 @@ export default function Articles() {
         setModalOpen(false);
         resetForm();
         fetchArticles();
+      } else {
+        alert("Failed to save article: " + error.message);
+        console.error("Supabase DB error:", error);
       }
     } catch (err) {
       console.error("Save failed:", err);
+      alert("An unexpected error occurred during save: " + (err.message || err));
     } finally {
       setSaving(false);
     }
