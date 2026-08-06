@@ -80,14 +80,14 @@ export default function AdminLayout() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#FCFBF9]">
-        <Loader2 className="w-8 h-8 text-black animate-spin mb-4" />
+        <Loader2 className="w-8 h-8 text-blue-900 animate-spin mb-4" />
         <p className="font-serif italic text-gray-500">Securing Editorial Desk...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#FCFBF9] overflow-hidden font-sans text-black selection:bg-black selection:text-white">
+    <div className="flex min-h-screen bg-[#FCFBF9] overflow-hidden font-sans text-blue-900 selection:bg-red-900 selection:text-white">
       
       {/* MOBILE OVERLAY */}
       {sidebarOpen && (
@@ -108,13 +108,13 @@ export default function AdminLayout() {
       <div className="flex-1 flex flex-col md:ml-64 min-w-0 h-screen">
 
         {/* HEADER / TOPBAR */}
-        <header className="bg-white sticky top-0 z-30 px-6 h-20 flex justify-between items-center border-b-2 border-black">
+        <header className="bg-white sticky top-0 z-30 px-6 h-20 flex justify-between items-center border-b-2 border-blue-900">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
               className="md:hidden p-2 hover:bg-gray-100 transition"
             >
-              <Menu size={24} className="text-black" />
+              <Menu size={24} className="text-blue-900" />
             </button>
             <div className="hidden sm:block">
               <h1 className="text-2xl font-serif font-black uppercase tracking-tight">
@@ -124,7 +124,7 @@ export default function AdminLayout() {
           </div>
 
           <div className="flex items-center gap-6">
-            <button className="text-gray-400 hover:text-black transition">
+            <button className="text-gray-400 hover:text-red-900 transition">
               <Bell size={20} />
             </button>
 
@@ -132,13 +132,13 @@ export default function AdminLayout() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-3 p-2 hover:bg-gray-100 transition border border-transparent hover:border-black"
+                className="flex items-center gap-3 p-2 hover:bg-gray-100 transition border border-transparent hover:border-red-900"
               >
-                <div className="w-8 h-8 bg-black flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-900 flex items-center justify-center">
                   <span className="text-white font-serif font-black">{user?.email?.charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="hidden lg:block text-left pr-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-black">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-blue-900">
                     {profileData.full_name || user?.email?.split('@')[0]}
                   </p>
                   <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Editor</p>
@@ -147,10 +147,10 @@ export default function AdminLayout() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-white border-2 border-blue-900 shadow-[4px_4px_0px_0px_rgba(30,58,138,1)] overflow-hidden z-50">
                   <button 
                     onClick={() => { navigate("/admin-panel/settings"); setDropdownOpen(false); }} 
-                    className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-black hover:bg-gray-100 border-b border-gray-200 transition"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-blue-900 hover:bg-gray-100 border-b border-gray-200 transition"
                   >
                     <Settings size={14} /> System Settings
                   </button>

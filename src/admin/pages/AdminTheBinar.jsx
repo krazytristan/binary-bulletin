@@ -135,7 +135,7 @@ export default function AdminTheBinar() {
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-none font-bold hover:bg-gray-800 transition  shadow-blue-100"
+          className="flex items-center gap-2 bg-blue-900 text-white px-5 py-2.5 rounded-none font-bold hover:bg-gray-800 transition  shadow-red-100"
         >
           <Plus size={20} /> Add Video
         </button>
@@ -143,7 +143,7 @@ export default function AdminTheBinar() {
 
       {/* LIST GRID */}
       {fetching ? (
-        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-black" size={40} /></div>
+        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-900" size={40} /></div>
       ) : videos.length === 0 ? (
         <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-none p-20 text-center">
           <Video className="mx-auto text-gray-300 mb-4" size={48} />
@@ -171,7 +171,7 @@ export default function AdminTheBinar() {
                 </button>
               </div>
               <div className="p-5 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-black bg-blue-50 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-900 bg-blue-50 px-2 py-0.5 rounded">
                   {v.video_type === 'link' ? 'Remote Link' : 'Internal File'}
                 </span>
                 <h3 className="font-bold text-gray-900 line-clamp-1">{v.title}</h3>
@@ -184,7 +184,7 @@ export default function AdminTheBinar() {
 
       {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-blue-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
           <div className="bg-white p-8 rounded-none w-full max-w-lg  animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-gray-900">Add Video Content</h2>
@@ -242,17 +242,17 @@ export default function AdminTheBinar() {
                 <input type="file" accept="video/*" onChange={handleFile} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 <div className="text-sm text-gray-500">
                   <Video className="mx-auto mb-2 text-gray-400" />
-                  {file ? <span className="text-black font-bold">{file.name}</span> : "Click to upload video file instead"}
+                  {file ? <span className="text-blue-900 font-bold">{file.name}</span> : "Click to upload video file instead"}
                 </div>
               </div>
 
               {preview && (
-                <video src={preview} className="h-32 w-full rounded-none object-cover bg-black" />
+                <video src={preview} className="h-32 w-full rounded-none object-cover bg-blue-900" />
               )}
 
               <button
                 disabled={loading}
-                className="w-full bg-black text-white py-4 rounded-none font-bold flex items-center justify-center gap-3 hover:bg-gray-800 transition disabled:bg-gray-300  shadow-blue-100 mt-4"
+                className="w-full bg-blue-900 text-white py-4 rounded-none font-bold flex items-center justify-center gap-3 hover:bg-gray-800 transition disabled:bg-gray-300  shadow-red-100 mt-4"
               >
                 {loading ? <Loader2 className="animate-spin" /> : "Publish Video"}
               </button>
@@ -263,13 +263,13 @@ export default function AdminTheBinar() {
 
       {/* DELETE MODAL */}
       {deleteId && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-60 p-4">
+        <div className="fixed inset-0 bg-blue-900/60 flex justify-center items-center z-60 p-4">
           <div className="bg-white p-8 rounded-none max-w-sm w-full text-center ">
             <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Video?</h2>
             <p className="text-gray-500 mb-6">This action is permanent and will remove the video from the site.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:bg-gray-50 rounded-none transition">Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-none hover:bg-red-600 transition  shadow-red-100">Delete</button>
+              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-none hover:bg-red-600 transition  shadow-blue-100">Delete</button>
             </div>
           </div>
         </div>

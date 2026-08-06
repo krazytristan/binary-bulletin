@@ -31,61 +31,61 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white">
       <Navbar />
 
       <main className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-        <header className="mb-16 text-center border-b-2 border-black pb-12">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-6">Editorial Board</p>
-          <h1 className="text-4xl md:text-6xl font-serif font-black uppercase tracking-tighter mb-6">Letters to the Editor</h1>
+        <header className="mb-16 text-center border-b-[3px] border-blue-900 pb-12">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-900 mb-6">Editorial Board</p>
+          <h1 className="text-4xl md:text-6xl font-serif font-black uppercase tracking-tighter mb-6 text-blue-900">Letters to the Editor</h1>
           <p className="font-serif text-gray-600 text-lg italic max-w-xl mx-auto">
             Submit inquiries, reports, and correspondence directly to the publication staff. All transmissions are subject to editorial review.
           </p>
         </header>
 
         {submitted ? (
-          <div className="text-center py-20 bg-white border border-black p-8">
-            <h2 className="text-3xl font-serif font-black uppercase mb-4">Letter Received</h2>
+          <div className="text-center py-20 bg-white border-2 border-blue-900 p-8 shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
+            <h2 className="text-3xl font-serif font-black uppercase mb-4 text-blue-900">Letter Received</h2>
             <p className="font-serif text-gray-600 mb-8 italic">Your correspondence has been filed in the registry.</p>
             <button 
               onClick={() => setSubmitted(false)}
-              className="text-[10px] font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-500 hover:border-gray-500 transition-all"
+              className="text-[10px] font-bold uppercase tracking-widest border-b-2 border-red-900 text-red-900 pb-1 hover:text-blue-900 hover:border-blue-900 transition-all"
             >
               Draft Another Letter
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white border border-gray-300 p-8 md:p-12 space-y-8">
+          <form onSubmit={handleSubmit} className="bg-white border-2 border-blue-900 p-8 md:p-12 space-y-8 shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-3">Name</label>
+                <label className="block text-[9px] font-bold uppercase tracking-widest text-red-900 mb-3">Name</label>
                 <input
                   required
                   name="name"
                   type="text"
-                  className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black font-serif outline-none transition-all"
+                  className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-red-900 font-serif outline-none transition-all"
                   disabled={loading}
                 />
               </div>
               <div>
-                <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-3">Return Address (Email)</label>
+                <label className="block text-[9px] font-bold uppercase tracking-widest text-red-900 mb-3">Return Address (Email)</label>
                 <input
                   required
                   name="email"
                   type="email"
-                  className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-black font-serif outline-none transition-all"
+                  className="w-full bg-transparent border-b border-gray-300 py-2 focus:border-red-900 font-serif outline-none transition-all"
                   disabled={loading}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-3">Correspondence</label>
+              <label className="block text-[9px] font-bold uppercase tracking-widest text-red-900 mb-3">Correspondence</label>
               <textarea
                 required
                 name="message"
                 rows="6"
-                className="w-full bg-[#FCFBF9] border border-gray-300 p-4 focus:border-black font-serif outline-none transition-all resize-y"
+                className="w-full bg-[#FCFBF9] border border-gray-300 p-4 focus:border-red-900 font-serif outline-none transition-all resize-y"
                 disabled={loading}
               ></textarea>
             </div>
@@ -95,7 +95,7 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-black text-white px-8 py-3 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="bg-red-900 text-white px-8 py-3 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-amber-400 hover:text-blue-900 transition-colors disabled:opacity-50"
               >
                 {loading ? "Transmitting..." : "Send Letter"}
               </button>

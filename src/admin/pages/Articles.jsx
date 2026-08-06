@@ -244,7 +244,7 @@ export default function Articles() {
         </div>
         <button 
           onClick={() => { resetForm(); setModalOpen(true); }}
-          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-none font-bold hover:bg-gray-800 transition  shadow-blue-100"
+          className="flex items-center gap-2 bg-blue-900 text-white px-5 py-2.5 rounded-none font-bold hover:bg-gray-800 transition  shadow-red-100"
         >
           <Plus size={20} /> New Article
         </button>
@@ -258,14 +258,14 @@ export default function Articles() {
           placeholder="Search articles..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-none outline-none focus:ring-2 focus:ring-black/20 focus:border-black transition"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-none outline-none focus:ring-2 focus:ring-black/20 focus:border-blue-900 transition"
         />
       </div>
 
       {/* TABLE/LIST */}
       <div className="bg-white border border-gray-100 rounded-none  overflow-hidden">
         {loading ? (
-          <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-black" size={32} /></div>
+          <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-blue-900" size={32} /></div>
         ) : filteredArticles.length === 0 ? (
           <div className="p-20 text-center text-gray-400">No articles found.</div>
         ) : (
@@ -290,7 +290,7 @@ export default function Articles() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[10px] font-black uppercase px-2 py-1 bg-blue-50 text-black rounded-none">
+                      <span className="text-[10px] font-black uppercase px-2 py-1 bg-blue-50 text-blue-900 rounded-none">
                         {article.category}
                       </span>
                     </td>
@@ -305,7 +305,7 @@ export default function Articles() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => openEdit(article)} className="p-2 text-gray-400 hover:text-black hover:bg-blue-50 rounded-none transition">
+                        <button onClick={() => openEdit(article)} className="p-2 text-gray-400 hover:text-red-900 hover:bg-blue-50 rounded-none transition">
                           <Edit3 size={18} />
                         </button>
                         <button onClick={() => setDeleteId(article.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-none transition">
@@ -323,7 +323,7 @@ export default function Articles() {
 
       {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-blue-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
           <div className="bg-white p-6 md:p-8 rounded-none w-full max-w-4xl  overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-gray-900">{editing ? 'Edit' : 'New'} Article</h2>
@@ -382,7 +382,7 @@ export default function Articles() {
                     {preview ? (
                       <>
                         <img src={preview} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                        <div className="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                           <button type="button" onClick={() => { setImageFile(null); setPreview(""); setForm({...form, image_url: ""})}} className="bg-white p-2 rounded-full text-red-500"><X size={20}/></button>
                         </div>
                       </>
@@ -436,7 +436,7 @@ export default function Articles() {
               <button 
                 disabled={saving}
                 type="submit"
-                className="w-full bg-black text-white py-4 rounded-none font-bold hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:bg-gray-300  shadow-blue-100"
+                className="w-full bg-blue-900 text-white py-4 rounded-none font-bold hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:bg-gray-300  shadow-red-100"
               >
                 {saving ? <Loader2 className="animate-spin" size={20} /> : (editing ? 'Update Article' : 'Publish Article')}
               </button>
@@ -447,13 +447,13 @@ export default function Articles() {
 
       {/* DELETE DIALOG */}
       {deleteId && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-60 p-4">
+        <div className="fixed inset-0 bg-blue-900/60 flex justify-center items-center z-60 p-4">
           <div className="bg-white p-8 rounded-none max-w-sm w-full text-center ">
             <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Article?</h2>
             <p className="text-gray-500 mb-6">This will permanently remove the story from the bulletin.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:bg-gray-50 rounded-none">Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-none hover:bg-red-600  shadow-red-100">Delete</button>
+              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-none hover:bg-red-600  shadow-blue-100">Delete</button>
             </div>
           </div>
         </div>

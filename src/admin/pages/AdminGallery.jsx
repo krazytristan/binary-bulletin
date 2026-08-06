@@ -267,7 +267,7 @@ export default function AdminGallery() {
 
       {/* VIEWER DIALOG */}
       {viewerIndex !== null && (
-        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-200 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-blue-900/95 flex items-center justify-center z-200 p-4 backdrop-blur-sm">
           <button onClick={() => setViewerIndex(null)} className="absolute top-8 right-8 text-white/50 hover:text-white transition"><X size={32} /></button>
           
           <button onClick={() => setViewerIndex(prev => (prev - 1 + currentAlbum.length) % currentAlbum.length)} className="absolute left-4 p-4 text-white/30 hover:text-white transition bg-white/5 rounded-full">
@@ -293,7 +293,7 @@ export default function AdminGallery() {
             <p className="text-sm text-gray-500 mb-6">This record will be permanently removed.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)} className="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 transition">Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 py-2 bg-red-500 text-white text-sm font-bold rounded-none  shadow-red-100 active:scale-95 transition">Delete</button>
+              <button onClick={confirmDelete} className="flex-1 py-2 bg-red-500 text-white text-sm font-bold rounded-none  shadow-blue-100 active:scale-95 transition">Delete</button>
             </div>
           </div>
         </div>

@@ -56,7 +56,7 @@ export default function Login() {
     <div className="min-h-screen flex bg-[#FCFBF9] font-sans selection:bg-[#1E3A8A] selection:text-white">
       
       {/* LEFT PANE: BRANDING & IMAGE */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-black flex-col justify-between overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-blue-900 flex-col justify-between overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
@@ -115,7 +115,7 @@ export default function Login() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="bg-red-50 border border-red-200 text-red-700 p-4 mb-8 rounded-lg text-sm flex items-start gap-3"
+                className="bg-red-50 border border-blue-200 text-red-700 p-4 mb-8 rounded-lg text-sm flex items-start gap-3"
               >
                 <ShieldAlert size={20} className="shrink-0 mt-0.5 text-red-500" />
                 <span className="font-serif leading-relaxed">{errorMsg}</span>
@@ -167,7 +167,7 @@ export default function Login() {
               disabled={loading}
               type="submit"
               className={`w-full p-4 mt-8 font-sans font-bold uppercase tracking-widest text-white transition-colors flex items-center justify-center gap-3 ${
-                loading ? "bg-gray-400" : "bg-black hover:bg-[#1E3A8A]"
+                loading ? "bg-gray-400" : "bg-blue-900 hover:bg-[#1E3A8A]"
               }`}
             >
               {loading ? (

@@ -129,7 +129,7 @@ export default function AdminAnnouncements() {
 
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white px-5 py-2.5 rounded-none font-semibold transition-all  shadow-blue-200"
+          className="flex items-center gap-2 bg-blue-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-none font-semibold transition-all  shadow-red-200"
         >
           <Plus size={20} />
           New Announcement
@@ -138,7 +138,7 @@ export default function AdminAnnouncements() {
 
       {/* LISTING */}
       {fetching ? (
-        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-black" size={40} /></div>
+        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-900" size={40} /></div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {announcements.map((a) => (
@@ -150,7 +150,7 @@ export default function AdminAnnouncements() {
                   <div className="flex items-center justify-center h-full text-gray-400"><ImageIcon size={40} /></div>
                 )}
                 <div className="absolute top-3 right-3 flex gap-2">
-                  <button onClick={() => handleEdit(a)} className="p-2 bg-white/90 backdrop-blur  rounded-full text-black hover:bg-black hover:text-white transition-colors">
+                  <button onClick={() => handleEdit(a)} className="p-2 bg-white/90 backdrop-blur  rounded-full text-blue-900 hover:bg-red-900 hover:text-amber-400 hover:border-red-900 hover:text-white transition-colors">
                     <Edit2 size={16} />
                   </button>
                   <button onClick={() => handleDelete(a.id)} className="p-2 bg-white/90 backdrop-blur  rounded-full text-red-600 hover:bg-red-600 hover:text-white transition-colors">
@@ -160,7 +160,7 @@ export default function AdminAnnouncements() {
               </div>
 
               <div className="p-5 flex-1 flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-black mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-900 mb-2">
                   {new Date(a.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
                 </span>
                 <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-1">{a.title}</h3>
@@ -243,7 +243,7 @@ export default function AdminAnnouncements() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-3 bg-black hover:bg-gray-800 text-white rounded-none font-bold transition-all flex items-center justify-center gap-2  shadow-blue-100"
+                  className="flex-1 px-4 py-3 bg-blue-900 hover:bg-gray-800 text-white rounded-none font-bold transition-all flex items-center justify-center gap-2  shadow-red-100"
                 >
                   {loading && <Loader2 size={18} className="animate-spin" />}
                   {editing ? "Update Post" : "Publish Post"}

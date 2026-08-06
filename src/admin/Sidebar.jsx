@@ -24,11 +24,11 @@ export default function Sidebar({ setSidebarOpen }) {
   ];
 
   return (
-    <div className="w-full h-full bg-white flex flex-col border-r-2 border-black font-sans">
+    <div className="w-full h-full bg-white flex flex-col border-r-2 border-blue-900 font-sans">
       
       {/* BRANDING SECTION */}
-      <div className="p-8 border-b-2 border-black">
-        <h2 className="text-2xl font-serif font-black text-black tracking-tighter uppercase mb-1">
+      <div className="p-8 border-b-2 border-blue-900">
+        <h2 className="text-2xl font-serif font-black text-blue-900 tracking-tighter uppercase mb-1">
           Editor's Desk
         </h2>
         <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">
@@ -49,8 +49,8 @@ export default function Sidebar({ setSidebarOpen }) {
                 className={({ isActive }) =>
                   `flex items-center gap-4 px-4 py-3 text-[11px] font-bold uppercase tracking-widest transition-all ${
                     isActive
-                      ? "bg-black text-white"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-black"
+                      ? "bg-blue-900 text-white"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-red-900"
                   }`
                 }
               >
@@ -63,10 +63,10 @@ export default function Sidebar({ setSidebarOpen }) {
       </nav>
 
       {/* FOOTER ACTION */}
-      <div className="p-6 border-t-2 border-black">
+      <div className="p-6 border-t-2 border-blue-900">
         <NavLink
           to="/"
-          className="flex items-center justify-center gap-3 w-full py-4 border border-black text-[10px] font-bold uppercase tracking-widest text-black hover:bg-black hover:text-white transition-colors"
+          className="flex items-center justify-center gap-3 w-full py-4 border border-blue-900 text-[10px] font-bold uppercase tracking-widest text-blue-900 hover:bg-red-900 hover:text-amber-400 hover:border-red-900 hover:text-white transition-colors"
         >
           <ArrowLeft size={14} />
           View Live Publication

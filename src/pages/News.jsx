@@ -60,13 +60,13 @@ export default function News() {
   const categories = ["All", "News", "Sports", "Opinion", "Feature", "Editorial", "Literary"];
 
   return (
-    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         {/* --- HEADER --- */}
-        <header className="mb-12 border-b-2 border-black pb-8">
-          <h1 className="text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter mb-6">Archive</h1>
+        <header className="mb-12 border-b-[3px] border-blue-900 pb-8">
+          <h1 className="text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter mb-6 text-blue-900">Archive</h1>
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex flex-wrap items-center gap-4">
@@ -75,7 +75,7 @@ export default function News() {
                   key={cat}
                   onClick={() => setCategory(cat)}
                   className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${
-                    category === cat ? "text-black border-b border-black pb-0.5" : "text-gray-500 hover:text-black"
+                    category === cat ? "text-red-900 border-b-2 border-red-900 pb-0.5" : "text-gray-500 hover:text-blue-900"
                   }`}
                 >
                   {cat}
@@ -84,13 +84,13 @@ export default function News() {
             </div>
             
             <div className="relative w-full md:w-64 group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={14} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-red-900 transition-colors" size={14} />
               <input 
                 type="text" 
                 placeholder="Search..." 
                 value={search} 
                 onChange={(e) => setSearch(e.target.value)} 
-                className="w-full bg-white border border-gray-300 rounded-none py-2 pl-9 pr-4 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-black transition-colors" 
+                className="w-full bg-white border border-gray-300 rounded-none py-2 pl-9 pr-4 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 transition-colors" 
               />
             </div>
           </div>
@@ -107,21 +107,22 @@ export default function News() {
           <div className="space-y-12">
             {/* --- LEAD STORY --- */}
             {latest && !search && category === "All" && (
-              <article className="grid grid-cols-1 lg:grid-cols-2 gap-8 border-b border-gray-300 pb-12 group">
-                <Link to={`/article/${latest.id}`} className="aspect-[16/10] overflow-hidden bg-gray-100 border border-gray-300">
+              <article className="grid grid-cols-1 lg:grid-cols-2 gap-8 border-b-2 border-gray-200 pb-12 group">
+                <Link to={`/article/${latest.id}`} className="aspect-[16/10] overflow-hidden bg-gray-100 border border-gray-300 relative">
                   <img 
                     src={getImage(latest.image_url)} 
-                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                     alt="Article Lead" 
                   />
+                  <div className="absolute top-0 left-0 bg-amber-400 px-3 py-1 text-[10px] font-sans font-bold uppercase tracking-widest text-blue-900">Featured</div>
                 </Link>
                 <div className="flex flex-col justify-center">
                   <div className="flex items-center gap-3 mb-4 text-[9px] font-bold uppercase tracking-widest text-gray-500">
-                    <span className="text-black border border-black px-2 py-0.5">{latest.category}</span>
-                    <span>{new Date(latest.created_at).toLocaleDateString()}</span>
+                    <span className="text-white bg-red-900 px-2 py-0.5">{latest.category}</span>
+                    <span className="text-amber-600">{new Date(latest.created_at).toLocaleDateString()}</span>
                   </div>
                   <Link to={`/article/${latest.id}`}>
-                    <h2 className="text-3xl md:text-5xl font-serif font-black leading-tight mb-4 group-hover:underline decoration-2 underline-offset-4">
+                    <h2 className="text-3xl md:text-5xl font-serif font-black leading-tight mb-4 group-hover:text-red-900 transition-colors text-gray-900">
                       {latest.title}
                     </h2>
                   </Link>
@@ -129,7 +130,7 @@ export default function News() {
                     {latest.excerpt || latest.content?.substring(0, 150) + "..."}
                   </p>
                   <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                    By <span className="text-black">{latest.author_name || "Staff"}</span>
+                    By <span className="text-blue-900">{latest.author_name || "Staff"}</span>
                   </div>
                 </div>
               </article>
@@ -142,16 +143,16 @@ export default function News() {
                   <Link to={`/article/${a.id}`} className="block aspect-[4/3] overflow-hidden bg-gray-100 border border-gray-300 mb-4">
                     <img 
                       src={getImage(a.image_url)} 
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                       alt="Thumbnail" 
                     />
                   </Link>
                   <div className="flex items-center justify-between mb-2 text-[9px] font-bold uppercase tracking-widest text-gray-500">
-                    <span className="text-black">{a.category}</span>
-                    <span>{new Date(a.created_at).toLocaleDateString()}</span>
+                    <span className="text-red-900">{a.category}</span>
+                    <span className="text-amber-600">{new Date(a.created_at).toLocaleDateString()}</span>
                   </div>
                   <Link to={`/article/${a.id}`}>
-                    <h3 className="text-xl font-serif font-black leading-tight mb-2 group-hover:underline decoration-1 underline-offset-2">
+                    <h3 className="text-xl font-serif font-black leading-tight mb-2 group-hover:text-red-900 transition-colors text-gray-900">
                       {a.title}
                     </h3>
                   </Link>
@@ -159,7 +160,7 @@ export default function News() {
                     {a.excerpt || a.content}
                   </p>
                   <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400">
-                    By {a.author_name || "Staff"}
+                    By <span className="text-blue-900">{a.author_name || "Staff"}</span>
                   </div>
                 </article>
               ))}
@@ -176,7 +177,7 @@ export default function News() {
 
       <button 
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className={`fixed bottom-8 right-8 z-50 bg-white border border-gray-300 text-black p-3 shadow-lg hover:bg-gray-50 transition-all duration-500 ${showScrollTop ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed bottom-8 right-8 z-50 bg-blue-900 border-2 border-blue-950 text-white p-3 shadow-lg hover:bg-amber-400 hover:text-blue-900 hover:border-amber-400 transition-all duration-500 ${showScrollTop ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       >
         <ChevronUp size={16} />
       </button>

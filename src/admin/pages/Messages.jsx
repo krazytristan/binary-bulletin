@@ -107,12 +107,12 @@ export default function Messages() {
         <div className="flex justify-between items-end mb-6 px-2">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-              <Inbox className="text-black" /> Communications
+              <Inbox className="text-blue-900" /> Communications
             </h1>
             <p className="text-gray-500 text-sm mt-1">Manage and respond to inbound contact requests.</p>
           </div>
           <div className="bg-white border border-gray-200  px-4 py-2 rounded-none text-sm font-semibold text-gray-700">
-            <span className="text-black">{messages.filter(m => !m.is_read).length}</span> Unread
+            <span className="text-blue-900">{messages.filter(m => !m.is_read).length}</span> Unread
           </div>
         </div>
 
@@ -127,7 +127,7 @@ export default function Messages() {
             
             <div className="overflow-y-auto flex-1 divide-y divide-gray-50">
               {loading ? (
-                <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-black" /></div>
+                <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-blue-900" /></div>
               ) : messages.length === 0 ? (
                 <div className="p-10 text-center text-gray-400 text-sm italic">No records found.</div>
               ) : (
@@ -140,10 +140,10 @@ export default function Messages() {
                     }`}
                   >
                     {!msg.is_read && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-black" />
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-900" />
                     )}
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${
-                      msg.is_read ? "bg-gray-50 text-gray-400 border-gray-100" : "bg-blue-50 text-black border-blue-100"
+                      msg.is_read ? "bg-gray-50 text-gray-400 border-gray-100" : "bg-blue-50 text-blue-900 border-red-100"
                     }`}>
                       <User size={16} />
                     </div>
@@ -179,12 +179,12 @@ export default function Messages() {
                       className="p-2 hover:bg-white hover: border border-transparent hover:border-gray-200 rounded-none text-gray-500 transition-all active:scale-95"
                       title="Mark as unread"
                     >
-                      {selectedMessage.is_read ? <Mail size={18} /> : <MailOpen size={18} className="text-black" />}
+                      {selectedMessage.is_read ? <Mail size={18} /> : <MailOpen size={18} className="text-blue-900" />}
                     </button>
                     <button 
                       onClick={() => deleteMessage(selectedMessage.id)}
                       disabled={deleting === selectedMessage.id}
-                      className="p-2 hover:bg-red-50 hover:border-red-100 border border-transparent rounded-none text-gray-500 hover:text-red-600 transition-all disabled:opacity-50"
+                      className="p-2 hover:bg-red-50 hover:border-blue-100 border border-transparent rounded-none text-gray-500 hover:text-red-600 transition-all disabled:opacity-50"
                     >
                       {deleting === selectedMessage.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
                     </button>
@@ -201,10 +201,10 @@ export default function Messages() {
                   <header className="mb-8 pb-8 border-b border-gray-50 flex flex-col md:flex-row justify-between gap-6">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                         <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded">Verified Source</span>
+                         <span className="px-2 py-0.5 bg-red-100 text-blue-700 text-[10px] font-bold uppercase rounded">Verified Source</span>
                       </div>
                       <h2 className="text-3xl font-bold text-gray-900 leading-tight">{selectedMessage.name}</h2>
-                      <div className="flex items-center gap-2 text-black font-medium mt-1">
+                      <div className="flex items-center gap-2 text-blue-900 font-medium mt-1">
                         <AtSign size={14} />
                         <span className="text-sm underline underline-offset-4">{selectedMessage.email}</span>
                       </div>
@@ -228,7 +228,7 @@ export default function Messages() {
                   <div className="mt-12 flex gap-4 no-print">
                     <a 
                       href={`mailto:${selectedMessage.email}`}
-                      className="bg-black text-white px-6 py-3 rounded-none font-bold hover:bg-gray-800 transition-all  shadow-blue-100 active:scale-95 text-sm"
+                      className="bg-blue-900 text-white px-6 py-3 rounded-none font-bold hover:bg-gray-800 transition-all  shadow-red-100 active:scale-95 text-sm"
                     >
                       Reply to Sender
                     </a>

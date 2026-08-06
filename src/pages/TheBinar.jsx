@@ -38,24 +38,24 @@ export default function TheBinar() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 py-12">
-        <header className="mb-12 border-b-2 border-black pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <header className="mb-12 border-b-[3px] border-blue-900 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-4">Motion Picture Archive</p>
-            <h1 className="text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter">The Binar</h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-900 mb-4">Motion Picture Archive</p>
+            <h1 className="text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter text-blue-900">The Binar</h1>
           </div>
           
           <div className="relative w-full md:w-64 group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={14} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-red-900 transition-colors" size={14} />
             <input 
               type="text" 
               placeholder="Search Footage..." 
               value={search} 
               onChange={(e) => setSearch(e.target.value)} 
-              className="w-full bg-white border border-gray-300 rounded-none py-2 pl-9 pr-4 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-black transition-colors" 
+              className="w-full bg-white border border-gray-300 rounded-none py-2 pl-9 pr-4 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 transition-colors" 
             />
           </div>
         </header>
@@ -65,38 +65,38 @@ export default function TheBinar() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredVideos.map((v) => (
-              <article key={v.id} className="group flex flex-col border border-gray-300 bg-white">
+              <article key={v.id} className="group flex flex-col border border-gray-300 bg-white hover:border-blue-900 transition-colors hover:shadow-md">
                 <div 
-                  className="aspect-video relative overflow-hidden bg-gray-100 cursor-pointer border-b border-gray-300"
+                  className="aspect-video relative overflow-hidden bg-gray-100 cursor-pointer border-b border-gray-300 group-hover:border-blue-900 transition-colors"
                   onClick={() => setViewer(v)}
                 >
                   {isYouTube(v.video_url) ? (
                     <img 
                       src={`https://img.youtube.com/vi/${v.video_url.split('v=')[1]?.split('&')[0] || v.video_url.split('/').pop()}/maxresdefault.jpg`}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       alt={v.title}
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200"></div>
                   )}
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="bg-white p-4 rounded-full text-black">
+                  <div className="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="bg-amber-400 p-4 rounded-full text-blue-900 shadow-lg">
                       <Play fill="currentColor" size={24} />
                     </div>
                   </div>
                 </div>
 
                 <div className="p-6 flex-1 flex flex-col">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-3 block">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-amber-600 mb-3 block">
                     {new Date(v.created_at).toLocaleDateString()}
                   </span>
-                  <h2 className="text-xl font-serif font-black uppercase leading-tight mb-3 group-hover:underline decoration-1 underline-offset-2 cursor-pointer" onClick={() => setViewer(v)}>
+                  <h2 className="text-xl font-serif font-black uppercase leading-tight mb-3 group-hover:text-red-900 transition-colors cursor-pointer text-gray-900" onClick={() => setViewer(v)}>
                     {v.title}
                   </h2>
                   <p className="text-sm font-serif text-gray-600 line-clamp-2 mb-4 flex-1">
                     {v.excerpt}
                   </p>
-                  <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400 border-t border-gray-200 pt-4">
+                  <div className="text-[9px] font-bold uppercase tracking-widest text-blue-900 border-t border-gray-200 pt-4">
                     Dir. {v.author_name}
                   </div>
                 </div>
@@ -114,13 +114,13 @@ export default function TheBinar() {
 
       {/* VIDEO LIGHTBOX */}
       {viewer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/95 backdrop-blur-md">
-          <div className="w-full max-w-5xl bg-white border border-black shadow-2xl relative">
-            <button onClick={() => setViewer(null)} className="absolute -top-12 right-0 p-2 text-black hover:bg-gray-100 bg-white border border-black transition-colors">
-              <X size={20} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/95 backdrop-blur-md">
+          <div className="w-full max-w-5xl bg-white border-2 border-amber-400 shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] relative">
+            <button onClick={() => setViewer(null)} className="absolute -top-12 right-0 p-2 text-white hover:text-amber-400 transition-colors">
+              <X size={24} />
             </button>
             
-            <div className="aspect-video bg-black w-full border-b border-black">
+            <div className="aspect-video bg-black w-full border-b border-amber-400">
               {isYouTube(viewer.video_url) ? (
                 <iframe 
                   src={getYouTubeEmbed(viewer.video_url)} 
@@ -134,11 +134,11 @@ export default function TheBinar() {
             </div>
             
             <div className="p-8">
-              <h2 className="text-3xl font-serif font-black uppercase tracking-tight mb-4">{viewer.title}</h2>
+              <h2 className="text-3xl font-serif font-black uppercase tracking-tight mb-4 text-blue-900">{viewer.title}</h2>
               <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-6">
-                <span>By {viewer.author_name}</span>
+                <span className="text-red-900">By {viewer.author_name}</span>
                 <span>|</span>
-                <span>{new Date(viewer.created_at).toLocaleDateString()}</span>
+                <span className="text-amber-600">{new Date(viewer.created_at).toLocaleDateString()}</span>
               </div>
               <p className="font-serif text-gray-700 leading-relaxed text-lg whitespace-pre-line">
                 {viewer.content || viewer.excerpt}

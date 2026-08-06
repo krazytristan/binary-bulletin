@@ -44,12 +44,12 @@ export default function Dashboard() {
     <div className="max-w-6xl mx-auto space-y-12">
       
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b-2 border-black pb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b-2 border-blue-900 pb-8">
         <div>
           <h1 className="text-4xl md:text-5xl font-serif font-black uppercase tracking-tighter mb-2">Morning Brief</h1>
           <p className="font-serif italic text-gray-600">The current state of the publication.</p>
         </div>
-        <Link to="/admin-panel/articles" className="bg-black text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
+        <Link to="/admin-panel/articles" className="bg-blue-900 text-white px-6 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
           File New Dispatch
         </Link>
       </div>
@@ -57,10 +57,10 @@ export default function Dashboard() {
       {/* STATS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat, i) => (
-          <div key={i} className="bg-white border border-gray-300 p-6 hover:border-black transition-colors">
+          <div key={i} className="bg-white border border-gray-300 p-6 hover:border-red-900 transition-colors">
             <div className="flex justify-between items-start mb-6">
               <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">{stat.label}</span>
-              <div className="text-black">{stat.icon}</div>
+              <div className="text-blue-900">{stat.icon}</div>
             </div>
             {loading ? (
               <div className="h-10 w-16 bg-gray-200 animate-pulse" />
@@ -75,8 +75,8 @@ export default function Dashboard() {
         {/* RECENT CONTENT */}
         <div className="lg:col-span-2 bg-white border border-gray-300">
           <div className="p-6 border-b border-gray-300 flex justify-between items-center bg-gray-50">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest text-black">Latest Archives</h2>
-            <Link to="/admin-panel/articles" className="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-black">View All</Link>
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-blue-900">Latest Archives</h2>
+            <Link to="/admin-panel/articles" className="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-red-900">View All</Link>
           </div>
 
           <div className="divide-y divide-gray-200">
@@ -93,7 +93,7 @@ export default function Dashboard() {
                       {new Date(article.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <Link to={`/admin-panel/articles`} className="p-2 border border-gray-300 text-gray-400 hover:border-black hover:text-black transition-colors">
+                  <Link to={`/admin-panel/articles`} className="p-2 border border-gray-300 text-gray-400 hover:border-red-900 hover:text-red-900 transition-colors">
                     <ArrowUpRight size={16} />
                   </Link>
                 </div>
@@ -104,26 +104,26 @@ export default function Dashboard() {
 
         {/* SYSTEM STATUS */}
         <div className="space-y-6">
-          <div className="bg-black text-white p-8">
+          <div className="bg-blue-900 text-white p-8">
             <h3 className="font-serif font-black text-2xl uppercase mb-4">Editorial Guidelines</h3>
             <p className="font-serif italic text-gray-400 mb-6">Review the latest standards for publishing to the campus network.</p>
-            <button className="w-full border border-white py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">
+            <button className="w-full border border-white py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-red-900 transition-colors">
               Read Manifesto
             </button>
           </div>
 
           <div className="bg-white border border-gray-300 p-6">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-black mb-6">System Status</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-blue-900 mb-6">System Status</h3>
             <div className="space-y-4 text-[10px] font-bold uppercase tracking-widest">
               <div className="flex items-center justify-between">
                 <span className="text-gray-500">Database Uplink</span>
-                <span className="flex items-center gap-2 text-black">
-                  <span className="w-1.5 h-1.5 bg-black rounded-full animate-pulse"></span> Active
+                <span className="flex items-center gap-2 text-blue-900">
+                  <span className="w-1.5 h-1.5 bg-blue-900 rounded-full animate-pulse"></span> Active
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500">Storage Archive</span>
-                <span className="text-black">Online</span>
+                <span className="text-blue-900">Online</span>
               </div>
             </div>
           </div>
