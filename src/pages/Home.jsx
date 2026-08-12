@@ -308,11 +308,11 @@ export default function Home() {
             </div>
           </div>
           
-          <div ref={scrollRef} className="flex gap-8 overflow-x-auto no-scrollbar pb-6 snap-x snap-mandatory">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-row gap-8 md:overflow-x-auto no-scrollbar pb-6 md:snap-x md:snap-mandatory">
             {filteredArticles.map((a) => (
-              <div key={a.id} className="min-w-[280px] md:min-w-[300px] snap-start shrink-0">
+              <div key={a.id} className="w-full md:min-w-[300px] md:snap-start shrink-0">
                 <Link to={`/article/${a.id}`} className="block group">
-                  <div className="aspect-[16/10] overflow-hidden bg-gray-200 mb-4 border border-gray-300">
+                  <div className="aspect-[16/10] overflow-hidden bg-gray-100 mb-4 border border-gray-300">
                     <img src={a.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="article" />
                   </div>
                   <span className="block text-[9px] font-sans uppercase tracking-widest text-amber-500 font-bold mb-2">{a.category}</span>

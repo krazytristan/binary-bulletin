@@ -105,9 +105,9 @@ export default function News() {
           </div>
         ) : (
           <div className="space-y-12">
-            {/* --- LEAD STORY --- */}
+            {/* --- LEAD STORY (DESKTOP ONLY) --- */}
             {latest && !search && category === "All" && (
-              <article className="grid grid-cols-1 lg:grid-cols-2 gap-8 border-b-2 border-gray-200 pb-12 group">
+              <article className="hidden lg:grid grid-cols-2 gap-8 border-b-2 border-gray-200 pb-12 group">
                 <Link to={`/article/${latest.id}`} className="aspect-[16/10] overflow-hidden bg-gray-100 border border-gray-300 relative">
                   <img 
                     src={getImage(latest.image_url)} 
@@ -136,34 +136,37 @@ export default function News() {
               </article>
             )}
 
-            {/* --- GRID --- */}
+            {/* --- GRID (ALL DEVICES) --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-              {(search || category !== "All" ? filtered : remaining).map((a) => (
-                <article key={a.id} className="group">
-                  <Link to={`/article/${a.id}`} className="block aspect-[4/3] overflow-hidden bg-gray-100 border border-gray-300 mb-4">
-                    <img 
-                      src={getImage(a.image_url)} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                      alt="Thumbnail" 
-                    />
-                  </Link>
-                  <div className="flex items-center justify-between mb-2 text-[9px] font-bold uppercase tracking-widest text-gray-500">
-                    <span className="text-red-900">{a.category}</span>
-                    <span className="text-amber-600">{new Date(a.created_at).toLocaleDateString()}</span>
-                  </div>
-                  <Link to={`/article/${a.id}`}>
-                    <h3 className="text-xl font-serif font-black leading-tight mb-2 group-hover:text-red-900 transition-colors text-gray-900">
-                      {a.title}
-                    </h3>
-                  </Link>
-                  <p className="text-sm text-gray-600 font-serif line-clamp-2 mb-3">
-                    {a.excerpt || a.content}
-                  </p>
-                  <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400">
-                    By <span className="text-blue-900">{a.author_name || "Staff"}</span>
-                  </div>
-                </article>
-              ))}
+              {filtered.map((a, index) => {
+                const isLeadDesktop = index === 0 && !search && category === "All";
+                return (
+                  <article key={a.id} className={`group ${isLeadDesktop ? 'lg:hidden' : ''}`}>
+                    <Link to={`/article/${a.id}`} className="block aspect-[4/3] overflow-hidden bg-gray-100 border border-gray-300 mb-4">
+                      <img 
+                        src={getImage(a.image_url)} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                        alt="Thumbnail" 
+                      />
+                    </Link>
+                    <div className="flex items-center justify-between mb-2 text-[9px] font-bold uppercase tracking-widest text-gray-500">
+                      <span className="text-red-900">{a.category}</span>
+                      <span className="text-amber-600">{new Date(a.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <Link to={`/article/${a.id}`}>
+                      <h3 className="text-xl font-serif font-black leading-tight mb-2 group-hover:text-red-900 transition-colors text-gray-900">
+                        {a.title}
+                      </h3>
+                    </Link>
+                    <p className="text-sm text-gray-600 font-serif line-clamp-2 mb-3">
+                      {a.excerpt || a.content}
+                    </p>
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400">
+                      By <span className="text-blue-900">{a.author_name || "Staff"}</span>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
 
             {filtered.length === 0 && (
