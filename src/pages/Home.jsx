@@ -39,15 +39,18 @@ export default function Home() {
 
       const [articlesRes, annRes, eventsRes] = await Promise.all([
         supabase.from("articles").select("*").order("created_at", { ascending: false }),
-        supabase.from("announcements").select("*").order("created_at", { ascending: false }).limit(3),
+        supabase.from("announcements").select("*").order("created_at", { ascending: false }),
         supabase.from("events").select("*").order("event_date", { ascending: true }).limit(3)
       ]);
 
-      if (articlesRes.data) {
-        setArticles(articlesRes.data);
-        setFeatured(articlesRes.data[0]);
+      const allArticles = [...(articlesRes.data || []), ...(annRes.data || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      if (allArticles.length > 0) {
+        setArticles(allArticles);
+        setFeatured(allArticles[0]);
       }
-      if (annRes.data) setAnnouncements(annRes.data);
+      
+      if (annRes.data) setAnnouncements(annRes.data.slice(0, 3));
       if (eventsRes.data) setEvents(eventsRes.data);
 
       clearInterval(stageInterval);
@@ -266,8 +269,10 @@ export default function Home() {
                   
                   {/* Drop cap styling for excerpt */}
                   <p className="text-gray-800 text-lg md:text-xl leading-relaxed font-serif">
-                    <span className="float-left text-6xl font-black font-serif leading-none pr-3 pt-1 text-blue-900">{featured.excerpt.charAt(0)}</span>
-                    {featured.excerpt.slice(1)}...
+                    <span className="float-left text-6xl font-black font-serif leading-none pr-3 pt-1 text-blue-900">
+                      {(featured.excerpt || featured.content || " ").charAt(0)}
+                    </span>
+                    {(featured.excerpt || featured.content || "").slice(1).substring(0, 150)}...
                   </p>
                   
                   <div className="flex items-center justify-center gap-2 mt-8 text-red-900 font-sans font-bold text-[11px] uppercase tracking-widest group-hover:text-blue-900 transition-colors">
@@ -288,7 +293,7 @@ export default function Home() {
                   <Link key={a.id} to={`/article/${a.id}`} className="block group border-b border-gray-200 pb-6 last:border-0">
                     <span className="inline-block bg-red-900 text-white font-sans font-bold text-[9px] uppercase tracking-widest mb-3 px-2 py-0.5">{a.category}</span>
                     <h4 className="font-serif font-bold text-xl leading-tight group-hover:text-red-900 transition-colors mb-3 text-gray-900">{a.title}</h4>
-                    <p className="text-sm font-serif text-gray-600 line-clamp-3 mb-3">"{a.excerpt}"</p>
+                    <p className="text-sm font-serif text-gray-600 line-clamp-3 mb-3">"{a.excerpt || a.content}"</p>
                     <p className="text-[9px] font-sans uppercase tracking-widest text-amber-500 font-bold">{formatDate(a.created_at)}</p>
                   </Link>
                 ))}

@@ -15,11 +15,20 @@ export default function ArticleView() {
     setLoading(true);
     window.scrollTo(0, 0);
     try {
-      const { data: artData } = await supabase
+      let { data: artData, error } = await supabase
         .from("articles")
         .select("*")
         .eq("id", id)
         .single();
+
+      if (error || !artData) {
+        const { data: annData } = await supabase
+          .from("announcements")
+          .select("*")
+          .eq("id", id)
+          .single();
+        artData = annData;
+      }
 
       if (artData) {
         setArticle(artData);

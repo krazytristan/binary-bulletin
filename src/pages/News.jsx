@@ -26,12 +26,16 @@ export default function News() {
   const fetchArticles = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("articles")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      setArticles(data || []);
+      const [artRes, annRes] = await Promise.all([
+        supabase.from("articles").select("*").order("created_at", { ascending: false }),
+        supabase.from("announcements").select("*").order("created_at", { ascending: false })
+      ]);
+      if (artRes.error) throw artRes.error;
+      
+      const allArticles = [...(artRes.data || []), ...(annRes.data || [])]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
+      setArticles(allArticles);
     } catch (err) {
       console.error("Error fetching articles:", err.message);
     } finally {
