@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import { 
   Search, Calendar, CloudSun, MapPin, Users, BookOpen, ChevronRight,
-  Newspaper, Quote, PenTool, ShieldCheck, X, ChevronLeft, ArrowRight
+  Newspaper, Quote, PenTool, ShieldCheck, X, ChevronLeft, ArrowRight, PlayCircle
 } from "lucide-react";
 
 const STAGES = [
@@ -21,6 +21,7 @@ export default function Home() {
   const [featured, setFeatured] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
   const [events, setEvents] = useState([]);
+  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingStage, setLoadingStage] = useState(0);
   const [email, setEmail] = useState("");
@@ -37,10 +38,11 @@ export default function Home() {
         setLoadingStage(prev => (prev < STAGES.length - 1 ? prev + 1 : prev));
       }, 500);
 
-      const [articlesRes, annRes, eventsRes] = await Promise.all([
+      const [articlesRes, annRes, eventsRes, videosRes] = await Promise.all([
         supabase.from("articles").select("*").order("created_at", { ascending: false }),
         supabase.from("announcements").select("*").order("created_at", { ascending: false }),
-        supabase.from("events").select("*").order("event_date", { ascending: true }).limit(3)
+        supabase.from("events").select("*").order("event_date", { ascending: true }).limit(3),
+        supabase.from("videos").select("*").order("created_at", { ascending: false }).limit(2)
       ]);
 
       const allArticles = [...(articlesRes.data || []), ...(annRes.data || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -52,6 +54,7 @@ export default function Home() {
       
       if (annRes.data) setAnnouncements(annRes.data.slice(0, 3));
       if (eventsRes.data) setEvents(eventsRes.data);
+      if (videosRes.data) setVideos(videosRes.data);
 
       clearInterval(stageInterval);
     } catch (err) {
@@ -298,8 +301,77 @@ export default function Home() {
                   </Link>
                 ))}
             </div>
+
+            {/* UPCOMING EVENTS */}
+            {events.length > 0 && (
+              <div className="pt-8">
+                <h2 className="font-sans font-bold uppercase text-[10px] tracking-widest border-t-2 border-blue-900 pt-2 flex items-center gap-2 text-blue-900 mb-6">
+                  <Calendar size={14}/> Upcoming Events
+                </h2>
+                <div className="flex flex-col gap-4">
+                  {events.map((evt) => (
+                    <Link key={evt.id} to="/events" className="block bg-white border border-gray-200 p-4 shadow-sm group hover:border-amber-400 hover:shadow-md transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-amber-400 text-blue-900 flex flex-col items-center justify-center min-w-[3rem] px-2 py-1">
+                          <span className="font-sans text-[9px] uppercase font-bold tracking-widest">
+                            {new Date(evt.event_date).toLocaleDateString('en-US', { month: 'short' })}
+                          </span>
+                          <span className="font-serif font-black text-xl leading-none">
+                            {new Date(evt.event_date).getDate()}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-serif font-bold text-sm leading-tight group-hover:text-red-900 transition-colors mb-1 text-gray-900">{evt.title}</h4>
+                          <span className="text-[10px] font-sans font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+                            <MapPin size={10}/> {evt.location || "TBA"}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* --- MULTIMEDIA DESK (Videos) --- */}
+        {videos.length > 0 && (
+          <section className="mb-16">
+            <div className="flex items-center justify-between border-b-2 border-gray-300 pb-4 mb-8">
+              <h2 className="font-sans font-bold text-[12px] uppercase tracking-widest text-blue-900 flex items-center gap-2">
+                <PlayCircle size={16} /> The Binar Online
+              </h2>
+              <Link to="/thebinar" className="text-[10px] font-bold uppercase tracking-widest text-red-900 hover:text-blue-900 transition-colors">
+                View All Series &rarr;
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {videos.map((vid) => (
+                <Link to="/thebinar" key={vid.id} className="group cursor-pointer border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md hover:border-blue-900 transition-all">
+                  <div className="aspect-video bg-gray-900 w-full mb-4 relative overflow-hidden flex items-center justify-center group-hover:bg-black transition-colors">
+                    {vid.video_type === "link" ? (
+                      <iframe 
+                        src={vid.video_url} 
+                        title={vid.title}
+                        className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity pointer-events-none"
+                      ></iframe>
+                    ) : (
+                      <video src={vid.video_url} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+                    )}
+                    <div className="absolute inset-0 bg-blue-900/10 group-hover:bg-transparent transition-colors"></div>
+                    <div className="absolute">
+                      <PlayCircle size={48} className="text-white/80 group-hover:text-white transition-colors drop-shadow-lg group-hover:scale-110 duration-300" strokeWidth={1.5} />
+                    </div>
+                  </div>
+                  <h3 className="font-serif font-black text-xl leading-tight mb-2 text-gray-900 group-hover:text-red-900 transition-colors line-clamp-1">{vid.title}</h3>
+                  <p className="font-serif text-sm text-gray-600 line-clamp-2">{vid.excerpt}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* --- ARCHIVE CAROUSEL (Bottom Strip) --- */}
         <section className="mt-16 pt-10 border-t-[4px] border-blue-900">
