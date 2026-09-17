@@ -61,28 +61,28 @@ export default function ArticleView() {
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white flex flex-col">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-6 py-12 md:py-20 flex-1">
-        <Link to="/news" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-red-900 hover:text-blue-900 transition-colors mb-12">
+      <main className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-20 flex-1">
+        <Link to="/news" className="inline-flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-red-900 hover:text-blue-900 transition-colors mb-8 md:mb-12">
           <ChevronLeft size={14} /> Back to Archive
         </Link>
         
         <article>
-          <header className="text-center mb-12">
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-amber-400 border border-amber-400 text-blue-900 px-3 py-1 inline-block mb-6 shadow-sm">
+          <header className="text-center mb-8 md:mb-12">
+            <span className="text-[10px] font-bold uppercase tracking-widest bg-amber-400 border border-amber-400 text-blue-900 px-3 py-1 inline-block mb-4 md:mb-6 shadow-sm">
               {article?.category || "Bulletin"}
             </span>
-            <h1 className="text-4xl md:text-6xl font-serif font-black leading-[1.1] mb-8 text-gray-900">
+            <h1 className="text-3xl md:text-6xl font-serif font-black leading-[1.1] mb-6 md:mb-8 text-gray-900">
               {article?.title}
             </h1>
             
-            <div className="flex items-center justify-center gap-4 text-[11px] font-bold uppercase tracking-widest text-gray-500">
+            <div className="flex items-center justify-center gap-4 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-gray-500">
               <span className="text-blue-900">By {article?.author_name || "Journal Staff"}</span>
               <span>|</span>
               <span className="text-amber-600">{new Date(article?.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
             </div>
           </header>
 
-          <div className="aspect-video w-full bg-gray-100 border-2 border-blue-900 mb-12 overflow-hidden shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
+          <div className="aspect-video w-full bg-gray-100 border-2 border-blue-900 mb-8 md:mb-12 overflow-hidden shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
             <img 
               src={article?.image_url} 
               className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" 
@@ -92,26 +92,26 @@ export default function ArticleView() {
 
           <div className="max-w-3xl mx-auto">
             {article?.excerpt && (
-              <p className="text-xl md:text-2xl font-serif italic text-red-900 text-center mb-12 leading-relaxed">
+              <p className="text-lg md:text-2xl font-serif italic text-red-900 text-center mb-8 md:mb-12 leading-relaxed">
                 "{article.excerpt}"
               </p>
             )}
             
-            <div className="prose prose-lg max-w-none prose-p:font-serif prose-p:leading-loose prose-p:text-gray-800 prose-a:text-red-900 hover:prose-a:text-blue-900">
+            <div className="prose prose-base md:prose-lg max-w-none prose-p:font-serif prose-p:leading-loose prose-p:text-gray-800 prose-a:text-red-900 hover:prose-a:text-blue-900">
               {article?.content?.split("\n").map((paragraph, i) => {
                 if (!paragraph.trim()) return null;
                 // Simple drop cap for first paragraph
                 if (i === 0) {
                   return (
-                    <p key={i} className="mb-8 text-lg">
-                      <span className="float-left text-7xl font-serif font-black leading-[0.8] pr-3 pt-2 text-blue-900">
+                    <p key={i} className="mb-6 md:mb-8">
+                      <span className="float-left text-6xl md:text-7xl font-serif font-black leading-[0.8] pr-3 pt-2 text-blue-900">
                         {paragraph.charAt(0)}
                       </span>
                       {paragraph.slice(1)}
                     </p>
                   );
                 }
-                return <p key={i} className="mb-8 text-lg">{paragraph}</p>;
+                return <p key={i} className="mb-6 md:mb-8">{paragraph}</p>;
               })}
             </div>
 

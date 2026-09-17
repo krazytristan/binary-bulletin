@@ -154,23 +154,23 @@ export default function Announcements() {
 
       {/* ARTICLE READING MODAL */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-blue-900/80 backdrop-blur-sm p-4 md:p-12" onClick={() => setSelectedItem(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-blue-900/80 backdrop-blur-sm p-0 md:p-12" onClick={() => setSelectedItem(null)}>
           <div 
-            className="bg-[#FCFBF9] w-full max-w-4xl max-h-full overflow-y-auto shadow-2xl border-4 border-blue-900 relative flex flex-col custom-scrollbar" 
+            className="bg-[#FCFBF9] w-full h-full md:h-auto max-w-4xl max-h-full overflow-y-auto shadow-2xl border-0 md:border-4 border-blue-900 relative flex flex-col custom-scrollbar" 
             onClick={(e) => e.stopPropagation()}
           >
             <button onClick={() => setSelectedItem(null)} className="absolute top-4 right-4 p-2 bg-white text-blue-900 border-2 border-blue-900 hover:bg-red-900 hover:text-white hover:border-red-900 transition-colors z-10 shadow-[2px_2px_0px_0px_rgba(30,58,138,1)]">
               <X size={20} />
             </button>
             
-            <div className="p-8 md:p-12 flex flex-col bg-white flex-1">
-               <span className="self-start text-[10px] font-bold uppercase tracking-widest text-blue-900 bg-amber-400 px-3 py-1 border border-amber-400 mb-6">
+            <div className="p-6 md:p-12 flex flex-col bg-white flex-1 min-h-screen md:min-h-0">
+               <span className="self-start text-[10px] font-bold uppercase tracking-widest text-blue-900 bg-amber-400 px-3 py-1 border border-amber-400 mb-6 mt-10 md:mt-0">
                   {new Date(selectedItem.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                </span>
-               <h2 className="text-3xl md:text-5xl font-serif font-black uppercase tracking-tight leading-tight text-blue-900 mb-8 pb-6 border-b-2 border-gray-200">
+               <h2 className="text-2xl md:text-5xl font-serif font-black uppercase tracking-tight leading-tight text-blue-900 mb-6 md:mb-8 pb-4 md:pb-6 border-b-2 border-gray-200">
                   {selectedItem.title}
                </h2>
-               <div className="prose prose-lg max-w-none font-serif text-gray-800 leading-relaxed whitespace-pre-wrap">
+               <div className="prose prose-base md:prose-lg max-w-none font-serif text-gray-800 leading-relaxed whitespace-pre-wrap">
                   {selectedItem.content}
                </div>
             </div>
@@ -181,13 +181,13 @@ export default function Announcements() {
       {/* FULL SCREEN IMAGE VIEWER */}
       {viewerImage && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-white/95 backdrop-blur-md" onClick={() => setViewerImage(null)}>
-          <button onClick={() => setViewerImage(null)} className="absolute top-6 right-6 p-2 text-black hover:bg-gray-100 transition-colors z-10">
+          <button onClick={() => setViewerImage(null)} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-black hover:bg-gray-100 transition-colors z-10">
             <X size={24} />
           </button>
-          <div className="w-full max-w-6xl max-h-screen p-12 flex flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-6xl max-h-screen p-4 md:p-12 flex flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}>
             <img
               src={viewerImage}
-              className="max-h-[85vh] w-auto border border-gray-300 shadow-2xl object-contain"
+              className="max-h-[90vh] w-auto border border-gray-300 shadow-2xl object-contain"
               alt="Notice full view"
             />
           </div>

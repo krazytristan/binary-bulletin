@@ -140,16 +140,16 @@ export default function Home() {
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans selection:bg-blue-900 selection:text-white antialiased">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-8">
         
         {/* --- CLASSIC MASTHEAD --- */}
-        <header className="mb-10 text-center border-b-[3px] border-blue-900 pb-6">
-          <div className="flex justify-between items-end border-b border-gray-300 pb-2 mb-6">
+        <header className="mb-8 md:mb-10 text-center border-b-[3px] border-blue-900 pb-4 md:pb-6">
+          <div className="flex justify-between items-end border-b border-gray-300 pb-2 mb-4 md:mb-6">
             <div className="flex gap-4 text-[10px] font-sans uppercase tracking-widest text-gray-600 hidden md:flex">
               <span className="flex items-center gap-1"><MapPin size={12}/> Lipa City, PH</span>
               <span className="flex items-center gap-1"><CloudSun size={12}/> 29°C</span>
             </div>
-            <div className="mx-auto md:mx-0 text-[10px] font-sans uppercase tracking-[0.2em] text-red-900 font-bold">
+            <div className="mx-auto md:mx-0 text-[9px] md:text-[10px] font-sans uppercase tracking-[0.2em] text-red-900 font-bold">
               Digital Premiere Edition
             </div>
             <div className="flex gap-4 text-[10px] font-sans uppercase tracking-widest text-gray-600 hidden md:flex">
@@ -157,11 +157,11 @@ export default function Home() {
             </div>
           </div>
           
-          <h1 className="text-5xl md:text-8xl lg:text-[8rem] font-serif font-black uppercase tracking-tighter leading-none text-blue-900">
+          <h1 className="text-[12vw] sm:text-6xl md:text-8xl lg:text-[8rem] font-serif font-black uppercase tracking-tighter leading-[0.9] text-blue-900">
             The Binary<br className="md:hidden" /> Bulletin
           </h1>
           
-          <div className="flex justify-between items-center border-t border-blue-900 mt-6 pt-3 text-[11px] font-sans uppercase tracking-widest font-bold text-blue-900">
+          <div className="flex justify-between items-center border-t border-blue-900 mt-4 md:mt-6 pt-3 text-[9px] md:text-[11px] font-sans uppercase tracking-widest font-bold text-blue-900">
             <span className="hidden sm:inline">Vol. 2026 — Ed. 04</span>
             <span className="mx-auto sm:mx-0">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
             <span className="hidden sm:inline">Since 1998</span>
@@ -255,21 +255,21 @@ export default function Home() {
             {featured && (
               <div className="block">
                 <Link to={`/article/${featured.id}`} className="group block">
-                  <h2 className="text-4xl md:text-5xl font-serif font-black leading-[1.1] mb-6 group-hover:text-red-900 transition-colors text-center text-gray-900">{featured.title}</h2>
+                  <h2 className="text-3xl md:text-5xl font-serif font-black leading-[1.1] mb-4 md:mb-6 group-hover:text-red-900 transition-colors text-center text-gray-900">{featured.title}</h2>
                   
-                  <div className="flex items-center justify-center gap-3 mb-8 text-[11px] font-sans uppercase tracking-widest">
+                  <div className="flex items-center justify-center gap-3 mb-6 md:mb-8 text-[10px] md:text-[11px] font-sans uppercase tracking-widest">
                     <span className="font-bold text-blue-900 border-r border-gray-300 pr-3">By {featured.author_name || "Journal Staff"}</span>
                     <span className="text-gray-500 font-bold">{formatDate(featured.created_at)}</span>
                   </div>
 
-                  <div className="relative aspect-[4/3] md:aspect-[16/10] overflow-hidden bg-gray-200 mb-8 border border-gray-300">
+                  <div className="relative aspect-[4/3] md:aspect-[16/10] overflow-hidden bg-gray-200 mb-6 md:mb-8 border border-gray-300">
                     <img src={featured.image_url} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Lead"/>
                     <div className="absolute bottom-0 right-0 bg-amber-400 px-3 py-1 text-[9px] font-sans uppercase tracking-widest text-blue-900 font-bold border-t border-l border-amber-400">Featured</div>
                   </div>
                   
                   {/* Drop cap styling for excerpt */}
-                  <p className="text-gray-800 text-lg md:text-xl leading-relaxed font-serif">
-                    <span className="float-left text-6xl font-black font-serif leading-none pr-3 pt-1 text-blue-900">
+                  <p className="text-gray-800 text-base md:text-xl leading-relaxed font-serif">
+                    <span className="float-left text-5xl md:text-6xl font-black font-serif leading-none pr-3 pt-1 text-blue-900">
                       {(featured.excerpt || featured.content || " ").charAt(0)}
                     </span>
                     {(featured.excerpt || featured.content || "").slice(1).substring(0, 150)}...
@@ -313,9 +313,9 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-row gap-8 md:overflow-x-auto no-scrollbar pb-6 md:snap-x md:snap-mandatory">
+          <div className="flex flex-row gap-6 md:gap-8 overflow-x-auto no-scrollbar pb-6 snap-x snap-mandatory">
             {filteredArticles.map((a) => (
-              <div key={a.id} className="w-full md:min-w-[300px] md:snap-start shrink-0">
+              <div key={a.id} className="w-[85vw] sm:w-[300px] snap-start shrink-0">
                 <Link to={`/article/${a.id}`} className="block group">
                   <div className="aspect-[16/10] overflow-hidden bg-gray-100 mb-4 border border-gray-300">
                     <img src={a.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="article" />

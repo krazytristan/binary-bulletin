@@ -170,9 +170,9 @@ export default function Navbar() {
 
       {/* MOBILE MENU */}
       <div className={`lg:hidden overflow-hidden transition-all duration-300 ${menuOpen ? "max-h-screen border-t-2 border-blue-800 bg-blue-900" : "max-h-0 bg-blue-900"}`}>
-        <div className="px-6 py-4 space-y-1">
+        <div className="px-4 py-2 space-y-1">
           {navLinks.map((link) => (
-            <Link key={link.path} to={link.path} onClick={() => setMenuOpen(false)} className={`block py-3.5 px-3 border-b border-blue-800 last:border-0 text-[11px] font-bold uppercase tracking-widest ${location.pathname === link.path ? "text-amber-400" : "text-blue-100 hover:text-white"}`}>
+            <Link key={link.path} to={link.path} onClick={() => setMenuOpen(false)} className={`block py-4 px-4 border-b border-blue-800 last:border-0 text-[13px] font-bold uppercase tracking-widest ${location.pathname === link.path ? "text-amber-400" : "text-blue-100 hover:text-white"}`}>
               {link.name}
             </Link>
           ))}

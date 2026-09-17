@@ -67,18 +67,18 @@ export default function News() {
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
         {/* --- HEADER --- */}
-        <header className="mb-12 border-b-[3px] border-blue-900 pb-8">
-          <h1 className="text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter mb-6 text-blue-900">Archive</h1>
+        <header className="mb-8 md:mb-12 border-b-[3px] border-blue-900 pb-6 md:pb-8">
+          <h1 className="text-4xl md:text-7xl font-serif font-black uppercase tracking-tighter mb-4 md:mb-6 text-blue-900">Archive</h1>
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 whitespace-nowrap -mx-4 px-4 md:mx-0 md:px-0">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}
-                  className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                  className={`text-[11px] md:text-[10px] font-bold uppercase tracking-widest transition-colors shrink-0 ${
                     category === cat ? "text-red-900 border-b-2 border-red-900 pb-0.5" : "text-gray-500 hover:text-blue-900"
                   }`}
                 >
