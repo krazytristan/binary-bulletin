@@ -45,7 +45,7 @@ export default function TheBinar() {
         <header className="mb-12 border-b-[3px] border-blue-900 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-900 mb-4">Motion Picture Archive</p>
-            <h1 className="text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter text-blue-900">The Binar</h1>
+            <h1 className="text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter text-blue-900">The Binary</h1>
           </div>
           
           <div className="relative w-full md:w-64 group">

@@ -340,7 +340,7 @@ export default function Home() {
           <section className="mb-16">
             <div className="flex items-center justify-between border-b-2 border-gray-300 pb-4 mb-8">
               <h2 className="font-sans font-bold text-[12px] uppercase tracking-widest text-blue-900 flex items-center gap-2">
-                <PlayCircle size={16} /> The Binar Online
+                <PlayCircle size={16} /> The Binary Online
               </h2>
               <Link to="/thebinar" className="text-[10px] font-bold uppercase tracking-widest text-red-900 hover:text-blue-900 transition-colors">
                 View All Series &rarr;

@@ -16,7 +16,7 @@ export default function Sidebar({ setSidebarOpen }) {
     { name: "Dashboard", path: "/admin-panel/dashboard", icon: <LayoutDashboard size={16} /> },
     { name: "Archive", path: "/admin-panel/articles", icon: <FileText size={16} /> },
     { name: "Exhibits", path: "/admin-panel/admingallery", icon: <ImageIcon size={16} /> },
-    { name: "The Binar", path: "/admin-panel/adminthebinar", icon: <Video size={16} /> },
+    { name: "The Binary", path: "/admin-panel/adminthebinar", icon: <Video size={16} /> },
     { name: "Registry", path: "/admin-panel/events", icon: <Calendar size={16} /> },
     { name: "Bulletins", path: "/admin-panel/announcements", icon: <Bell size={16} /> },
     { name: "Letters", path: "/admin-panel/messages", icon: <MessageSquare size={16} /> },
