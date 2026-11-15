@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { hasPermission } from "../../utils/rbac";
+import { logActivity } from "../../utils/cmsService";
 import { 
   Plus, 
   Search, 
@@ -13,6 +16,9 @@ import {
 } from "lucide-react";
 
 export default function Events() {
+  const { user, profile, role = "Staff Writer" } = useOutletContext() || {};
+  const canDelete = hasPermission(role, "deleteArticles");
+
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -122,6 +128,14 @@ export default function Events() {
 
       if (error) throw error;
 
+      await logActivity({
+        action: `${editing ? "Updated" : "Created"} event "${form.title}"`,
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+        entityType: "event",
+      });
+
       setModalOpen(false);
       resetForm();
       await fetchEvents(); // Refresh list from DB
@@ -135,6 +149,11 @@ export default function Events() {
 
   // 🗑️ FIXED DELETE LOGIC
   const confirmDelete = async () => {
+    if (!canDelete) {
+      alert("Your role does not permit deleting events.");
+      setDeleteId(null);
+      return;
+    }
     try {
       // 1. Delete from database first
       const { error } = await supabase
@@ -143,6 +162,15 @@ export default function Events() {
         .eq("id", deleteId);
 
       if (error) throw error;
+
+      await logActivity({
+        action: `Deleted event #${deleteId}`,
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+        entityType: "event",
+        entityId: deleteId,
+      });
 
       // 2. Only update local state if DB deletion succeeded
       setEvents(prev => prev.filter(e => e.id !== deleteId));

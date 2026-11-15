@@ -1,5 +1,8 @@
 import { useEffect, useState, useRef } from "react";
+import { useOutletContext } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { hasPermission } from "../../utils/rbac";
+import { logActivity } from "../../utils/cmsService";
 import { 
   PlusCircle, 
   Edit3, 
@@ -13,6 +16,9 @@ import {
 } from "lucide-react";
 
 export default function AdminGallery() {
+  const { user, profile, role = "Staff Writer" } = useOutletContext() || {};
+  const canDelete = hasPermission(role, "deleteMedia");
+
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -96,6 +102,13 @@ export default function AdminGallery() {
       } else {
         await supabase.from("gallery").insert([payload]);
       }
+      await logActivity({
+        action: `${editing ? "Updated" : "Created"} gallery album "${title}"`,
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+        entityType: "gallery",
+      });
       resetForm();
       fetchGallery();
     } catch (err) {
@@ -122,7 +135,20 @@ export default function AdminGallery() {
   };
 
   const confirmDelete = async () => {
+    if (!canDelete) {
+      alert("Your role does not permit deleting gallery albums.");
+      setDeleteId(null);
+      return;
+    }
     await supabase.from("gallery").delete().eq("id", deleteId);
+    await logActivity({
+      action: `Deleted gallery album #${deleteId}`,
+      userId: user?.id,
+      userName: profile?.full_name,
+      userRole: role,
+      entityType: "gallery",
+      entityId: deleteId,
+    });
     setDeleteId(null);
     fetchGallery();
   };

@@ -1,8 +1,15 @@
 import { useEffect, useState, useRef } from "react";
+import { useOutletContext } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { hasPermission } from "../../utils/rbac";
+import { logActivity } from "../../utils/cmsService";
 import { Plus, Edit2, Trash2, X, Image as ImageIcon, Loader2 } from "lucide-react";
 
 export default function AdminAnnouncements() {
+  const { user, profile, role = "Staff Writer" } = useOutletContext() || {};
+  const canDelete = hasPermission(role, "deleteArticles");
+  const canCreateOrEdit = hasPermission(role, "createArticle");
+
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -88,6 +95,13 @@ export default function AdminAnnouncements() {
     if (error) {
       alert("Error saving announcement");
     } else {
+      await logActivity({
+        action: `${editing ? "Updated" : "Created"} announcement "${form.title}"`,
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+        entityType: "announcement",
+      });
       closeModal();
       fetchAnnouncements();
     }
@@ -96,6 +110,7 @@ export default function AdminAnnouncements() {
 
   // ✏️ EDIT MODE
   const handleEdit = (item) => {
+    if (!canCreateOrEdit) return;
     setEditing(item);
     setForm({ title: item.title, content: item.content, image: null });
     setPreview(item.image_url);
@@ -104,10 +119,21 @@ export default function AdminAnnouncements() {
 
   // ❌ DELETE
   const handleDelete = async (id) => {
+    if (!canDelete) return alert("Your role does not permit deleting announcements.");
     if (!window.confirm("Are you sure you want to delete this? This action cannot be undone.")) return;
 
     const { error } = await supabase.from("announcements").delete().eq("id", id);
-    if (!error) fetchAnnouncements();
+    if (!error) {
+      await logActivity({
+        action: `Deleted announcement #${id}`,
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+        entityType: "announcement",
+        entityId: id,
+      });
+      fetchAnnouncements();
+    }
   };
 
   const closeModal = () => {

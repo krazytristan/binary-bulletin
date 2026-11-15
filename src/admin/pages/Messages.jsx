@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { hasPermission } from "../../utils/rbac";
+import { logActivity } from "../../utils/cmsService";
 import { 
   Mail, 
   MailOpen, 
@@ -13,6 +16,9 @@ import {
 } from "lucide-react";
 
 export default function Messages() {
+  const { user, profile, role = "Staff Writer" } = useOutletContext() || {};
+  const canDelete = hasPermission(role, "moderateComments");
+
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState(null);
@@ -82,6 +88,7 @@ export default function Messages() {
   };
 
   const deleteMessage = async (id) => {
+    if (!canDelete) return alert("Your role does not permit deleting reader messages.");
     if (!window.confirm("Purge this transmission from the database?")) return;
     
     setDeleting(id);
@@ -92,6 +99,14 @@ export default function Messages() {
     } else if (data && data.length === 0) {
       alert("Permission Denied: The database refused to delete the message. Please check the Row Level Security (RLS) DELETE policies for the 'messages' table in your Supabase dashboard to ensure authenticated users have delete access.");
     } else {
+      await logActivity({
+        action: `Deleted inbox message #${id}`,
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+        entityType: "message",
+        entityId: id,
+      });
       setMessages(prev => prev.filter(m => m.id !== id));
       if (selectedMessage?.id === id) setSelectedMessage(null);
     }

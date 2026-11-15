@@ -113,18 +113,32 @@ export function parseArticleBlocks(rawContent, { category } = {}) {
     .filter(Boolean);
 
   return lines.map((line, index) => {
+    // Inline Markdown image ![alt](url)
+    const imgMatch = line.match(/^!\[(.*?)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)$/);
+    if (imgMatch) {
+      return { type: "image", alt: imgMatch[1] || "Editorial photograph", url: imgMatch[2] };
+    }
+
     // Explicit Markdown heading
     if (/^#{1,3}\s+/.test(line)) {
       return { type: "heading", text: line.replace(/^#{1,3}\s+/, "") };
+    }
+
+    // Explicit blockquote
+    if (/^>\s+/.test(line)) {
+      return { type: "quote", text: line.replace(/^>\s+/, "") };
     }
 
     if (isLiterary) {
       return { type: "paragraph", text: line };
     }
 
-    // Explicit bullet list line
-    if (/^[-•✅📌🗓️📝📖🎓🏁📚]\s*/.test(line)) {
-      return { type: "bullet", text: line.replace(/^[-•✅📌🗓️📝📖🎓🏁📚]\s*/, "") };
+    // Explicit bullet or numbered list line
+    if (/^[-•✅📌🗓️📝📖🎓🏁📚]\s*/.test(line) || /^\d+\.\s+/.test(line)) {
+      return {
+        type: "bullet",
+        text: line.replace(/^(?:[-•✅📌🗓️📝📖🎓🏁📚]\s*|\d+\.\s+)/, ""),
+      };
     }
 
     // Heuristic for plain-text section subheadings in existing articles:

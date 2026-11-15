@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { hasPermission } from "../../utils/rbac";
+import { logActivity } from "../../utils/cmsService";
 import { Trash2, Plus, Video, Link as LinkIcon, X, Loader2 } from "lucide-react";
 
 export default function AdminTheBinar() {
+  const { user, profile, role = "Staff Writer" } = useOutletContext() || {};
+  const canDelete = hasPermission(role, "deleteArticles");
+
   const [videos, setVideos] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -102,6 +108,14 @@ export default function AdminTheBinar() {
 
       if (error) throw error;
 
+      await logActivity({
+        action: `Added video broadcast "${form.title}"`,
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+        entityType: "video",
+      });
+
       // Reset
       setForm({ title: "", excerpt: "", content: "", author_name: "", video_url: "" });
       setFile(null);
@@ -117,8 +131,21 @@ export default function AdminTheBinar() {
   };
 
   const confirmDelete = async () => {
+    if (!canDelete) {
+      alert("Your role does not permit deleting videos.");
+      setDeleteId(null);
+      return;
+    }
     const { error } = await supabase.from("videos").delete().eq("id", deleteId);
     if (!error) {
+      await logActivity({
+        action: `Deleted video #${deleteId}`,
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+        entityType: "video",
+        entityId: deleteId,
+      });
       setVideos(videos.filter(v => v.id !== deleteId));
       setDeleteId(null);
     }

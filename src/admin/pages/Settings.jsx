@@ -1,249 +1,750 @@
-import { useState, useEffect, useRef } from "react";
-import { supabase } from "../../lib/supabase"; 
-import { 
-  User, Save, Camera, 
-  CheckCircle, AlertCircle, Loader2,
-  Shield, Briefcase, Mail
+import React, { useEffect, useState, useCallback } from "react";
+import { useOutletContext } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
+import { hasPermission } from "../../utils/rbac";
+import {
+  checkTableExists,
+  logActivity,
+  optimizeImageFile,
+} from "../../utils/cmsService";
+import {
+  User,
+  Settings as SettingsIcon,
+  Save,
+  Upload,
+  KeyRound,
+  Download,
+  AlertTriangle,
+  CheckCircle2,
+  Shield,
 } from "lucide-react";
 
 export default function Settings() {
-  const fileInputRef = useRef(null);
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
+  const {
+    user,
+    profile,
+    role = "Staff Writer",
+    refreshProfile,
+  } = useOutletContext() || {};
+  const canManageSettings = hasPermission(role, "manageSettings");
 
-  const [profile, setProfile] = useState({
-    id: "",
+  const [tab, setTab] = useState("profile");
+  const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [exportingBackup, setExportingBackup] = useState(false);
+  const [siteTableReady, setSiteTableReady] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const [profileForm, setProfileForm] = useState({
     full_name: "",
-    email: "",
     avatar_url: "",
-    role: "Reader" // Default role
+    bio: "",
   });
 
-  const [previewImage, setPreviewImage] = useState(null);
-  const [uploadFile, setUploadFile] = useState(null);
+  const [systemForm, setSystemForm] = useState({
+    publication_name: "The Binary Bulletin",
+    publication_tagline:
+      "Official Student Publication of AMA Computer College Lipa Campus",
+    publication_description: "",
+    institution_name: "AMA Computer College Lipa Campus",
+    logo_url: "/binary-logo.png",
+    favicon_url: "/binary-logo.png",
+    primary_color: "#1E3A8A",
+    accent_color: "#FBBF24",
+    secondary_color: "#7F1D1D",
+    seo_title: "",
+    seo_description: "",
+    facebook_url: "",
+    twitter_url: "",
+    instagram_url: "",
+    youtube_url: "",
+    default_article_status: "draft",
+    comment_moderation: "pre_moderate",
+    allow_public_registration: false,
+    timezone: "Asia/Manila",
+    maintenance_mode: false,
+    maintenance_message: "",
+    privacy_policy: "",
+    terms_of_use: "",
+  });
 
-  // 1. FETCH DATA FROM SUPABASE
+  const showToast = (type, text) => {
+    setToast({ type, text });
+    setTimeout(() => setToast(null), 4500);
+  };
+
   useEffect(() => {
-    fetchProfile();
+    if (profile) {
+      setProfileForm({
+        full_name: profile.full_name || "",
+        avatar_url: profile.avatar_url || "",
+        bio: profile.bio || "",
+      });
+    }
+  }, [profile]);
+
+  const loadSystemSettings = useCallback(async () => {
+    const exists = await checkTableExists("site_settings");
+    setSiteTableReady(exists);
+    if (!exists) return;
+
+    const { data } = await supabase
+      .from("site_settings")
+      .select("*")
+      .eq("id", "default")
+      .maybeSingle();
+
+    if (data) {
+      setSystemForm((prev) => ({
+        ...prev,
+        ...data,
+      }));
+    }
   }, []);
 
-  const fetchProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+  useEffect(() => {
+    loadSystemSettings();
+  }, [loadSystemSettings]);
 
-      const { data, error } = await supabase
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+    setUploadingAvatar(true);
+    try {
+      const optimized = await optimizeImageFile(file, 600, 0.85);
+      const ext = optimized.name.split(".").pop() || "jpg";
+      const fileName = `avatar_${user.id}_${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, optimized);
+      if (upErr) throw upErr;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(fileName);
+
+      setProfileForm((p) => ({ ...p, avatar_url: publicUrl }));
+      showToast("success", "Avatar uploaded. Save profile to apply.");
+    } catch (err) {
+      showToast("error", err.message || "Avatar upload failed.");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    if (!user?.id) return;
+    setSaving(true);
+    try {
+      const base = {
+        full_name: profileForm.full_name.trim(),
+        avatar_url: profileForm.avatar_url.trim() || null,
+      };
+      const ext = {
+        ...base,
+        bio: profileForm.bio.trim() || null,
+      };
+
+      let { error } = await supabase
         .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+        .update(ext)
+        .eq("id", user.id);
+
+      if (error && /column .* does not exist/i.test(error.message || "")) {
+        const retry = await supabase
+          .from("profiles")
+          .update(base)
+          .eq("id", user.id);
+        error = retry.error;
+      }
 
       if (error) throw error;
 
-      if (data) {
-        setProfile({
-          id: data.id,
-          full_name: data.full_name || "",
-          email: data.email || user.email,
-          avatar_url: data.avatar_url || "",
-          role: data.role || "Reader"
-        });
-      }
+      await refreshProfile?.();
+      await logActivity({
+        action: "Updated personal editorial profile",
+        userId: user.id,
+        userName: profileForm.full_name,
+        userRole: role,
+        entityType: "profile",
+      });
+      showToast("success", "Profile updated.");
     } catch (err) {
-      console.error("Error fetching profile:", err.message);
-      setError("Failed to load profile data.");
+      showToast("error", err.message || "Failed to update profile.");
     } finally {
-      setInitialLoading(false);
+      setSaving(false);
     }
   };
 
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        setError("Please upload a valid image file.");
-        return;
-      }
-      setUploadFile(file);
-      setPreviewImage(URL.createObjectURL(file));
-    }
-  };
-
-  // 2. SAVE CHANGES (Including Role)
-  const handleSave = async () => {
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-
+  const handlePasswordReset = async () => {
+    if (!user?.email) return;
     try {
-      let finalAvatarUrl = profile.avatar_url;
-
-      if (uploadFile) {
-        const fileExt = uploadFile.name.split('.').pop();
-        const fileName = `${profile.id}-${Math.random()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(fileName, uploadFile);
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrlData } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(fileName);
-        
-        finalAvatarUrl = publicUrlData.publicUrl;
-      }
-
-      // Update Profile Table including the new 'role' field
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          full_name: profile.full_name,
-          avatar_url: finalAvatarUrl,
-          role: profile.role, // Ensure this column exists in your DB
-        })
-        .eq("id", profile.id);
-
-      if (updateError) throw updateError;
-
-      setSuccess(true);
-      setProfile(prev => ({ ...prev, avatar_url: finalAvatarUrl }));
-      setUploadFile(null);
-      setTimeout(() => setSuccess(false), 3000);
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/admin`,
+      });
+      if (error) throw error;
+      showToast("success", `Password reset link sent to ${user.email}.`);
     } catch (err) {
-      setError(err.message || "An error occurred while saving.");
-    } finally {
-      setLoading(false);
+      showToast("error", err.message || "Reset request failed.");
     }
   };
 
-  if (initialLoading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="animate-spin text-blue-900" size={32} />
-      </div>
-    );
-  }
+  const handleSaveSystem = async (e) => {
+    e.preventDefault();
+    if (!canManageSettings || !siteTableReady) return;
+    setSaving(true);
+    try {
+      const payload = {
+        ...systemForm,
+        id: "default",
+        updated_by: user?.id || null,
+        updated_at: new Date().toISOString(),
+      };
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert(payload, { onConflict: "id" });
+      if (error) throw error;
+
+      await logActivity({
+        action: "Updated publication & system settings",
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+        entityType: "site_settings",
+      });
+      showToast("success", "Publication & system settings saved.");
+    } catch (err) {
+      showToast("error", err.message || "Failed saving system settings.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExportBackup = async () => {
+    if (!canManageSettings) return;
+    setExportingBackup(true);
+    try {
+      const [articles, announcements, events, gallery, videos, categories, profiles] =
+        await Promise.all([
+          supabase.from("articles").select("*"),
+          supabase.from("announcements").select("*"),
+          supabase.from("events").select("*"),
+          supabase.from("gallery").select("*"),
+          supabase.from("videos").select("*"),
+          supabase.from("categories").select("*"),
+          supabase.from("profiles").select("*"),
+        ]);
+
+      const snapshot = {
+        exportedAt: new Date().toISOString(),
+        exportedBy: profile?.email || user?.email,
+        tables: {
+          articles: articles.data || [],
+          announcements: announcements.data || [],
+          events: events.data || [],
+          gallery: gallery.data || [],
+          videos: videos.data || [],
+          categories: categories.data || [],
+          profiles: profiles.data || [],
+        },
+      };
+
+      const blob = new Blob([JSON.stringify(snapshot, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `binary-bulletin-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      await logActivity({
+        action: "Downloaded full publication JSON backup",
+        userId: user?.id,
+        userName: profile?.full_name,
+        userRole: role,
+      });
+      showToast("success", "Database JSON backup downloaded.");
+    } catch (err) {
+      showToast("error", err.message || "Backup export failed.");
+    } finally {
+      setExportingBackup(false);
+    }
+  };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h1>
-        <p className="text-gray-500">Manage your The Binary Bulletin profile and editorial privileges.</p>
+    <div className="space-y-6">
+      {toast && (
+        <div
+          className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-lg border text-xs font-bold flex items-center gap-2 ${
+            toast.type === "error"
+              ? "bg-red-50 border-red-200 text-red-800"
+              : "bg-emerald-50 border-emerald-200 text-emerald-800"
+          }`}
+        >
+          {toast.type === "error" ? (
+            <AlertTriangle className="w-4 h-4" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4" />
+          )}
+          {toast.text}
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="border-b border-slate-200 pb-5">
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-900 mb-1">
+          Account &amp; Newsroom Configuration
+        </p>
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          Settings &amp; System Preferences
+        </h1>
       </div>
 
-      {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-none flex items-center gap-3">
-          <CheckCircle size={20} />
-          <p className="text-sm font-medium">Database updated successfully!</p>
-        </div>
-      )}
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200">
+        <button
+          type="button"
+          onClick={() => setTab("profile")}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition ${
+            tab === "profile"
+              ? "border-blue-900 text-blue-900"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          <User className="w-3.5 h-3.5" />
+          My Profile &amp; Security
+        </button>
 
-      {error && (
-        <div className="bg-red-50 border border-blue-200 text-red-700 p-4 rounded-none flex items-center gap-3">
-          <AlertCircle size={20} />
-          <p className="text-sm font-medium">{error}</p>
-        </div>
-      )}
+        {canManageSettings && (
+          <button
+            type="button"
+            onClick={() => setTab("system")}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition ${
+              tab === "system"
+                ? "border-blue-900 text-blue-900"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <SettingsIcon className="w-3.5 h-3.5" />
+            Publication &amp; System Settings
+          </button>
+        )}
+      </div>
 
-      <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
+      {tab === "profile" && (
+        <form
+          onSubmit={handleSaveProfile}
+          className="bg-white border border-slate-200 rounded-xl p-6 max-w-2xl space-y-5 text-xs"
+        >
+          <div className="flex items-center gap-4">
+            {profileForm.avatar_url ? (
+              <img
+                src={profileForm.avatar_url}
+                alt="Avatar"
+                className="w-16 h-16 rounded-full object-cover border border-slate-200"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-900 font-black text-xl flex items-center justify-center">
+                {(profileForm.full_name || user?.email || "U")
+                  .charAt(0)
+                  .toUpperCase()}
+              </div>
+            )}
 
-      <div className="grid gap-8">
-        {/* Profile Section */}
-        <section className="bg-white p-8 rounded-none  border border-gray-100 space-y-6">
-          <div className="flex items-center gap-2 pb-4 border-b border-gray-50">
-            <User size={20} className="text-blue-900" />
-            <h2 className="text-lg font-bold text-gray-900">Profile Information</h2>
+            <div className="space-y-1.5">
+              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 font-bold text-slate-700 hover:bg-slate-100 cursor-pointer">
+                <Upload className="w-3.5 h-3.5" />
+                {uploadingAvatar ? "Uploading..." : "Change Profile Photo"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-[11px] text-slate-500">
+                Role:{" "}
+                <strong className="text-blue-900 inline-flex items-center gap-1">
+                  <Shield className="w-3 h-3" /> {role}
+                </strong>{" "}
+                &middot; {user?.email}
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="relative group shrink-0">
-              <div className="w-24 h-24 bg-gray-100 rounded-none flex items-center justify-center text-gray-400 overflow-hidden border border-gray-100 shadow-inner">
-                {previewImage || profile.avatar_url ? (
-                  <img src={previewImage || profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <User size={40} />
-                )}
-              </div>
-              <button 
-                onClick={() => fileInputRef.current.click()}
-                className="absolute -bottom-2 -right-2 p-2 bg-white  border border-gray-100 rounded-none text-blue-900 hover:scale-110 active:scale-95 transition-transform"
-              >
-                <Camera size={16} />
-              </button>
-            </div>
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">
+              Display / Byline Name
+            </label>
+            <input
+              type="text"
+              required
+              value={profileForm.full_name}
+              onChange={(e) =>
+                setProfileForm((p) => ({ ...p, full_name: e.target.value }))
+              }
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+            />
+          </div>
 
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Full Name</label>
-                <input 
-                  type="text" 
-                  value={profile.full_name}
-                  onChange={(e) => setProfile({...profile, full_name: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-none text-sm focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-blue-900 transition-all"
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">
+              Editorial Biography
+            </label>
+            <textarea
+              rows={3}
+              value={profileForm.bio}
+              onChange={(e) =>
+                setProfileForm((p) => ({ ...p, bio: e.target.value }))
+              }
+              placeholder="Your journalism beat, college department, and editorial role..."
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={handlePasswordReset}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-slate-200 text-slate-700 font-bold hover:bg-slate-50"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              Send Password Reset Email
+            </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-900 text-white font-bold hover:bg-blue-800 disabled:opacity-50"
+            >
+              <Save className="w-3.5 h-3.5" />
+              {saving ? "Saving..." : "Save Profile"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {tab === "system" && canManageSettings && (
+        <div className="space-y-6 max-w-4xl">
+          {!siteTableReady && (
+            <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 text-xs text-amber-900 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+              <div>
+                <p className="font-bold">
+                  Run SQL Migration for Persistent System Settings
+                </p>
+                <p>
+                  Execute{" "}
+                  <code>client/supabase/migrations/001_editorial_cms_upgrade.sql</code>{" "}
+                  to store system settings in <code>site_settings</code>. Backup
+                  export below already works immediately.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSaveSystem} className="space-y-5 text-xs">
+            {/* Publication Identity & Branding */}
+            <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3.5">
+              <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                Publication Identity &amp; Branding
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Publication Name
+                  </label>
+                  <input
+                    type="text"
+                    value={systemForm.publication_name}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        publication_name: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Institution Name
+                  </label>
+                  <input
+                    type="text"
+                    value={systemForm.institution_name}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        institution_name: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Tagline
+                </label>
+                <input
+                  type="text"
+                  value={systemForm.publication_tagline}
+                  onChange={(e) =>
+                    setSystemForm((p) => ({
+                      ...p,
+                      publication_tagline: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg"
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
-                <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 border border-gray-100 rounded-none text-sm text-gray-500 italic">
-                  <Mail size={14} /> {profile.email}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Primary Color
+                  </label>
+                  <input
+                    type="text"
+                    value={systemForm.primary_color}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        primary_color: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Accent Color
+                  </label>
+                  <input
+                    type="text"
+                    value={systemForm.accent_color}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        accent_color: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Timezone
+                  </label>
+                  <input
+                    type="text"
+                    value={systemForm.timezone}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({ ...p, timezone: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+                  />
                 </div>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Staff Role Section */}
-        <section className="bg-white p-8 rounded-none  border border-gray-100 space-y-6">
-          <div className="flex items-center gap-2 pb-4 border-b border-gray-50">
-            <Briefcase size={20} className="text-blue-900" />
-            <h2 className="text-lg font-bold text-gray-900">Designation & Permissions</h2>
-          </div>
+            {/* Workflow, Comments & SEO Policies */}
+            <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3.5">
+              <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                Editorial Policy, Moderation &amp; SEO
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Default New Article Status
+                  </label>
+                  <select
+                    value={systemForm.default_article_status}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        default_article_status: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white"
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="pending_review">Submitted for Review</option>
+                  </select>
+                </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Staff Role</label>
-              <select 
-                value={profile.role}
-                onChange={(e) => setProfile({...profile, role: e.target.value})}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-none text-sm font-bold focus:ring-2 focus:ring-black/20 outline-none appearance-none cursor-pointer"
-              >
-                <option value="Reader">Standard Reader</option>
-                <option value="News Writer">News Writer</option>
-                <option value="Editor">Content Editor</option>
-                <option value="Editor in Chief">Editor in Chief</option>
-                <option value="Administrator">System Administrator</option>
-              </select>
-              <p className="text-[10px] text-gray-400 font-medium px-1">Your role determines your access level to the publishing dashboard.</p>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Comment Moderation Policy
+                  </label>
+                  <select
+                    value={systemForm.comment_moderation}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        comment_moderation: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white"
+                  >
+                    <option value="pre_moderate">
+                      Pre-moderate (Require Approval)
+                    </option>
+                    <option value="auto_approve">
+                      Auto-approve (Post-moderate)
+                    </option>
+                    <option value="disabled">Disable Reader Comments</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Default Site SEO Title
+                </label>
+                <input
+                  type="text"
+                  value={systemForm.seo_title || ""}
+                  onChange={(e) =>
+                    setSystemForm((p) => ({ ...p, seo_title: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Default Site SEO Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={systemForm.seo_description || ""}
+                  onChange={(e) =>
+                    setSystemForm((p) => ({
+                      ...p,
+                      seo_description: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-6 pt-1">
+                <label className="flex items-center gap-2 font-semibold text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(systemForm.allow_public_registration)}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        allow_public_registration: e.target.checked,
+                      }))
+                    }
+                  />
+                  Allow Contributor Self-Registration
+                </label>
+
+                <label className="flex items-center gap-2 font-semibold text-red-700">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(systemForm.maintenance_mode)}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        maintenance_mode: e.target.checked,
+                      }))
+                    }
+                  />
+                  Enable Public Maintenance Banner
+                </label>
+              </div>
+
+              {systemForm.maintenance_mode && (
+                <input
+                  type="text"
+                  value={systemForm.maintenance_message || ""}
+                  onChange={(e) =>
+                    setSystemForm((p) => ({
+                      ...p,
+                      maintenance_message: e.target.value,
+                    }))
+                  }
+                  placeholder="Maintenance message shown to public visitors..."
+                  className="w-full px-3 py-2 border border-red-200 rounded-lg bg-red-50"
+                />
+              )}
             </div>
 
-            <div className="bg-blue-50/50 p-4 rounded-none border border-red-100 self-end">
-               <div className="flex items-center gap-2 text-blue-700 mb-1">
-                 <Shield size={14} />
-                 <span className="text-xs font-bold uppercase tracking-tight">Access Level</span>
-               </div>
-               <p className="text-xs text-blue-900 font-medium">
-                 {profile.role === "Editor in Chief" || profile.role === "Administrator" 
-                   ? "Full publishing and user management privileges granted." 
-                   : "Standard content submission privileges granted."}
-               </p>
-            </div>
-          </div>
-        </section>
+            {/* Legal & Backup */}
+            <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3.5">
+              <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                Governance &amp; Database Backup
+              </h2>
 
-        <div className="flex justify-end pt-4">
-          <button 
-            onClick={handleSave}
-            disabled={loading}
-            className="flex items-center gap-2 bg-blue-900 text-white px-8 py-3 rounded-none font-bold hover:bg-gray-800 transition-all  shadow-red-100 disabled:opacity-50 active:scale-95"
-          >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-            Synchronize Profile
-          </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Privacy Policy Summary
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={systemForm.privacy_policy || ""}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        privacy_policy: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Terms of Publication Use
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={systemForm.terms_of_use || ""}
+                    onChange={(e) =>
+                      setSystemForm((p) => ({
+                        ...p,
+                        terms_of_use: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  disabled={exportingBackup}
+                  onClick={handleExportBackup}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 font-bold text-slate-800 hover:bg-slate-100"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  {exportingBackup
+                    ? "Exporting Snapshot..."
+                    : "Export Full Publication Backup (JSON)"}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={saving || !siteTableReady}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-blue-900 text-white font-bold hover:bg-blue-800 disabled:opacity-50"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  {saving ? "Saving..." : "Save System Settings"}
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
-      </div>
+      )}
     </div>
   );
 }

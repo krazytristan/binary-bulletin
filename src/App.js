@@ -23,6 +23,13 @@ import Dashboard from "./admin/Dashboard";
 
 /* ADMIN SUB-PAGES */
 import Articles from "./admin/pages/Articles";
+import MediaLibrary from "./admin/pages/MediaLibrary";
+import Categories from "./admin/pages/Categories";
+import HomepageCMS from "./admin/pages/HomepageCMS";
+import Comments from "./admin/pages/Comments";
+import Analytics from "./admin/pages/Analytics";
+import ActivityCenter from "./admin/pages/ActivityCenter";
+import Users from "./admin/pages/Users";
 import AdminGallery from "./admin/pages/AdminGallery";
 import AdminTheBinar from "./admin/pages/AdminTheBinar";
 import AdminEvents from "./admin/pages/Events";
@@ -82,6 +89,13 @@ function App() {
             <Route index element={<Navigate to="/admin-panel/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="articles" element={<Articles />} />
+            <Route path="media" element={<MediaLibrary />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="homepage" element={<HomepageCMS />} />
+            <Route path="comments" element={<Comments />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="activity" element={<ActivityCenter />} />
+            <Route path="users" element={<Users />} />
             <Route path="admingallery" element={<AdminGallery />} />
             <Route path="adminthebinar" element={<AdminTheBinar />} />
             <Route path="events" element={<AdminEvents />} />

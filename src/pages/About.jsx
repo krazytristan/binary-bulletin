@@ -5,9 +5,12 @@ import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import { ShieldCheck, BookOpen, Users, CheckSquare } from "lucide-react";
 import { PUBLICATION } from "../utils/editorial";
+import { checkTableExists } from "../utils/cmsService";
 
 export default function About() {
   const [loading, setLoading] = useState(true);
+  const [missionOverride, setMissionOverride] = useState("");
+  const [boardMembers, setBoardMembers] = useState([]);
   const [counts, setCounts] = useState({
     articles: 0,
     announcements: 0,
@@ -23,12 +26,27 @@ export default function About() {
   const fetchLiveStats = async () => {
     setLoading(true);
     try {
-      const [art, ann, evt, gal] = await Promise.all([
+      const [art, ann, evt, gal, hasSettings] = await Promise.all([
         supabase.from("articles").select("id", { count: "exact", head: true }),
         supabase.from("announcements").select("id", { count: "exact", head: true }),
         supabase.from("events").select("id", { count: "exact", head: true }),
         supabase.from("gallery").select("id", { count: "exact", head: true }),
+        checkTableExists("site_settings"),
       ]);
+
+      if (hasSettings) {
+        const { data: cfg } = await supabase
+          .from("site_settings")
+          .select("homepage_config")
+          .eq("id", "default")
+          .maybeSingle();
+        if (cfg?.homepage_config?.aboutMission) {
+          setMissionOverride(cfg.homepage_config.aboutMission);
+        }
+        if (Array.isArray(cfg?.homepage_config?.editorialBoard)) {
+          setBoardMembers(cfg.homepage_config.editorialBoard);
+        }
+      }
 
       setCounts({
         articles: art.count || 0,
@@ -97,9 +115,35 @@ export default function About() {
                 Editorial Mission
               </h2>
               <blockquote className="text-lg md:text-xl font-serif text-gray-700 leading-relaxed italic max-w-2xl mx-auto border-l-4 border-amber-400 pl-6 text-left bg-white p-6 border border-gray-200">
-                &ldquo;To empower the AMA Computer College Lipa Campus community through accurate, timely, and responsible journalism. We are committed to upholding editorial integrity and providing a credible digital platform where student voices resonate with clarity and purpose.&rdquo;
+                &ldquo;
+                {missionOverride ||
+                  "To empower the AMA Computer College Lipa Campus community through accurate, timely, and responsible journalism. We are committed to upholding editorial integrity and providing a credible digital platform where student voices resonate with clarity and purpose."}
+                &rdquo;
               </blockquote>
             </section>
+
+            {boardMembers.length > 0 && (
+              <section>
+                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-red-900 mb-6 text-center flex items-center justify-center gap-2">
+                  <Users size={15} /> Editorial Board
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                  {boardMembers.map((member, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white border border-gray-200 p-4 text-center"
+                    >
+                      <p className="font-serif font-bold text-blue-900 text-base">
+                        {member.name}
+                      </p>
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-red-900 mt-1">
+                        {member.position}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* LIVE ARCHIVE METRICS */}
             <section>

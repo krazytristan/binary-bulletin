@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { ChevronLeft, Share2, Check, Clock, Newspaper } from "lucide-react";
+import { ChevronLeft, Share2, Check, Clock, Newspaper, MessageSquare } from "lucide-react";
 import {
   PUBLICATION,
   formatDate,
@@ -13,10 +13,46 @@ import {
   parseArticleBlocks,
 } from "../utils/editorial";
 
+function renderInlineMarkdown(text) {
+  if (!text) return text;
+  const parts = String(text).split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return <strong key={idx}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
+      return <em key={idx}>{part.slice(1, -1)}</em>;
+    }
+    const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (linkMatch) {
+      return (
+        <a
+          key={idx}
+          href={linkMatch[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-900 underline hover:text-red-900"
+        >
+          {linkMatch[1]}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 export default function ArticleView() {
   const { id } = useParams();
   const [article, setArticle] = useState(null);
   const [related, setRelated] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [commentForm, setCommentForm] = useState({
+    author_name: "",
+    author_email: "",
+    content: "",
+  });
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [commentNotice, setCommentNotice] = useState("");
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -50,7 +86,24 @@ export default function ArticleView() {
 
       if (artData) {
         setArticle({ ...artData, sourceType });
-        document.title = `${cleanEditorialText(artData.title)} | ${PUBLICATION.name}`;
+        document.title = `${cleanEditorialText(artData.seo_title || artData.title)} | ${PUBLICATION.name}`;
+
+        if (sourceType === "article") {
+          // Track view count & page view gracefully
+          supabase.rpc("increment_article_views", { target_article_id: id }).then(() => {}, () => {});
+          supabase.from("page_views").insert({ path: `/article/${id}`, article_id: id }).then(() => {}, () => {});
+
+          const { data: commData } = await supabase
+            .from("comments")
+            .select("*")
+            .eq("article_id", id)
+            .order("created_at", { ascending: false });
+          setComments(
+            (commData || []).filter(
+              (c) => !c.status || c.status === "approved"
+            )
+          );
+        }
 
         if (sourceType === "article" && artData.category) {
           const { data: relData } = await supabase
@@ -102,6 +155,41 @@ export default function ArticleView() {
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!commentForm.content.trim() || article?.sourceType !== "article") return;
+    setCommentSubmitting(true);
+    setCommentNotice("");
+    try {
+      const basePayload = {
+        article_id: article.id,
+        content: commentForm.content.trim(),
+      };
+      const extPayload = {
+        ...basePayload,
+        author_name: commentForm.author_name.trim() || "Campus Reader",
+        author_email: commentForm.author_email.trim() || null,
+        status: "pending",
+      };
+      let { error } = await supabase.from("comments").insert(extPayload);
+      if (error && /column .* does not exist/i.test(error.message || "")) {
+        const retry = await supabase.from("comments").insert(basePayload);
+        error = retry.error;
+      }
+      if (error) throw error;
+      setCommentForm({ author_name: "", author_email: "", content: "" });
+      setCommentNotice(
+        "Thank you. Your comment has been submitted for editorial review."
+      );
+    } catch (err) {
+      setCommentNotice(
+        err.message || "Unable to submit comment right now."
+      );
+    } finally {
+      setCommentSubmitting(false);
     }
   };
 
@@ -179,9 +267,9 @@ export default function ArticleView() {
               {cleanEditorialText(article.title)}
             </h1>
 
-            {validDeck && (
+            {(article.subheadline || validDeck) && (
               <p className="text-lg md:text-xl font-serif italic text-gray-700 max-w-2xl mx-auto mb-6 leading-relaxed">
-                {validDeck}
+                {article.subheadline || validDeck}
               </p>
             )}
 
@@ -190,7 +278,7 @@ export default function ArticleView() {
                 By {article.author_name || "Editorial Staff"}
               </span>
               <span className="text-gray-300">&bull;</span>
-              <span className="text-amber-800">{formatDate(article.created_at)}</span>
+              <span className="text-amber-800">{formatDate(article.published_at || article.created_at)}</span>
               <span className="text-gray-300">&bull;</span>
               <span className="inline-flex items-center gap-1 text-gray-600">
                 <Clock size={12} /> {estimateReadingTime(article.content)}
@@ -204,12 +292,17 @@ export default function ArticleView() {
                 <img
                   src={article.image_url}
                   className="w-full h-full object-cover"
-                  alt={article.title}
+                  alt={article.image_caption || article.title}
                 />
               </div>
               <figcaption className="mt-3 text-xs font-serif italic text-gray-600 text-right">
                 {article.image_caption ||
                   `${cleanEditorialText(article.title)} — Courtesy of ${PUBLICATION.name}`}
+                {article.image_credit && (
+                  <span className="not-italic font-semibold text-gray-700">
+                    {" "}({article.image_credit})
+                  </span>
+                )}
               </figcaption>
             </figure>
           )}
@@ -227,8 +320,36 @@ export default function ArticleView() {
                       key={i}
                       className="text-xl md:text-2xl font-serif font-black text-blue-900 mt-10 mb-4 border-l-4 border-amber-400 pl-4"
                     >
-                      {block.text}
+                      {renderInlineMarkdown(block.text)}
                     </h2>
+                  );
+                }
+
+                if (block.type === "quote") {
+                  return (
+                    <blockquote
+                      key={i}
+                      className="my-6 border-l-4 border-red-900 pl-5 italic text-gray-700 text-lg bg-white py-3 pr-4"
+                    >
+                      {renderInlineMarkdown(block.text)}
+                    </blockquote>
+                  );
+                }
+
+                if (block.type === "image") {
+                  return (
+                    <figure key={i} className="my-8">
+                      <img
+                        src={block.url}
+                        alt={block.alt || article.title}
+                        className="w-full border border-gray-300"
+                      />
+                      {block.alt && (
+                        <figcaption className="mt-2 text-xs font-serif italic text-gray-500 text-right">
+                          {block.alt}
+                        </figcaption>
+                      )}
+                    </figure>
                   );
                 }
 
@@ -236,7 +357,9 @@ export default function ArticleView() {
                   return (
                     <div key={i} className="flex items-start gap-3 mb-3 pl-2">
                       <span className="mt-2.5 w-1.5 h-1.5 bg-red-900 shrink-0 rounded-full" />
-                      <p className="leading-relaxed">{block.text}</p>
+                      <p className="leading-relaxed">
+                        {renderInlineMarkdown(block.text)}
+                      </p>
                     </div>
                   );
                 }
@@ -247,14 +370,14 @@ export default function ArticleView() {
                       <span className="float-left text-6xl md:text-7xl font-serif font-black leading-[0.8] pr-3 pt-2 text-blue-900">
                         {block.text.charAt(0)}
                       </span>
-                      {block.text.slice(1)}
+                      {renderInlineMarkdown(block.text.slice(1))}
                     </p>
                   );
                 }
 
                 return (
                   <p key={i} className={isLiterary ? "mb-3" : "mb-6 leading-loose"}>
-                    {block.text}
+                    {renderInlineMarkdown(block.text)}
                   </p>
                 );
               })}
@@ -307,6 +430,95 @@ export default function ArticleView() {
             )}
           </div>
         </article>
+
+        {/* Reader Comments Section */}
+        {article.sourceType === "article" && (
+          <section className="max-w-3xl mx-auto mt-14 pt-10 border-t border-gray-300">
+            <h3 className="font-sans font-bold text-xs uppercase tracking-widest mb-6 text-blue-900 flex items-center gap-2">
+              <MessageSquare size={15} /> Reader Discussion ({comments.length})
+            </h3>
+
+            {comments.length > 0 && (
+              <div className="space-y-4 mb-8">
+                {comments.map((c) => (
+                  <div
+                    key={c.id}
+                    className="bg-white border border-gray-200 p-4"
+                  >
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="font-bold text-blue-900">
+                        {c.author_name || "Campus Reader"}
+                      </span>
+                      <span className="text-gray-400">
+                        {formatDate(c.created_at, { short: true })}
+                      </span>
+                    </div>
+                    <p className="font-serif text-sm text-gray-800 leading-relaxed">
+                      {c.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <form
+              onSubmit={handleCommentSubmit}
+              className="bg-white border border-gray-300 p-5 space-y-3"
+            >
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-800">
+                Leave a Comment
+              </p>
+              {commentNotice && (
+                <p className="text-xs bg-blue-50 border border-blue-200 text-blue-900 px-3 py-2">
+                  {commentNotice}
+                </p>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={commentForm.author_name}
+                  onChange={(e) =>
+                    setCommentForm((p) => ({
+                      ...p,
+                      author_name: e.target.value,
+                    }))
+                  }
+                  placeholder="Your Name (optional)"
+                  className="px-3 py-2 text-xs border border-gray-300 focus:outline-none focus:border-blue-900"
+                />
+                <input
+                  type="email"
+                  value={commentForm.author_email}
+                  onChange={(e) =>
+                    setCommentForm((p) => ({
+                      ...p,
+                      author_email: e.target.value,
+                    }))
+                  }
+                  placeholder="Campus Email (optional, kept private)"
+                  className="px-3 py-2 text-xs border border-gray-300 focus:outline-none focus:border-blue-900"
+                />
+              </div>
+              <textarea
+                rows={3}
+                required
+                value={commentForm.content}
+                onChange={(e) =>
+                  setCommentForm((p) => ({ ...p, content: e.target.value }))
+                }
+                placeholder="Share a respectful, constructive perspective on this report..."
+                className="w-full px-3 py-2 text-xs border border-gray-300 focus:outline-none focus:border-blue-900"
+              />
+              <button
+                type="submit"
+                disabled={commentSubmitting}
+                className="bg-blue-900 text-white px-5 py-2 text-xs font-bold uppercase tracking-widest hover:bg-red-900 transition-colors disabled:opacity-50"
+              >
+                {commentSubmitting ? "Submitting..." : "Submit Comment"}
+              </button>
+            </form>
+          </section>
+        )}
 
         {/* Related */}
         {related.length > 0 && (

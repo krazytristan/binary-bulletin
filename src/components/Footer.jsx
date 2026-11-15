@@ -1,7 +1,38 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 import { PUBLICATION } from "../utils/editorial";
+import { checkTableExists } from "../utils/cmsService";
 
 export default function Footer() {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    checkTableExists("site_settings").then((exists) => {
+      if (!exists || !active) return;
+      supabase
+        .from("site_settings")
+        .select("publication_name, publication_description, contact_email, contact_address, facebook_url")
+        .eq("id", "default")
+        .maybeSingle()
+        .then(({ data }) => {
+          if (active && data) setSettings(data);
+        });
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const pubName = settings?.publication_name || PUBLICATION.name;
+  const pubEmail = settings?.contact_email || PUBLICATION.email;
+  const pubAddress = settings?.contact_address || PUBLICATION.location;
+  const pubFacebook = settings?.facebook_url || PUBLICATION.facebookUrl;
+  const pubDesc =
+    settings?.publication_description ||
+    `The official student publication of ${PUBLICATION.institution}, committed to accurate, ethical, and student-centered campus journalism.`;
+
   return (
     <footer className="bg-blue-900 border-t-4 border-blue-950 text-white mt-16 font-sans">
       <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
@@ -15,7 +46,7 @@ export default function Footer() {
             />
             <div>
               <h2 className="text-lg font-serif font-black uppercase tracking-tight text-white">
-                {PUBLICATION.name}
+                {pubName}
               </h2>
               <p className="text-[10px] font-semibold uppercase tracking-widest text-blue-200">
                 {PUBLICATION.shortInstitution}
@@ -23,10 +54,10 @@ export default function Footer() {
             </div>
           </div>
           <p className="text-sm font-serif text-blue-100 leading-relaxed mb-5">
-            The official student publication of {PUBLICATION.institution}, committed to accurate, ethical, and student-centered campus journalism.
+            {pubDesc}
           </p>
           <a
-            href={PUBLICATION.facebookUrl}
+            href={pubFacebook}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 hover:text-amber-300 transition-colors"
@@ -89,10 +120,10 @@ export default function Footer() {
               </Link>
             </li>
             <li className="pt-2 text-blue-200">{PUBLICATION.institution}</li>
-            <li className="text-blue-200">{PUBLICATION.location}</li>
+            <li className="text-blue-200">{pubAddress}</li>
             <li>
-              <a href={`mailto:${PUBLICATION.email}`} className="text-blue-100 hover:text-amber-400 transition-colors">
-                {PUBLICATION.email}
+              <a href={`mailto:${pubEmail}`} className="text-blue-100 hover:text-amber-400 transition-colors">
+                {pubEmail}
               </a>
             </li>
           </ul>

@@ -46,7 +46,16 @@ export default function News() {
       ]);
       if (artRes.error) throw artRes.error;
 
-      const normalizedArticles = (artRes.data || []).map((item) => ({
+      const now = new Date();
+      const publicArticles = (artRes.data || []).filter((item) => {
+        if (!item.status || item.status === "published") return true;
+        if (item.status === "scheduled" && item.scheduled_at) {
+          return new Date(item.scheduled_at) <= now;
+        }
+        return false;
+      });
+
+      const normalizedArticles = publicArticles.map((item) => ({
         ...item,
         sourceType: "article",
         category: item.category || "News",

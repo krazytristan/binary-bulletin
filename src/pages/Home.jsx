@@ -28,12 +28,14 @@ import {
   isYouTubeUrl,
   getYouTubeThumbnailUrl,
 } from "../utils/editorial";
+import { checkTableExists } from "../utils/cmsService";
 
 export default function Home() {
   const [articles, setArticles] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [events, setEvents] = useState([]);
   const [videos, setVideos] = useState([]);
+  const [siteSettings, setSiteSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
@@ -45,14 +47,33 @@ export default function Home() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [articlesRes, annRes, eventsRes, videosRes] = await Promise.all([
+      const [articlesRes, annRes, eventsRes, videosRes, hasSiteSettings] = await Promise.all([
         supabase.from("articles").select("*").order("created_at", { ascending: false }),
         supabase.from("announcements").select("*").order("created_at", { ascending: false }),
         supabase.from("events").select("*").order("event_date", { ascending: true }).limit(3),
         supabase.from("videos").select("*").order("created_at", { ascending: false }).limit(2),
+        checkTableExists("site_settings"),
       ]);
 
-      const normalizedArticles = (articlesRes.data || []).map((item) => ({
+      if (hasSiteSettings) {
+        const { data: settingsRow } = await supabase
+          .from("site_settings")
+          .select("*")
+          .eq("id", "default")
+          .maybeSingle();
+        if (settingsRow) setSiteSettings(settingsRow);
+      }
+
+      const now = new Date();
+      const publicArticles = (articlesRes.data || []).filter((item) => {
+        if (!item.status || item.status === "published") return true;
+        if (item.status === "scheduled" && item.scheduled_at) {
+          return new Date(item.scheduled_at) <= now;
+        }
+        return false;
+      });
+
+      const normalizedArticles = publicArticles.map((item) => ({
         ...item,
         sourceType: "article",
         category: item.category || "News",
@@ -136,14 +157,21 @@ export default function Home() {
     );
   }, [articles, searchQuery]);
 
-  // Select Front Page Lead: prefer newest editorial/news/feature article with an image
+  // Select Front Page Lead: prefer admin-pinned hero, then featured flag, then newest editorial/news/feature article with an image
   const featured = useMemo(() => {
+    const pinnedId = siteSettings?.featured_article_id;
+    const pinned = pinnedId
+      ? filteredArticles.find((a) => String(a.id) === String(pinnedId))
+      : null;
+    if (pinned) return pinned;
+
     const editorialLead =
+      filteredArticles.find((a) => a.is_featured && a.sourceType === "article") ||
       filteredArticles.find((a) => a.sourceType === "article" && a.image_url) ||
       filteredArticles.find((a) => a.sourceType === "article") ||
       filteredArticles[0];
     return editorialLead || null;
-  }, [filteredArticles]);
+  }, [filteredArticles, siteSettings]);
 
   const recentDispatches = useMemo(() => {
     return filteredArticles.filter((a) => a.id !== featured?.id).slice(0, 4);
@@ -209,6 +237,34 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans selection:bg-blue-900 selection:text-white antialiased">
       <Navbar />
+
+      {siteSettings?.maintenance_mode && (
+        <div className="bg-amber-400 text-blue-950 text-xs font-bold py-2.5 px-4 text-center border-b border-amber-500">
+          {siteSettings.maintenance_message ||
+            "The Binary Bulletin is undergoing scheduled editorial maintenance."}
+        </div>
+      )}
+
+      {siteSettings?.breaking_news_enabled && siteSettings?.breaking_news_text && (
+        <div className="bg-red-900 text-white py-2.5 px-4 text-center text-xs font-bold tracking-wider uppercase">
+          <span className="bg-amber-400 text-blue-950 px-2 py-0.5 mr-2.5 font-black">
+            Breaking
+          </span>
+          {siteSettings.breaking_news_link ? (
+            <Link to={siteSettings.breaking_news_link} className="hover:underline">
+              {siteSettings.breaking_news_text}
+            </Link>
+          ) : (
+            <span>{siteSettings.breaking_news_text}</span>
+          )}
+        </div>
+      )}
+
+      {siteSettings?.homepage_config?.announcementBanner && (
+        <div className="bg-blue-50 border-b border-blue-200 text-blue-900 py-2 px-4 text-center text-xs font-semibold">
+          {siteSettings.homepage_config.announcementBanner}
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-8">
         {/* --- CLASSIC MASTHEAD --- */}
