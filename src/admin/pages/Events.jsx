@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { 
-  Calendar, 
   Plus, 
   Search, 
   Trash2, 
@@ -10,8 +9,7 @@ import {
   Clock,
   Loader2,
   Image as ImageIcon,
-  X,
-  FileText
+  X
 } from "lucide-react";
 
 export default function Events() {
@@ -347,10 +345,10 @@ export default function Events() {
 
       {/* DELETE DIALOG */}
       {deleteId && (
-        <div className="fixed inset-0 bg-blue-900/60 flex justify-center items-center z-60 p-4">
+        <div className="fixed inset-0 bg-blue-900/60 flex justify-center items-center z-[60] p-4">
           <div className="bg-white p-8 rounded-none max-w-sm w-full text-center ">
-            <h2 className="text-xl font-bold text-gray-900 mb-2 italic">Cancel Event?</h2>
-            <p className="text-gray-500 mb-6">This will remove the event from the NexGen calendar permanently.</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Cancel Event?</h2>
+            <p className="text-gray-500 mb-6">This will permanently remove the event from The Binary Bulletin events calendar.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)} className="flex-1 py-3 font-bold text-gray-400 hover:bg-gray-50 rounded-none">Back</button>
               <button onClick={confirmDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-none hover:bg-red-600  shadow-blue-100">Delete</button>

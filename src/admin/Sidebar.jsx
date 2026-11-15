@@ -14,11 +14,11 @@ import {
 export default function Sidebar({ setSidebarOpen }) {
   const links = [
     { name: "Dashboard", path: "/admin-panel/dashboard", icon: <LayoutDashboard size={16} /> },
-    { name: "Archive", path: "/admin-panel/articles", icon: <FileText size={16} /> },
-    { name: "Exhibits", path: "/admin-panel/admingallery", icon: <ImageIcon size={16} /> },
-    { name: "The Binary", path: "/admin-panel/adminthebinar", icon: <Video size={16} /> },
-    { name: "Registry", path: "/admin-panel/events", icon: <Calendar size={16} /> },
-    { name: "Bulletins", path: "/admin-panel/announcements", icon: <Bell size={16} /> },
+    { name: "News & Archive", path: "/admin-panel/articles", icon: <FileText size={16} /> },
+    { name: "Photo Gallery", path: "/admin-panel/admingallery", icon: <ImageIcon size={16} /> },
+    { name: "The Binary Online", path: "/admin-panel/adminthebinar", icon: <Video size={16} /> },
+    { name: "Campus Events", path: "/admin-panel/events", icon: <Calendar size={16} /> },
+    { name: "Announcements", path: "/admin-panel/announcements", icon: <Bell size={16} /> },
     { name: "Letters", path: "/admin-panel/messages", icon: <MessageSquare size={16} /> },
     { name: "Settings", path: "/admin-panel/settings", icon: <Shield size={16} /> },
   ];
@@ -29,10 +29,10 @@ export default function Sidebar({ setSidebarOpen }) {
       {/* BRANDING SECTION */}
       <div className="p-8 border-b-2 border-blue-900">
         <h2 className="text-2xl font-serif font-black text-blue-900 tracking-tighter uppercase mb-1">
-          Editor's Desk
+          Editor&apos;s Desk
         </h2>
-        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">
-          Binary Bulletin
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+          The Binary Bulletin
         </p>
       </div>
 
@@ -66,7 +66,7 @@ export default function Sidebar({ setSidebarOpen }) {
       <div className="p-6 border-t-2 border-blue-900">
         <NavLink
           to="/"
-          className="flex items-center justify-center gap-3 w-full py-4 border border-blue-900 text-[10px] font-bold uppercase tracking-widest text-blue-900 hover:bg-red-900 hover:text-amber-400 hover:border-red-900 hover:text-white transition-colors"
+          className="flex items-center justify-center gap-3 w-full py-4 border border-blue-900 text-[10px] font-bold uppercase tracking-widest text-blue-900 hover:bg-red-900 hover:border-red-900 hover:text-white transition-colors"
         >
           <ArrowLeft size={14} />
           View Live Publication

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../../lib/supabase"; 
 import { 
-  User, Lock, Save, Camera, 
+  User, Save, Camera, 
   CheckCircle, AlertCircle, Loader2,
   Shield, Briefcase, Mail
 } from "lucide-react";
@@ -131,7 +131,7 @@ export default function Settings() {
     <div className="p-6 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h1>
-        <p className="text-gray-500">Manage your THE BINARY BULLETIN identity and staff privileges.</p>
+        <p className="text-gray-500">Manage your The Binary Bulletin profile and editorial privileges.</p>
       </div>
 
       {success && (

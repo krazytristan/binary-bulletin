@@ -7,7 +7,6 @@ import {
   User, 
   Clock, 
   Loader2, 
-  ChevronRight,
   Inbox,
   Printer,
   AtSign
@@ -201,7 +200,7 @@ export default function Messages() {
                   <header className="mb-8 pb-8 border-b border-gray-50 flex flex-col md:flex-row justify-between gap-6">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                         <span className="px-2 py-0.5 bg-red-100 text-blue-700 text-[10px] font-bold uppercase rounded">Verified Source</span>
+                         <span className="px-2 py-0.5 bg-blue-50 text-blue-900 text-[10px] font-bold uppercase rounded">Reader Submission</span>
                       </div>
                       <h2 className="text-3xl font-bold text-gray-900 leading-tight">{selectedMessage.name}</h2>
                       <div className="flex items-center gap-2 text-blue-900 font-medium mt-1">

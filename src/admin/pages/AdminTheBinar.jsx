@@ -157,6 +157,7 @@ export default function AdminTheBinar() {
                 {isYouTube(v.video_url) ? (
                   <iframe
                     src={getYouTubeEmbed(v.video_url)}
+                    title={v.title}
                     className="w-full h-full"
                     allowFullScreen
                   />
@@ -263,7 +264,7 @@ export default function AdminTheBinar() {
 
       {/* DELETE MODAL */}
       {deleteId && (
-        <div className="fixed inset-0 bg-blue-900/60 flex justify-center items-center z-60 p-4">
+        <div className="fixed inset-0 bg-blue-900/60 flex justify-center items-center z-[60] p-4">
           <div className="bg-white p-8 rounded-none max-w-sm w-full text-center ">
             <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Video?</h2>
             <p className="text-gray-500 mb-6">This action is permanent and will remove the video from the site.</p>

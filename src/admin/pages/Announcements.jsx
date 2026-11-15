@@ -150,10 +150,10 @@ export default function AdminAnnouncements() {
                   <div className="flex items-center justify-center h-full text-gray-400"><ImageIcon size={40} /></div>
                 )}
                 <div className="absolute top-3 right-3 flex gap-2">
-                  <button onClick={() => handleEdit(a)} className="p-2 bg-white/90 backdrop-blur  rounded-full text-blue-900 hover:bg-red-900 hover:text-amber-400 hover:border-red-900 hover:text-white transition-colors">
+                  <button onClick={() => handleEdit(a)} className="p-2 bg-white/90 backdrop-blur rounded-full text-blue-900 hover:bg-blue-900 hover:text-white transition-colors">
                     <Edit2 size={16} />
                   </button>
-                  <button onClick={() => handleDelete(a.id)} className="p-2 bg-white/90 backdrop-blur  rounded-full text-red-600 hover:bg-red-600 hover:text-white transition-colors">
+                  <button onClick={() => handleDelete(a.id)} className="p-2 bg-white/90 backdrop-blur rounded-full text-red-600 hover:bg-red-600 hover:text-white transition-colors">
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -171,9 +171,9 @@ export default function AdminAnnouncements() {
         </div>
       )}
 
-      {/* 🔥 MODAL */}
+      {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-100 p-4">
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-none  w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
             
             <div className="flex justify-between items-center p-6 border-b">

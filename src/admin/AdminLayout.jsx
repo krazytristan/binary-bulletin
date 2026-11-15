@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { supabase } from "../lib/supabase";
-import { Menu, ChevronDown, User, Settings, LogOut, Loader2, Bell } from "lucide-react";
+import { Menu, ChevronDown, Settings, LogOut, Loader2, Bell } from "lucide-react";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -72,6 +72,21 @@ export default function AdminLayout() {
     setSidebarOpen(false);
   }, [location]);
 
+  const pageTitle = (() => {
+    const segment = location.pathname.split("/").pop();
+    const map = {
+      dashboard: "Editorial Dashboard",
+      articles: "News & Archive",
+      admingallery: "Photo Gallery",
+      adminthebinar: "The Binary Online",
+      events: "Campus Events",
+      announcements: "Official Announcements",
+      messages: "Letters to the Editor",
+      settings: "Account Settings",
+    };
+    return map[segment] || segment?.replace("-", " ") || "Dashboard";
+  })();
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/admin");
@@ -118,7 +133,7 @@ export default function AdminLayout() {
             </button>
             <div className="hidden sm:block">
               <h1 className="text-2xl font-serif font-black uppercase tracking-tight">
-                {location.pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
+                {pageTitle}
               </h1>
             </div>
           </div>

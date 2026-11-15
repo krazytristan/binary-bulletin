@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../lib/supabase";
 import { 
   PlusCircle, 
-  LayoutGrid, 
   Edit3, 
   Trash2, 
   X, 
@@ -10,8 +9,7 @@ import {
   ChevronRight, 
   Upload, 
   Loader2,
-  Clock,
-  Image as ImageIcon
+  Clock
 } from "lucide-react";
 
 export default function AdminGallery() {
@@ -133,15 +131,15 @@ export default function AdminGallery() {
     <div className="p-6 max-w-7xl mx-auto space-y-8">
       
       {/* HEADER SECTION */}
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Gallery</h1>
-          <p className="text-gray-500">Manage your campus visual content and albums.</p>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Photo Gallery</h1>
+          <p className="text-gray-500">Manage campus photojournalism albums and exhibits.</p>
         </div>
-        <div className="hidden md:flex gap-3">
+        <div className="flex gap-3">
           <button 
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-none text-sm font-medium hover:opacity-90 transition "
+            className="flex items-center gap-2 bg-blue-900 text-white px-4 py-2.5 rounded-none text-sm font-bold hover:bg-red-900 transition"
           >
             <PlusCircle size={16} /> New Album
           </button>
@@ -180,7 +178,7 @@ export default function AdminGallery() {
                     </p>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => openEdit(album)} className="p-1.5 text-gray-400 hover:text-primary transition-colors">
+                    <button onClick={() => openEdit(album)} className="p-1.5 text-gray-400 hover:text-blue-900 transition-colors">
                       <Edit3 size={16} />
                     </button>
                     <button onClick={() => setDeleteId(album.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
@@ -196,7 +194,7 @@ export default function AdminGallery() {
 
       {/* MODAL (Matches Dashboard Create Style) */}
       {modalOpen && (
-        <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-950/20 backdrop-blur-sm" onClick={resetForm} />
           
           <div className="relative bg-white w-full max-w-xl rounded-none  flex flex-col max-h-[90vh]">
@@ -256,7 +254,7 @@ export default function AdminGallery() {
               <button
                 disabled={actionLoading}
                 onClick={handleSubmit}
-                className="bg-primary text-white px-6 py-2 rounded-none font-medium text-sm flex items-center gap-2 "
+                className="bg-blue-900 hover:bg-red-900 text-white px-6 py-2 rounded-none font-bold text-sm flex items-center gap-2 transition"
               >
                 {actionLoading ? <Loader2 size={16} className="animate-spin" /> : "Save Album"}
               </button>
@@ -267,7 +265,7 @@ export default function AdminGallery() {
 
       {/* VIEWER DIALOG */}
       {viewerIndex !== null && (
-        <div className="fixed inset-0 bg-blue-900/95 flex items-center justify-center z-200 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-blue-900/95 flex items-center justify-center z-[60] p-4 backdrop-blur-sm">
           <button onClick={() => setViewerIndex(null)} className="absolute top-8 right-8 text-white/50 hover:text-white transition"><X size={32} /></button>
           
           <button onClick={() => setViewerIndex(prev => (prev - 1 + currentAlbum.length) % currentAlbum.length)} className="absolute left-4 p-4 text-white/30 hover:text-white transition bg-white/5 rounded-full">
@@ -284,7 +282,7 @@ export default function AdminGallery() {
 
       {/* DELETE CONFIRMATION */}
       {deleteId && (
-        <div className="fixed inset-0 bg-gray-950/20 backdrop-blur-sm flex justify-center items-center z-210 p-4">
+        <div className="fixed inset-0 bg-gray-950/20 backdrop-blur-sm flex justify-center items-center z-[70] p-4">
           <div className="bg-white p-8 rounded-none text-center max-w-xs w-full  border border-gray-50">
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 size={24} />

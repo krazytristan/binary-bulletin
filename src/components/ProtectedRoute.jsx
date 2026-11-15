@@ -8,7 +8,6 @@ export default function ProtectedRoute() {
   const location = useLocation();
 
   useEffect(() => {
-    // 1. Get the initial session state
     const checkSession = async () => {
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       setSession(currentSession);
@@ -17,7 +16,6 @@ export default function ProtectedRoute() {
 
     checkSession();
 
-    // 2. Listen for auth changes (Login/Logout/Token Refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
       setSession(currentSession);
       setLoading(false);
@@ -28,22 +26,18 @@ export default function ProtectedRoute() {
     };
   }, []);
 
-  // While checking auth, show a clean background to avoid the "White Screen" flash
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#05070a] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#FCFBF9] flex flex-col items-center justify-center gap-3">
+        <div className="w-8 h-8 border-4 border-blue-900 border-t-amber-400 rounded-full animate-spin"></div>
+        <p className="font-serif italic text-sm text-gray-600">Verifying editorial credentials...</p>
       </div>
     );
   }
 
-  // If no user is logged in, send them to the login page
-  // 'replace' prevents them from clicking 'back' into the admin panel
-  // 'state' remembers where they were trying to go
   if (!session) {
     return <Navigate to="/admin" state={{ from: location }} replace />;
   }
 
-  // If authenticated, render the sub-routes (Dashboard, Articles, etc.)
   return <Outlet />;
 }

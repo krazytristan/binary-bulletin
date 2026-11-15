@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { 
-  FileText, 
   Plus, 
   Search, 
-  MoreVertical, 
   Trash2, 
   Edit3, 
-  ExternalLink,
   Loader2,
   Image as ImageIcon,
   User,
@@ -285,7 +282,7 @@ export default function Articles() {
                   <tr key={article.id} className="hover:bg-gray-50/50 transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <img src={article.image_url || 'https://via.placeholder.com/150'} className="w-12 h-12 rounded-none object-cover bg-gray-100" />
+                        <img src={article.image_url || 'https://via.placeholder.com/150'} alt={article.title} className="w-12 h-12 rounded-none object-cover bg-gray-100" />
                         <span className="font-bold text-gray-900 line-clamp-1">{article.title}</span>
                       </div>
                     </td>
@@ -296,7 +293,7 @@ export default function Articles() {
                     </td>
                     <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                            <img src={article.author_image || 'https://via.placeholder.com/100'} className="w-6 h-6 rounded-full object-cover bg-gray-100" />
+                            <img src={article.author_image || 'https://via.placeholder.com/100'} alt={article.author_name || 'Author'} className="w-6 h-6 rounded-full object-cover bg-gray-100" />
                             <span className="text-sm text-gray-600">{article.author_name}</span>
                         </div>
                     </td>
@@ -381,7 +378,7 @@ export default function Articles() {
                   <div className="relative aspect-video bg-gray-50 rounded-none border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
                     {preview ? (
                       <>
-                        <img src={preview} className="w-full h-full object-cover" />
+                        <img src={preview} alt="Article thumbnail preview" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                           <button type="button" onClick={() => { setImageFile(null); setPreview(""); setForm({...form, image_url: ""})}} className="bg-white p-2 rounded-full text-red-500"><X size={20}/></button>
                         </div>
@@ -405,7 +402,7 @@ export default function Articles() {
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {galleryPreviews.map((src, index) => (
                     <div key={index} className="relative aspect-square rounded-none overflow-hidden border border-gray-100 group">
-                      <img src={src} className="w-full h-full object-cover" />
+                      <img src={src} alt={`Gallery item ${index + 1}`} className="w-full h-full object-cover" />
                       <button 
                         type="button" 
                         onClick={() => removeGalleryItem(index)}
@@ -424,13 +421,13 @@ export default function Articles() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Excerpt</label>
-                <textarea rows="2" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none resize-none" />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Excerpt (Lead Deck)</label>
+                <textarea rows="2" placeholder="Write a concise 1–2 sentence summary for the article card and deck..." value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none resize-none" />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Content</label>
-                <textarea rows="6" value={form.content} onChange={e => setForm({...form, content: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none" />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Content (Use ## before a line for subheadings)</label>
+                <textarea rows="6" placeholder="Write the full story here. Separate paragraphs with blank lines and prefix section headers with ## ..." value={form.content} onChange={e => setForm({...form, content: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-100 rounded-none focus:ring-2 focus:ring-black outline-none" />
               </div>
 
               <button 
@@ -447,7 +444,7 @@ export default function Articles() {
 
       {/* DELETE DIALOG */}
       {deleteId && (
-        <div className="fixed inset-0 bg-blue-900/60 flex justify-center items-center z-60 p-4">
+        <div className="fixed inset-0 bg-blue-900/60 flex justify-center items-center z-[60] p-4">
           <div className="bg-white p-8 rounded-none max-w-sm w-full text-center ">
             <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Article?</h2>
             <p className="text-gray-500 mb-6">This will permanently remove the story from the bulletin.</p>
