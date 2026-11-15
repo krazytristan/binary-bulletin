@@ -5,8 +5,9 @@ import { hasPermission } from "../../utils/rbac";
 import {
   checkTableExists,
   logActivity,
-  optimizeImageFile,
 } from "../../utils/cmsService";
+import SmartImage from "../../components/SmartImage";
+import { ACCEPTED_IMAGE_INPUT, validateImageFile } from "../../utils/imageUtils";
 import {
   User,
   Settings as SettingsIcon,
@@ -111,12 +112,14 @@ export default function Settings() {
     if (!file || !user?.id) return;
     setUploadingAvatar(true);
     try {
-      const optimized = await optimizeImageFile(file, 600, 0.85);
-      const ext = optimized.name.split(".").pop() || "jpg";
+      const check = await validateImageFile(file);
+      if (!check.valid) throw new Error(check.error);
+
+      const ext = file.name.split(".").pop() || "jpg";
       const fileName = `avatar_${user.id}_${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
-        .upload(fileName, optimized);
+        .upload(fileName, file, { contentType: file.type, cacheControl: "3600" });
       if (upErr) throw upErr;
 
       const {
@@ -341,13 +344,16 @@ export default function Settings() {
         >
           <div className="flex items-center gap-4">
             {profileForm.avatar_url ? (
-              <img
+              <SmartImage
                 src={profileForm.avatar_url}
-                alt="Avatar"
-                className="w-16 h-16 rounded-full object-cover border border-slate-200"
+                alt={profileForm.full_name || "Avatar"}
+                mode="avatar"
+                fit="cover"
+                containerClassName="w-16 h-16 rounded-full border border-slate-200 shrink-0"
+                fallbackLabel=""
               />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-900 font-black text-xl flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-900 font-black text-xl flex items-center justify-center shrink-0">
                 {(profileForm.full_name || user?.email || "U")
                   .charAt(0)
                   .toUpperCase()}
@@ -360,7 +366,7 @@ export default function Settings() {
                 {uploadingAvatar ? "Uploading..." : "Change Profile Photo"}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept={ACCEPTED_IMAGE_INPUT}
                   onChange={handleAvatarUpload}
                   className="hidden"
                 />

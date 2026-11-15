@@ -3,6 +3,8 @@ import { useOutletContext } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { hasPermission } from "../../utils/rbac";
 import { logActivity } from "../../utils/cmsService";
+import SmartImage from "../../components/SmartImage";
+import { ACCEPTED_IMAGE_INPUT, validateImageFile } from "../../utils/imageUtils";
 import { 
   Plus, 
   Search, 
@@ -38,6 +40,7 @@ export default function Events() {
 
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState("");
+  const [imageError, setImageError] = useState("");
 
   useEffect(() => {
     fetchEvents();
@@ -61,14 +64,21 @@ export default function Events() {
     }
   };
 
-  // 🖼️ HANDLE IMAGE
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (preview && preview.startsWith('blob:')) URL.revokeObjectURL(preview);
-      setImageFile(file);
-      setPreview(URL.createObjectURL(file));
+  // 🖼️ HANDLE IMAGE (VALIDATION + PREVIEW)
+  const handleImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    setImageError("");
+    if (!file) return;
+
+    const check = await validateImageFile(file);
+    if (!check.valid) {
+      setImageError(check.error);
+      return;
     }
+
+    if (preview && preview.startsWith('blob:')) URL.revokeObjectURL(preview);
+    setImageFile(file);
+    setPreview(URL.createObjectURL(file));
   };
 
   const uploadImage = async () => {
@@ -80,7 +90,10 @@ export default function Events() {
 
     const { error: uploadError } = await supabase.storage
       .from("events")
-      .upload(filePath, imageFile);
+      .upload(filePath, imageFile, {
+        contentType: imageFile.type,
+        cacheControl: "3600",
+      });
 
     if (uploadError) {
       console.error("Storage Upload Error:", uploadError.message);
@@ -260,10 +273,13 @@ export default function Events() {
                   <tr key={event.id} className="hover:bg-gray-50/50 transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <img 
-                          src={event.image_url || 'https://via.placeholder.com/150'} 
-                          alt="" 
-                          className="w-12 h-12 rounded-none object-cover bg-gray-100 border border-gray-100" 
+                        <SmartImage
+                          src={event.image_url}
+                          alt={event.title}
+                          mode="thumbnail"
+                          fit="cover"
+                          containerClassName="w-12 h-12 shrink-0 border border-gray-100"
+                          fallbackLabel=""
                         />
                         <span className="font-bold text-gray-900 line-clamp-1">{event.title}</span>
                       </div>
@@ -334,24 +350,32 @@ export default function Events() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Thumbnail</label>
                   <div className="relative aspect-video bg-gray-50 rounded-none border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
                     {preview ? (
                       <>
-                        <img src={preview} className="w-full h-full object-cover" alt="Preview" />
-                        <div className="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                          <button type="button" onClick={() => { setImageFile(null); setPreview(""); }} className="bg-white p-2 rounded-full text-red-500"><X size={20}/></button>
+                        <SmartImage
+                          src={preview}
+                          alt="Event banner preview"
+                          mode="preview"
+                          fit="contain"
+                          showDimensionsBadge
+                          containerClassName="w-full h-full"
+                        />
+                        <div className="absolute top-2 right-2 z-20">
+                          <button type="button" onClick={() => { setImageFile(null); setPreview(""); }} className="bg-white/95 p-1.5 rounded-full text-red-500 shadow hover:bg-red-50 transition"><X size={16}/></button>
                         </div>
                       </>
                     ) : (
                       <div className="text-center p-6">
                         <ImageIcon className="mx-auto text-gray-300 mb-2" size={32} />
-                        <p className="text-xs text-gray-400 font-bold">Click to upload banner</p>
+                        <p className="text-xs text-gray-400 font-bold">Click to upload banner (JPG, PNG, WebP)</p>
                       </div>
                     )}
-                    <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    <input type="file" accept={ACCEPTED_IMAGE_INPUT} onChange={handleImageChange} className="absolute inset-0 z-10 opacity-0 cursor-pointer" />
                   </div>
+                  {imageError && <p className="text-xs text-red-600 font-medium">{imageError}</p>}
                 </div>
               </div>
 

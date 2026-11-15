@@ -9,6 +9,7 @@ import {
 } from "../../utils/rbac";
 import { formatDate } from "../../utils/editorial";
 import { logActivity } from "../../utils/cmsService";
+import SmartImage from "../../components/SmartImage";
 import {
   Users as UsersIcon,
   Shield,
@@ -327,10 +328,13 @@ export default function Users() {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           {u.avatar_url ? (
-                            <img
+                            <SmartImage
                               src={u.avatar_url}
-                              alt=""
-                              className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                              alt={u.full_name || u.email || "Staff avatar"}
+                              mode="avatar"
+                              fit="cover"
+                              containerClassName="w-8 h-8 rounded-full border border-slate-200 shrink-0"
+                              fallbackLabel=""
                             />
                           ) : (
                             <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-900 font-black text-xs flex items-center justify-center">

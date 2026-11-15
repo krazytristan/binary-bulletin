@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SmartImage from "../components/SmartImage";
 import { Search, X, Play, Film } from "lucide-react";
 import {
   PUBLICATION,
@@ -110,10 +111,15 @@ export default function TheBinar() {
                     onClick={() => setViewer(v)}
                   >
                     {ytThumb ? (
-                      <img
+                      <SmartImage
                         src={ytThumb}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        mode="thumbnail"
+                        fit="cover"
+                        containerClassName="w-full h-full"
+                        className="transition-transform duration-700 group-hover:scale-105"
                         alt={v.title}
+                        fallbackLabel="Broadcast"
+                        fallbackIcon={Film}
                       />
                     ) : v.video_url ? (
                       <video

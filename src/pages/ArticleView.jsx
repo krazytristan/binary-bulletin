@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { ChevronLeft, Share2, Check, Clock, Newspaper, MessageSquare } from "lucide-react";
+import SmartImage from "../components/SmartImage";
+import { ChevronLeft, Share2, Check, Clock, Newspaper, MessageSquare, X } from "lucide-react";
 import {
   PUBLICATION,
   formatDate,
@@ -55,6 +56,7 @@ export default function ArticleView() {
   const [commentNotice, setCommentNotice] = useState("");
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -288,10 +290,14 @@ export default function ArticleView() {
 
           {article.image_url && (
             <figure className="mb-10 md:mb-12">
-              <div className="aspect-video w-full bg-gray-100 border-2 border-blue-900 overflow-hidden shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
-                <img
+              <div className="w-full bg-[#F5F3EE] border-2 border-blue-900 overflow-hidden shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
+                <SmartImage
                   src={article.image_url}
-                  className="w-full h-full object-cover"
+                  mode="article"
+                  fit="contain"
+                  loading="eager"
+                  onClick={() => setLightboxImage(article.image_url)}
+                  className="max-h-[75vh] cursor-zoom-in"
                   alt={article.image_caption || article.title}
                 />
               </div>
@@ -339,10 +345,14 @@ export default function ArticleView() {
                 if (block.type === "image") {
                   return (
                     <figure key={i} className="my-8">
-                      <img
+                      <SmartImage
                         src={block.url}
                         alt={block.alt || article.title}
-                        className="w-full border border-gray-300"
+                        mode="inline"
+                        fit="contain"
+                        onClick={() => setLightboxImage(block.url)}
+                        containerClassName="border border-gray-300"
+                        className="max-h-[650px] cursor-zoom-in"
                       />
                       {block.alt && (
                         <figcaption className="mt-2 text-xs font-serif italic text-gray-500 text-right">
@@ -414,9 +424,13 @@ export default function ArticleView() {
                   {article.gallery.map((url, index) => (
                     <figure key={index} className="group">
                       <div className="aspect-[4/3] border-2 border-gray-300 overflow-hidden bg-gray-100 group-hover:border-blue-900 transition-colors">
-                        <img
+                        <SmartImage
                           src={url}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          mode="card"
+                          fit="auto"
+                          onClick={() => setLightboxImage(url)}
+                          containerClassName="w-full h-full"
+                          className="cursor-zoom-in transition-transform duration-700 group-hover:scale-105"
                           alt={`${article.title} — Photograph ${index + 1}`}
                         />
                       </div>
@@ -531,10 +545,14 @@ export default function ArticleView() {
                 <Link key={item.id} to={`/article/${item.id}`} className="group">
                   <div className="aspect-[16/10] border border-gray-300 mb-3 overflow-hidden bg-gray-100 group-hover:border-blue-900 transition-colors">
                     {item.image_url ? (
-                      <img
+                      <SmartImage
                         src={item.image_url}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        mode="card"
+                        fit="auto"
+                        containerClassName="w-full h-full"
+                        className="transition-transform duration-700 group-hover:scale-105"
                         alt={item.title}
+                        fallbackLabel={item.category || "Article"}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-blue-50/70">
@@ -554,6 +572,33 @@ export default function ArticleView() {
           </section>
         )}
       </main>
+
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-blue-950/95 backdrop-blur-md p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button
+            type="button"
+            aria-label="Close full image viewer"
+            onClick={() => setLightboxImage(null)}
+            className="absolute top-6 right-6 p-2 bg-white text-blue-900 border-2 border-blue-900 hover:bg-red-900 hover:text-white transition-colors"
+          >
+            <X size={22} />
+          </button>
+          <div onClick={(e) => e.stopPropagation()} className="max-w-5xl w-full flex justify-center">
+            <SmartImage
+              src={lightboxImage}
+              alt={article.title}
+              mode="lightbox"
+              fit="contain"
+              loading="eager"
+              containerClassName="bg-transparent"
+              showDimensionsBadge
+            />
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

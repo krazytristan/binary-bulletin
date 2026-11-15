@@ -2,7 +2,14 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { hasPermission } from "../../utils/rbac";
-import { logActivity, optimizeImageFile } from "../../utils/cmsService";
+import { logActivity } from "../../utils/cmsService";
+import {
+  ACCEPTED_IMAGE_INPUT,
+  validateImageFile,
+  createThumbnailFile,
+  formatFileSize,
+} from "../../utils/imageUtils";
+import SmartImage from "../../components/SmartImage";
 import {
   Upload,
   Search,
@@ -15,6 +22,7 @@ import {
   CheckCircle2,
   Eye,
   RefreshCw,
+  ExternalLink,
 } from "lucide-react";
 
 const BUCKETS = ["articles", "events", "pubmats", "avatars"];
@@ -145,20 +153,44 @@ export default function MediaLibrary() {
 
     setUploading(true);
     let successCount = 0;
+    const rejectedMessages = [];
     try {
       for (const file of files) {
-        const optimized = await optimizeImageFile(file, 1600, 0.85);
-        const ext = optimized.name.split(".").pop() || "jpg";
-        const cleanName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}.${ext}`;
+        const validation = await validateImageFile(file);
+        if (!validation.valid) {
+          rejectedMessages.push(`${file.name}: ${validation.error}`);
+          continue;
+        }
 
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const baseId = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        const cleanName = `${baseId}.${ext}`;
+
+        // Preserve original file intact without altering dimensions or quality
         const { error: upErr } = await supabase.storage
           .from(uploadBucket)
-          .upload(cleanName, optimized);
+          .upload(cleanName, file);
         if (upErr) throw upErr;
 
         const {
           data: { publicUrl },
         } = supabase.storage.from(uploadBucket).getPublicUrl(cleanName);
+
+        // Generate a proportional thumbnail separately for faster grid loading
+        let thumbnailUrl = null;
+        const thumbFile = await createThumbnailFile(file, 480, 0.82);
+        if (thumbFile) {
+          const thumbExt = thumbFile.name.split(".").pop() || "webp";
+          const thumbPath = `thumbs/${baseId}_thumb.${thumbExt}`;
+          const { error: thumbErr } = await supabase.storage
+            .from(uploadBucket)
+            .upload(thumbPath, thumbFile);
+          if (!thumbErr) {
+            thumbnailUrl = supabase.storage
+              .from(uploadBucket)
+              .getPublicUrl(thumbPath).data.publicUrl;
+          }
+        }
 
         const basePayload = {
           file_name: file.name,
@@ -170,27 +202,53 @@ export default function MediaLibrary() {
           title: file.name.replace(/\.[^/.]+$/, ""),
           folder: uploadBucket,
           storage_path: cleanName,
-          file_size: optimized.size,
-          mime_type: optimized.type,
+          file_size: file.size,
+          mime_type: file.type,
+        };
+        const richPayload = {
+          ...extPayload,
+          thumbnail_url: thumbnailUrl,
+          width: validation.width,
+          height: validation.height,
+          orientation: validation.orientation,
         };
 
-        let { error: dbErr } = await supabase.from("media").insert(extPayload);
+        let { error: dbErr } = await supabase.from("media").insert(richPayload);
         if (dbErr && /column .* does not exist/i.test(dbErr.message || "")) {
-          const retry = await supabase.from("media").insert(basePayload);
-          dbErr = retry.error;
+          const extRetry = await supabase.from("media").insert(extPayload);
+          dbErr = extRetry.error;
+          if (dbErr && /column .* does not exist/i.test(dbErr.message || "")) {
+            const retry = await supabase.from("media").insert(basePayload);
+            dbErr = retry.error;
+          }
         }
         if (dbErr) throw dbErr;
         successCount += 1;
       }
 
-      await logActivity({
-        action: `Uploaded ${successCount} media file(s) to "${uploadBucket}"`,
-        userId: user?.id,
-        userName: profile?.full_name,
-        userRole: role,
-        entityType: "media",
-      });
-      showToast("success", `Uploaded & optimized ${successCount} image(s).`);
+      if (successCount > 0) {
+        await logActivity({
+          action: `Uploaded ${successCount} original image(s) with thumbnails to "${uploadBucket}"`,
+          userId: user?.id,
+          userName: profile?.full_name,
+          userRole: role,
+          entityType: "media",
+        });
+      }
+
+      if (rejectedMessages.length > 0 && successCount === 0) {
+        showToast("error", rejectedMessages[0]);
+      } else if (rejectedMessages.length > 0) {
+        showToast(
+          "error",
+          `Uploaded ${successCount}; skipped ${rejectedMessages.length} invalid file(s).`
+        );
+      } else if (successCount > 0) {
+        showToast(
+          "success",
+          `Uploaded ${successCount} original image(s) with proportional thumbnails.`
+        );
+      }
       loadMedia();
     } catch (err) {
       showToast("error", err.message || "Media upload failed.");
@@ -329,11 +387,11 @@ export default function MediaLibrary() {
 
             <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-900 text-white text-xs font-bold hover:bg-blue-800 cursor-pointer transition shadow-sm">
               <Upload className="w-4 h-4" />
-              {uploading ? "Optimizing & Uploading..." : "Upload Images"}
+              {uploading ? "Validating & Uploading..." : "Upload Images"}
               <input
                 type="file"
                 multiple
-                accept="image/*"
+                accept={ACCEPTED_IMAGE_INPUT}
                 onChange={handleMultiUpload}
                 className="hidden"
                 disabled={uploading}
@@ -415,15 +473,23 @@ export default function MediaLibrary() {
                 className="bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col group hover:border-blue-300 transition"
               >
                 <div className="relative h-36 bg-slate-100">
-                  <img
-                    src={item.file_url}
+                  <SmartImage
+                    src={item.thumbnail_url || item.file_url}
                     alt={item.alt_text || item.file_name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
+                    mode="thumbnail"
+                    fit="auto"
+                    containerClassName="w-full h-full cursor-pointer"
+                    onClick={() => setPreviewItem(item)}
+                    fallbackLabel="Unavailable"
                   />
                   <span className="absolute top-2 left-2 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-900/75 text-white">
                     {item.folder}
                   </span>
+                  {item.width && item.height && (
+                    <span className="absolute bottom-2 left-2 text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-900/75 text-white">
+                      {item.width}&times;{item.height}
+                    </span>
+                  )}
                   {refs.length > 0 && (
                     <span className="absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-600 text-white">
                       In Use ({refs.length})
@@ -493,25 +559,46 @@ export default function MediaLibrary() {
       {previewItem && (
         <div className="fixed inset-0 z-50 bg-slate-900/75 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl">
-            <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+            <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
               <h3 className="text-sm font-black text-slate-900 truncate">
                 {previewItem.title || previewItem.file_name}
               </h3>
-              <button
-                type="button"
-                onClick={() => setPreviewItem(null)}
-                className="p-1 text-slate-500"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={previewItem.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-900 hover:underline"
+                >
+                  Open Original <ExternalLink className="w-3 h-3" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewItem(null)}
+                  className="p-1 text-slate-500"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <div className="p-5 space-y-3">
-              <img
+              <SmartImage
                 src={previewItem.file_url}
                 alt={previewItem.alt_text || previewItem.file_name}
-                className="w-full max-h-[60vh] object-contain rounded-lg bg-slate-100"
+                mode="preview"
+                fit="contain"
+                loading="eager"
+                showDimensionsBadge
+                containerClassName="rounded-lg border border-slate-200"
+                className="max-h-[60vh]"
               />
               <div className="text-xs text-slate-600 space-y-1">
+                {previewItem.file_size && (
+                  <p>
+                    <strong>Original Size:</strong> {formatFileSize(previewItem.file_size)}
+                    {previewItem.mime_type ? ` (${previewItem.mime_type})` : ""}
+                  </p>
+                )}
                 {previewItem.caption && (
                   <p>
                     <strong>Caption:</strong> {previewItem.caption}

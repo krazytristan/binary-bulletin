@@ -14,6 +14,13 @@ import {
   EDITORIAL_ROLES,
 } from "./utils/rbac";
 import { slugify } from "./utils/cmsService";
+import {
+  classifyOrientation,
+  resolveObjectFit,
+  isSupportedImageType,
+  validateImageFile,
+  formatFileSize,
+} from "./utils/imageUtils";
 
 test("formats YYYY-MM-DD dates without timezone day shift", () => {
   expect(formatDate("2026-07-20")).toBe("July 20, 2026");
@@ -70,4 +77,45 @@ test("resolves editorial status metadata and generates SEO slugs", () => {
   expect(slugify("AMACC Lipa Wins Regional Tech Cup 2026!")).toBe(
     "amacc-lipa-wins-regional-tech-cup-2026"
   );
+});
+
+test("classifies image orientations and resolves object-fit behavior cleanly", () => {
+  expect(classifyOrientation(1600, 900)).toBe("landscape");
+  expect(classifyOrientation(800, 1200)).toBe("portrait");
+  expect(classifyOrientation(1000, 1020)).toBe("square");
+  expect(classifyOrientation(0, 0)).toBe("landscape");
+
+  expect(resolveObjectFit({ mode: "article", orientation: "landscape" })).toBe("contain");
+  expect(resolveObjectFit({ mode: "preview", orientation: "landscape" })).toBe("contain");
+  expect(resolveObjectFit({ mode: "lightbox", orientation: "square" })).toBe("contain");
+  expect(resolveObjectFit({ mode: "card", orientation: "portrait" })).toBe("contain");
+  expect(resolveObjectFit({ mode: "card", orientation: "landscape" })).toBe("cover");
+  expect(resolveObjectFit({ mode: "thumbnail", orientation: "portrait" })).toBe("cover");
+  expect(resolveObjectFit({ mode: "card", orientation: "portrait", fit: "cover" })).toBe("cover");
+});
+
+test("validates supported image formats and formats file sizes", async () => {
+  expect(isSupportedImageType({ type: "image/jpeg", name: "photo.jpg" })).toBe(true);
+  expect(isSupportedImageType({ type: "image/png", name: "graphic.png" })).toBe(true);
+  expect(isSupportedImageType({ type: "image/webp", name: "banner.webp" })).toBe(true);
+  expect(isSupportedImageType({ type: "", name: "campus.jpeg" })).toBe(true);
+  expect(isSupportedImageType({ type: "image/gif", name: "anim.gif" })).toBe(false);
+  expect(isSupportedImageType({ type: "application/pdf", name: "issue.pdf" })).toBe(false);
+
+  expect(formatFileSize(512)).toBe("512 B");
+  expect(formatFileSize(2048)).toBe("2.0 KB");
+  expect(formatFileSize(2 * 1024 * 1024)).toBe("2.00 MB");
+
+  const emptyResult = await validateImageFile(null);
+  expect(emptyResult.valid).toBe(false);
+
+  const gifFile = new File(["gif"], "test.gif", { type: "image/gif" });
+  const unsupportedResult = await validateImageFile(gifFile);
+  expect(unsupportedResult.valid).toBe(false);
+  expect(unsupportedResult.error).toMatch(/JPG, JPEG, PNG, or WebP/i);
+
+  const zeroBytePng = new File([], "empty.png", { type: "image/png" });
+  const zeroResult = await validateImageFile(zeroBytePng);
+  expect(zeroResult.valid).toBe(false);
+  expect(zeroResult.error).toMatch(/empty/i);
 });

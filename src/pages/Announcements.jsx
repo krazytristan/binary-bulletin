@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SmartImage from "../components/SmartImage";
 import { Search, Maximize2, X, Bell } from "lucide-react";
 import { PUBLICATION, formatDate, cleanEditorialText, parseArticleBlocks } from "../utils/editorial";
 
@@ -132,10 +133,15 @@ export default function Announcements() {
                       className="w-full h-48 sm:h-56 border-b-2 border-blue-900 relative cursor-pointer bg-gray-100 overflow-hidden shrink-0"
                       onClick={() => setViewerImage(item.image_url)}
                     >
-                      <img
+                      <SmartImage
                         src={item.image_url}
                         alt={cleanEditorialText(item.title)}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
+                        mode="card"
+                        fit="auto"
+                        containerClassName="w-full h-full"
+                        className="group-hover:scale-105 transition-all duration-700"
+                        fallbackLabel="Official Campus Advisory"
+                        fallbackIcon={Bell}
                       />
                       <div className="absolute inset-0 bg-blue-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Maximize2 className="text-amber-400 drop-shadow-md" size={24} />
@@ -232,11 +238,15 @@ export default function Announcements() {
 
               {selectedItem.image_url && (
                 <figure className="mb-8">
-                  <img
+                  <SmartImage
                     src={selectedItem.image_url}
                     alt={cleanEditorialText(selectedItem.title)}
+                    mode="article"
+                    fit="contain"
+                    loading="eager"
                     onClick={() => setViewerImage(selectedItem.image_url)}
-                    className="w-full max-h-[420px] object-contain bg-gray-50 border border-gray-300 cursor-zoom-in"
+                    containerClassName="border border-gray-300"
+                    className="max-h-[460px] cursor-zoom-in"
                   />
                   <figcaption className="mt-2 text-xs font-serif italic text-gray-500 text-right">
                     Official Notice Visual &mdash; Click image to enlarge
@@ -290,10 +300,14 @@ export default function Announcements() {
             className="w-full max-w-6xl max-h-screen p-4 md:p-12 flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
+            <SmartImage
               src={viewerImage}
-              className="max-h-[88vh] w-auto border-2 border-amber-400 shadow-2xl object-contain bg-white"
+              mode="lightbox"
+              fit="contain"
+              loading="eager"
+              containerClassName="border-2 border-amber-400 shadow-2xl bg-white"
               alt="Official notice full view"
+              showDimensionsBadge
             />
           </div>
         </div>

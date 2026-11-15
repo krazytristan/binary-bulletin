@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SmartImage from "../components/SmartImage";
 import { Search, X, ChevronLeft, ChevronRight, Images } from "lucide-react";
 import { PUBLICATION, formatDate } from "../utils/editorial";
 
@@ -122,10 +123,15 @@ export default function Gallery() {
                 >
                   <div className="aspect-[4/3] relative overflow-hidden bg-gray-100 border-b-2 border-gray-200 group-hover:border-blue-900 transition-colors">
                     {coverImage ? (
-                      <img
+                      <SmartImage
                         src={coverImage}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        mode="card"
+                        fit="auto"
+                        containerClassName="w-full h-full"
+                        className="transition-transform duration-700 group-hover:scale-105"
                         alt={album.title}
+                        fallbackLabel="Album Cover"
+                        fallbackIcon={Images}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -205,10 +211,14 @@ export default function Gallery() {
             className="w-full max-w-6xl max-h-screen p-8 md:p-14 flex flex-col items-center justify-center gap-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
+            <SmartImage
               src={viewer}
-              className="max-h-[76vh] w-auto border-[3px] border-amber-400 shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] object-contain bg-white"
+              mode="lightbox"
+              fit="contain"
+              loading="eager"
+              containerClassName="border-[3px] border-amber-400 shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] bg-white"
               alt={`${currentTitle} — Exhibit ${viewerIndex + 1}`}
+              showDimensionsBadge
             />
             <div className="bg-white px-5 py-2 border-2 border-blue-900 shadow-lg text-xs font-bold uppercase tracking-widest text-blue-900 text-center">
               {currentTitle} &bull; Photo {viewerIndex + 1} of {currentAlbum.length}

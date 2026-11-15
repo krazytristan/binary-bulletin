@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SmartImage from "../components/SmartImage";
 import { Link } from "react-router-dom";
 import { Search, ChevronUp, Newspaper } from "lucide-react";
 import {
@@ -176,10 +177,14 @@ export default function News() {
                   className="aspect-[16/10] overflow-hidden bg-gray-100 border border-gray-300 relative"
                 >
                   {latest.image_url ? (
-                    <img
+                    <SmartImage
                       src={latest.image_url}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      mode="card"
+                      fit="auto"
+                      containerClassName="w-full h-full"
+                      className="transition-transform duration-700 group-hover:scale-105"
                       alt={latest.title}
+                      fallbackLabel={latest.category}
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50/70">
@@ -233,10 +238,14 @@ export default function News() {
                       className="block aspect-[4/3] overflow-hidden bg-gray-100 border border-gray-300 mb-4 group-hover:border-blue-900 transition-colors"
                     >
                       {a.image_url ? (
-                        <img
+                        <SmartImage
                           src={a.image_url}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          mode="card"
+                          fit="auto"
+                          containerClassName="w-full h-full"
+                          className="group-hover:scale-105 transition-transform duration-700"
                           alt={a.title}
+                          fallbackLabel={a.category}
                         />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50/70 p-6 text-center">

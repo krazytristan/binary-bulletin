@@ -3,6 +3,8 @@ import { useOutletContext } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { hasPermission } from "../../utils/rbac";
 import { logActivity } from "../../utils/cmsService";
+import SmartImage from "../../components/SmartImage";
+import { ACCEPTED_IMAGE_INPUT, validateImageFile } from "../../utils/imageUtils";
 import { 
   PlusCircle, 
   Edit3, 
@@ -28,6 +30,7 @@ export default function AdminGallery() {
   const [title, setTitle] = useState("");
   const [files, setFiles] = useState([]);
   const [preview, setPreview] = useState([]);
+  const [uploadError, setUploadError] = useState("");
   const [deleteId, setDeleteId] = useState(null);
 
   const [viewerIndex, setViewerIndex] = useState(null);
@@ -49,28 +52,26 @@ export default function AdminGallery() {
     setLoading(false);
   };
 
-  const compressImage = (file) =>
-    new Promise((resolve) => {
-      const img = new Image();
-      const reader = new FileReader();
-      reader.onload = (e) => (img.src = e.target.result);
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const scale = 800 / img.width;
-        canvas.width = 800;
-        canvas.height = img.height * scale;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob((blob) => {
-          resolve(new File([blob], file.name, { type: "image/jpeg" }));
-        }, "image/jpeg", 0.7);
-      };
-      reader.readAsDataURL(file);
-    });
-
   const processFiles = async (selected) => {
-    const compressed = await Promise.all(selected.map(f => compressImage(f)));
-    const newFiles = [...files, ...compressed];
+    setUploadError("");
+    const validFiles = [];
+    const errors = [];
+
+    for (const file of selected) {
+      const check = await validateImageFile(file);
+      if (!check.valid) {
+        errors.push(`${file.name}: ${check.error}`);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (errors.length > 0) {
+      setUploadError(errors[0]);
+    }
+    if (validFiles.length === 0) return;
+
+    const newFiles = [...files, ...validFiles];
     setFiles(newFiles);
     setPreview(newFiles.map((f) => URL.createObjectURL(f)));
   };
@@ -78,8 +79,12 @@ export default function AdminGallery() {
   const uploadImages = async () => {
     let urls = [];
     for (let file of files) {
-      const name = `gallery/${Date.now()}-${file.name}`;
-      await supabase.storage.from("articles").upload(name, file);
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const name = `gallery/${Date.now()}-${safeName}`;
+      await supabase.storage.from("articles").upload(name, file, {
+        contentType: file.type,
+        cacheControl: "3600",
+      });
       const { data } = supabase.storage.from("articles").getPublicUrl(name);
       urls.push(data.publicUrl);
     }
@@ -183,11 +188,14 @@ export default function AdminGallery() {
             <div key={album.id} className="bg-white rounded-none  border border-gray-100 overflow-hidden group">
               {/* Thumbnail */}
               <div className="relative h-48 overflow-hidden bg-gray-50">
-                <img
+                <SmartImage
                   src={album.images?.[0]}
-                  className="w-full h-full object-cover cursor-pointer"
+                  alt={album.title || "Album thumbnail"}
+                  mode="card"
+                  fit="auto"
+                  containerClassName="h-48"
+                  className="cursor-pointer"
                   onClick={() => { setCurrentAlbum(album.images); setViewerIndex(0); }}
-                  alt=""
                 />
                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-none text-[10px] font-bold text-gray-600 ">
                   {album.images?.length} PHOTOS
@@ -253,20 +261,22 @@ export default function AdminGallery() {
                 >
                   <Upload size={24} className="mx-auto text-gray-400 mb-2" />
                   <p className="text-sm text-gray-500 font-medium">Click to browse or drag and drop</p>
-                  <input type="file" multiple ref={fileInputRef} onChange={(e) => processFiles(Array.from(e.target.files))} className="hidden" accept="image/*" />
+                  <input type="file" multiple ref={fileInputRef} onChange={(e) => processFiles(Array.from(e.target.files))} className="hidden" accept={ACCEPTED_IMAGE_INPUT} />
                 </div>
+                <p className="text-[11px] text-gray-400 mt-1.5">JPG, JPEG, PNG, or WebP. Original image proportions & quality are preserved.</p>
+                {uploadError && <p className="text-xs text-red-600 mt-1.5 font-medium">{uploadError}</p>}
               </div>
 
               {preview.length > 0 && (
                 <div className="grid grid-cols-4 gap-3">
                   {preview.map((img, i) => (
-                    <div key={i} className="relative aspect-square rounded-none overflow-hidden border border-gray-100 ">
-                      <img src={img} className="h-full w-full object-cover" alt="" />
+                    <div key={i} className="relative aspect-square rounded-none overflow-hidden border border-gray-100 bg-gray-50">
+                      <SmartImage src={img} alt={`Preview ${i + 1}`} mode="preview" fit="contain" containerClassName="h-full w-full" />
                       <button type="button" onClick={() => {
                         const newFiles = files.filter((_, idx) => idx !== i);
                         setFiles(newFiles);
                         setPreview(newFiles.map(f => URL.createObjectURL(f)));
-                      }} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-none">
+                      }} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-none z-10">
                         <X size={10} />
                       </button>
                     </div>
@@ -298,7 +308,15 @@ export default function AdminGallery() {
             <ChevronLeft size={40} />
           </button>
           
-          <img src={currentAlbum[viewerIndex]} className="max-h-[85vh] w-auto object-contain rounded-none " alt="" />
+          <SmartImage
+            src={currentAlbum[viewerIndex]}
+            alt={`Album photograph ${viewerIndex + 1}`}
+            mode="lightbox"
+            fit="contain"
+            showDimensionsBadge
+            containerClassName="max-w-5xl w-full max-h-[85vh] bg-transparent"
+            className="max-h-[85vh] rounded-none"
+          />
           
           <button onClick={() => setViewerIndex(prev => (prev + 1) % currentAlbum.length)} className="absolute right-4 p-4 text-white/30 hover:text-white transition bg-white/5 rounded-full">
             <ChevronRight size={40} />

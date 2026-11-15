@@ -15,6 +15,7 @@ import {
 import { normalizeRole } from "../utils/rbac";
 import { logActivity } from "../utils/cmsService";
 import { formatDate } from "../utils/editorial";
+import SmartImage from "../components/SmartImage";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -345,10 +346,13 @@ export default function AdminLayout() {
                 className="flex items-center gap-3 p-1.5 hover:bg-gray-100 transition border border-transparent hover:border-blue-900"
               >
                 {profileData.avatar_url ? (
-                  <img
+                  <SmartImage
                     src={profileData.avatar_url}
-                    alt={profileData.full_name}
-                    className="w-8 h-8 object-cover border border-blue-900"
+                    alt={profileData.full_name || "User avatar"}
+                    mode="avatar"
+                    fit="cover"
+                    containerClassName="w-8 h-8 border border-blue-900 shrink-0"
+                    fallbackLabel=""
                   />
                 ) : (
                   <div className="w-8 h-8 bg-blue-900 flex items-center justify-center shrink-0">

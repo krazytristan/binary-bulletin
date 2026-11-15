@@ -16,9 +16,14 @@ import {
   logActivity,
   createNotification,
   checkTableExists,
-  optimizeImageFile,
 } from "../../utils/cmsService";
+import {
+  ACCEPTED_IMAGE_INPUT,
+  validateImageFile,
+  createThumbnailFile,
+} from "../../utils/imageUtils";
 import RichTextEditor from "../../components/RichTextEditor";
+import SmartImage from "../../components/SmartImage";
 import {
   Plus,
   Search,
@@ -364,12 +369,20 @@ export default function Articles() {
     if (!file) return;
     setUploadingCover(true);
     try {
-      const optimized = await optimizeImageFile(file, 1600, 0.85);
-      const ext = optimized.name.split(".").pop() || "jpg";
-      const fileName = `article_${Date.now()}.${ext}`;
+      const validation = await validateImageFile(file);
+      if (!validation.valid) {
+        showToast("error", validation.error);
+        return;
+      }
+
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const baseId = `article_${Date.now()}`;
+      const fileName = `${baseId}.${ext}`;
+
+      // Upload intact original file
       const { error: uploadError } = await supabase.storage
         .from("articles")
-        .upload(fileName, optimized);
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
@@ -377,21 +390,57 @@ export default function Articles() {
         data: { publicUrl },
       } = supabase.storage.from("articles").getPublicUrl(fileName);
 
+      // Generate proportional thumbnail separately
+      let thumbnailUrl = null;
+      const thumbFile = await createThumbnailFile(file, 480, 0.82);
+      if (thumbFile) {
+        const thumbExt = thumbFile.name.split(".").pop() || "webp";
+        const thumbPath = `thumbs/${baseId}_thumb.${thumbExt}`;
+        const { error: thumbErr } = await supabase.storage
+          .from("articles")
+          .upload(thumbPath, thumbFile);
+        if (!thumbErr) {
+          thumbnailUrl = supabase.storage
+            .from("articles")
+            .getPublicUrl(thumbPath).data.publicUrl;
+        }
+      }
+
       setForm((prev) => ({ ...prev, image_url: publicUrl }));
 
-      // Also register in media table
-      await supabase.from("media").insert({
+      // Register original + thumbnail metadata in media table (graceful fallback)
+      const baseMedia = {
         file_name: file.name,
         file_url: publicUrl,
         uploaded_by: user?.id || null,
-      });
+      };
+      const richMedia = {
+        ...baseMedia,
+        title: file.name.replace(/\.[^/.]+$/, ""),
+        folder: "articles",
+        storage_path: fileName,
+        file_size: file.size,
+        mime_type: file.type,
+        thumbnail_url: thumbnailUrl,
+        width: validation.width,
+        height: validation.height,
+        orientation: validation.orientation,
+      };
+      const { error: medErr } = await supabase.from("media").insert(richMedia);
+      if (medErr && /column .* does not exist/i.test(medErr.message || "")) {
+        await supabase.from("media").insert(baseMedia);
+      }
 
-      showToast("success", "Featured image uploaded and optimized.");
+      showToast(
+        "success",
+        `Featured image uploaded (${validation.width}×${validation.height}).`
+      );
     } catch (err) {
       console.error("Upload failed:", err);
       showToast("error", err.message || "Image upload failed.");
     } finally {
       setUploadingCover(false);
+      e.target.value = "";
     }
   };
 
@@ -952,10 +1001,13 @@ export default function Articles() {
                       <td className="py-3 px-4 max-w-md">
                         <div className="flex items-center gap-3">
                           {art.image_url ? (
-                            <img
+                            <SmartImage
                               src={art.image_url}
-                              alt=""
-                              className="w-12 h-9 object-cover rounded border border-slate-200 shrink-0"
+                              alt={art.title}
+                              mode="thumbnail"
+                              fit="cover"
+                              containerClassName="w-12 h-9 rounded border border-slate-200 shrink-0"
+                              fallbackLabel=""
                             />
                           ) : (
                             <div className="w-12 h-9 rounded bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
@@ -1436,20 +1488,24 @@ export default function Articles() {
                       </h3>
 
                       {form.image_url && (
-                        <img
+                        <SmartImage
                           src={form.image_url}
                           alt="Featured preview"
-                          className="w-full h-36 object-cover rounded-lg border border-slate-200"
+                          mode="preview"
+                          fit="contain"
+                          showDimensionsBadge
+                          containerClassName="rounded-lg border border-slate-200"
+                          className="max-h-52"
                         />
                       )}
 
                       <div className="flex gap-2">
                         <label className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer">
                           <Upload className="w-3.5 h-3.5" />
-                          {uploadingCover ? "Uploading..." : "Upload"}
+                          {uploadingCover ? "Validating & Uploading..." : "Upload"}
                           <input
                             type="file"
-                            accept="image/*"
+                            accept={ACCEPTED_IMAGE_INPUT}
                             onChange={handleUploadCoverImage}
                             className="hidden"
                           />
@@ -1864,10 +1920,15 @@ export default function Articles() {
               </p>
               {previewArticle.image_url && (
                 <figure>
-                  <img
+                  <SmartImage
                     src={previewArticle.image_url}
                     alt={previewArticle.image_caption || previewArticle.title}
-                    className="w-full max-h-96 object-cover rounded-lg border border-slate-200"
+                    mode="article"
+                    fit="contain"
+                    loading="eager"
+                    showDimensionsBadge
+                    containerClassName="rounded-lg border border-slate-200"
+                    className="max-h-[480px]"
                   />
                   {(previewArticle.image_caption ||
                     previewArticle.image_credit) && (
@@ -1916,10 +1977,13 @@ export default function Articles() {
                   if (block.type === "image") {
                     return (
                       <figure key={idx} className="my-4">
-                        <img
+                        <SmartImage
                           src={block.url}
                           alt={block.alt || "Article visual"}
-                          className="w-full rounded-lg border border-slate-200"
+                          mode="inline"
+                          fit="contain"
+                          containerClassName="rounded-lg border border-slate-200"
+                          className="max-h-[460px]"
                         />
                         {block.alt && (
                           <figcaption className="text-xs text-slate-500 mt-1">
@@ -1972,10 +2036,13 @@ export default function Articles() {
                     }
                     className="group text-left border border-slate-200 rounded-lg overflow-hidden hover:border-blue-600 transition"
                   >
-                    <img
-                      src={m.file_url}
+                    <SmartImage
+                      src={m.thumbnail_url || m.file_url}
                       alt={m.alt_text || m.file_name}
-                      className="w-full h-24 object-cover"
+                      mode="thumbnail"
+                      fit="auto"
+                      containerClassName="w-full h-24"
+                      fallbackLabel=""
                     />
                     <p className="p-1.5 text-[10px] font-medium text-slate-700 truncate">
                       {m.title || m.file_name}

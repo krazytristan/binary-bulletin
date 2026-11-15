@@ -3,6 +3,8 @@ import { useOutletContext } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { hasPermission } from "../../utils/rbac";
 import { logActivity } from "../../utils/cmsService";
+import SmartImage from "../../components/SmartImage";
+import { ACCEPTED_IMAGE_INPUT, validateImageFile } from "../../utils/imageUtils";
 import { Plus, Edit2, Trash2, X, Image as ImageIcon, Loader2 } from "lucide-react";
 
 export default function AdminAnnouncements() {
@@ -17,6 +19,7 @@ export default function AdminAnnouncements() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [imageError, setImageError] = useState("");
 
   const [form, setForm] = useState({
     title: "",
@@ -42,23 +45,32 @@ export default function AdminAnnouncements() {
     setFetching(false);
   };
 
-  // 🖼️ HANDLE IMAGE SELECTION (PREVIEW)
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setForm({ ...form, image: file });
-      setPreview(URL.createObjectURL(file));
+  // 🖼️ HANDLE IMAGE SELECTION (PREVIEW + VALIDATION)
+  const handleImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    setImageError("");
+    if (!file) return;
+
+    const check = await validateImageFile(file);
+    if (!check.valid) {
+      setImageError(check.error);
+      return;
     }
+
+    if (preview && preview.startsWith("blob:")) URL.revokeObjectURL(preview);
+    setForm({ ...form, image: file });
+    setPreview(URL.createObjectURL(file));
   };
 
-  // 📤 UPLOAD IMAGE
+  // 📤 UPLOAD IMAGE (ORIGINAL PRESERVED)
   const uploadImage = async (file) => {
     if (!file) return null;
-    const fileName = `pubmat-${Date.now()}-${file.name.replace(/\s/g, '_')}`;
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const fileName = `pubmat-${Date.now()}-${safeName}`;
 
     const { error } = await supabase.storage
       .from("pubmats")
-      .upload(fileName, file);
+      .upload(fileName, file, { contentType: file.type, cacheControl: "3600" });
 
     if (error) {
       console.error("Upload error:", error);
@@ -169,13 +181,16 @@ export default function AdminAnnouncements() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {announcements.map((a) => (
             <div key={a.id} className="bg-white rounded-none border border-gray-100  overflow-hidden flex flex-col group">
-              <div className="relative h-48 bg-gray-200">
-                {a.image_url ? (
-                  <img src={a.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400"><ImageIcon size={40} /></div>
-                )}
-                <div className="absolute top-3 right-3 flex gap-2">
+              <div className="relative h-48 bg-gray-100">
+                <SmartImage
+                  src={a.image_url}
+                  alt={a.title}
+                  mode="card"
+                  fit="auto"
+                  containerClassName="h-48"
+                  fallbackLabel="No Featured Image"
+                />
+                <div className="absolute top-3 right-3 flex gap-2 z-10">
                   <button onClick={() => handleEdit(a)} className="p-2 bg-white/90 backdrop-blur rounded-full text-blue-900 hover:bg-blue-900 hover:text-white transition-colors">
                     <Edit2 size={16} />
                   </button>
@@ -241,21 +256,29 @@ export default function AdminAnnouncements() {
                   className="border-2 border-dashed border-gray-200 rounded-none p-4 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all"
                 >
                   {preview ? (
-                    <img src={preview} alt="Preview" className="h-32 w-full object-cover rounded-none" />
+                    <SmartImage
+                      src={preview}
+                      alt="Announcement visual preview"
+                      mode="preview"
+                      fit="contain"
+                      showDimensionsBadge
+                      containerClassName="h-44 w-full bg-gray-50"
+                    />
                   ) : (
                     <>
                       <ImageIcon className="text-gray-400 mb-2" size={32} />
-                      <span className="text-sm text-gray-500">Click to upload or drag and drop</span>
+                      <span className="text-sm text-gray-500">Click to upload (JPG, JPEG, PNG, WebP)</span>
                     </>
                   )}
                   <input
                     type="file"
                     ref={fileInputRef}
                     hidden
-                    accept="image/*"
+                    accept={ACCEPTED_IMAGE_INPUT}
                     onChange={handleImageChange}
                   />
                 </div>
+                {imageError && <p className="text-xs text-red-600 mt-1.5 font-medium">{imageError}</p>}
               </div>
 
               <div className="flex gap-3 pt-4">

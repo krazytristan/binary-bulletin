@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SmartImage from "../components/SmartImage";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -346,15 +347,18 @@ export default function Home() {
                     {getLeadSummary(categorized.editorial[0])}
                   </p>
                   <div className="flex items-center gap-3">
-                    <img
+                    <SmartImage
                       src={
                         categorized.editorial[0].author_image ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
                           categorized.editorial[0].author_name || "Editorial Board"
                         )}&background=1E3A8A&color=fff`
                       }
-                      className="w-8 h-8 rounded-full border border-gray-200 object-cover"
+                      mode="avatar"
+                      fit="cover"
+                      containerClassName="w-8 h-8 rounded-full border border-gray-200 shrink-0"
                       alt={categorized.editorial[0].author_name || "Editorial Board"}
+                      fallbackLabel=""
                     />
                     <span className="block text-[11px] font-sans font-bold uppercase tracking-wider text-red-900">
                       {categorized.editorial[0].author_name || "Editorial Board"}
@@ -488,18 +492,21 @@ export default function Home() {
 
                   {featured.image_url && (
                     <figure className="mb-6 md:mb-8">
-                      <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 border border-gray-300">
-                        <img
+                      <div className="relative overflow-hidden bg-[#F5F3EE] border border-gray-300">
+                        <SmartImage
                           src={featured.image_url}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          alt={featured.title}
+                          mode="article"
+                          fit="contain"
+                          loading="eager"
+                          className="max-h-[540px] transition-transform duration-700 group-hover:scale-[1.02]"
+                          alt={featured.image_caption || featured.title}
                         />
                         <div className="absolute bottom-0 right-0 bg-amber-400 px-3 py-1 text-[10px] font-sans uppercase tracking-widest text-blue-950 font-bold border-t border-l border-amber-500">
                           Lead Story
                         </div>
                       </div>
                       <figcaption className="mt-2 text-xs font-serif italic text-gray-500 text-right">
-                        Visual coverage &mdash; {PUBLICATION.name}
+                        {featured.image_caption || `Visual coverage — ${PUBLICATION.name}`}
                       </figcaption>
                     </figure>
                   )}
@@ -642,10 +649,13 @@ export default function Home() {
                   >
                     <div className="aspect-video bg-gray-900 w-full mb-4 relative overflow-hidden flex items-center justify-center">
                       {ytThumb ? (
-                        <img
+                        <SmartImage
                           src={ytThumb}
                           alt={vid.title}
-                          className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                          mode="thumbnail"
+                          fit="cover"
+                          containerClassName="w-full h-full"
+                          className="opacity-90 group-hover:opacity-100 transition-opacity"
                         />
                       ) : (
                         <video
@@ -714,10 +724,14 @@ export default function Home() {
                   <Link to={`/article/${a.id}`} className="block group">
                     <div className="aspect-[16/10] overflow-hidden bg-gray-100 mb-3.5 border border-gray-300 group-hover:border-blue-900 transition-colors">
                       {a.image_url ? (
-                        <img
+                        <SmartImage
                           src={a.image_url}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          mode="card"
+                          fit="auto"
+                          containerClassName="w-full h-full"
+                          className="group-hover:scale-105 transition-transform duration-700"
                           alt={a.title}
+                          fallbackLabel={a.category || "Official Notice"}
                         />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50/70 p-4 text-center">

@@ -43,3 +43,19 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #7f1d1d;
 }
+
+/* Prevent distortion, clipping, and overflow on printed article & report layouts */
+@media print {
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 85vh !important;
+    object-fit: contain !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  figure {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}

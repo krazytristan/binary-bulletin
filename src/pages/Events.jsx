@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import SmartImage from "../components/SmartImage";
 import { Calendar, MapPin, Clock, X, Maximize2 } from "lucide-react";
 import {
   PUBLICATION,
@@ -109,10 +110,15 @@ export default function Events() {
                         className="w-full h-48 sm:h-56 border-b-2 border-blue-900 relative cursor-pointer bg-gray-100 overflow-hidden shrink-0"
                         onClick={() => setViewerImage(item.image_url)}
                       >
-                        <img
+                        <SmartImage
                           src={item.image_url}
                           alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
+                          mode="card"
+                          fit="auto"
+                          containerClassName="w-full h-full"
+                          className="group-hover:scale-105 transition-all duration-700"
+                          fallbackLabel="Campus Event"
+                          fallbackIcon={Calendar}
                         />
                         <div className="absolute inset-0 bg-blue-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <Maximize2 className="text-amber-400 drop-shadow-md" size={24} />
@@ -228,11 +234,15 @@ export default function Events() {
 
               {selectedItem.image_url && (
                 <figure className="mb-8">
-                  <img
+                  <SmartImage
                     src={selectedItem.image_url}
                     alt={selectedItem.title}
+                    mode="article"
+                    fit="contain"
+                    loading="eager"
                     onClick={() => setViewerImage(selectedItem.image_url)}
-                    className="w-full max-h-[400px] object-cover border border-gray-300 cursor-zoom-in"
+                    containerClassName="border border-gray-300"
+                    className="max-h-[460px] cursor-zoom-in"
                   />
                   <figcaption className="mt-2 text-xs font-serif italic text-gray-500 text-right">
                     Event Banner &mdash; Click image to enlarge
@@ -286,10 +296,14 @@ export default function Events() {
             className="w-full max-w-6xl max-h-screen p-6 md:p-12 flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
+            <SmartImage
               src={viewerImage}
-              className="max-h-[85vh] w-auto border-2 border-amber-400 shadow-2xl object-contain bg-white"
+              mode="lightbox"
+              fit="contain"
+              loading="eager"
+              containerClassName="border-2 border-amber-400 shadow-2xl bg-white"
               alt="Event banner full view"
+              showDimensionsBadge
             />
           </div>
         </div>
