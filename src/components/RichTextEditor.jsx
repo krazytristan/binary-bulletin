@@ -14,6 +14,7 @@ import {
   Edit3,
 } from "lucide-react";
 import { parseArticleBlocks } from "../utils/editorial";
+import SmartImage from "./SmartImage";
 
 /**
  * Newsroom Rich-Text / Editorial Markdown Editor with live preview and Media Library insertion.
@@ -93,15 +94,15 @@ export default function RichTextEditor({
   const previewBlocks = parseArticleBlocks(value || "");
 
   return (
-    <div className="border border-gray-300 bg-white">
+    <div className="border border-gray-300 bg-white rounded-lg overflow-hidden">
       {/* TOOLBAR */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-gray-50 border-b border-gray-300">
-        <div className="flex flex-wrap items-center gap-1">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-2.5 sm:px-3 py-2 bg-gray-50 border-b border-gray-300">
+        <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar pb-0.5 sm:pb-0">
           <button
             type="button"
             onClick={() => insertLinePrefix("## ")}
             title="Section Heading (H2)"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <Heading2 size={15} />
           </button>
@@ -109,16 +110,16 @@ export default function RichTextEditor({
             type="button"
             onClick={() => insertLinePrefix("### ")}
             title="Subheading (H3)"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <Heading3 size={15} />
           </button>
-          <span className="w-px h-4 bg-gray-300 mx-1" />
+          <span className="w-px h-4 bg-gray-300 mx-0.5 sm:mx-1 shrink-0" />
           <button
             type="button"
             onClick={() => wrapSelection("**", "**", "bold text")}
             title="Bold"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <Bold size={15} />
           </button>
@@ -126,7 +127,7 @@ export default function RichTextEditor({
             type="button"
             onClick={() => wrapSelection("*", "*", "italic text")}
             title="Italic"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <Italic size={15} />
           </button>
@@ -134,16 +135,16 @@ export default function RichTextEditor({
             type="button"
             onClick={() => insertLinePrefix("> ")}
             title="Blockquote"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <Quote size={15} />
           </button>
-          <span className="w-px h-4 bg-gray-300 mx-1" />
+          <span className="w-px h-4 bg-gray-300 mx-0.5 sm:mx-1 shrink-0" />
           <button
             type="button"
             onClick={() => insertLinePrefix("- ")}
             title="Bullet List"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <List size={15} />
           </button>
@@ -151,16 +152,16 @@ export default function RichTextEditor({
             type="button"
             onClick={() => insertLinePrefix("1. ")}
             title="Numbered List"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <ListOrdered size={15} />
           </button>
-          <span className="w-px h-4 bg-gray-300 mx-1" />
+          <span className="w-px h-4 bg-gray-300 mx-0.5 sm:mx-1 shrink-0" />
           <button
             type="button"
             onClick={handleInsertLink}
             title="Insert Hyperlink"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <Link2 size={15} />
           </button>
@@ -168,7 +169,7 @@ export default function RichTextEditor({
             type="button"
             onClick={handleInsertImageUrl}
             title="Insert Image"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <ImageIcon size={15} />
           </button>
@@ -176,34 +177,36 @@ export default function RichTextEditor({
             type="button"
             onClick={handleInsertMediaEmbed}
             title="Embed Video / Media"
-            className="p-1.5 text-gray-700 hover:bg-blue-900 hover:text-white transition-colors"
+            className="min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 flex items-center justify-center rounded text-gray-700 hover:bg-blue-900 hover:text-white transition-colors shrink-0"
           >
             <Video size={15} />
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-semibold text-gray-500 mr-2">
+        <div className="flex items-center justify-between sm:justify-end gap-2 border-t sm:border-t-0 border-gray-200 pt-2 sm:pt-0">
+          <span className="text-[11px] font-semibold text-gray-500">
             {wordCount} {wordCount === 1 ? "word" : "words"}
           </span>
-          <button
-            type="button"
-            onClick={() => setMode("write")}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
-              mode === "write" ? "bg-blue-900 text-white" : "text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            <Edit3 size={12} /> Write
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("preview")}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
-              mode === "preview" ? "bg-blue-900 text-white" : "text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            <Eye size={12} /> Preview
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setMode("write")}
+              className={`inline-flex items-center gap-1 min-h-[36px] sm:min-h-0 px-3 py-1.5 sm:py-1 rounded text-[11px] font-bold uppercase tracking-wider ${
+                mode === "write" ? "bg-blue-900 text-white" : "text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              <Edit3 size={12} /> Write
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("preview")}
+              className={`inline-flex items-center gap-1 min-h-[36px] sm:min-h-0 px-3 py-1.5 sm:py-1 rounded text-[11px] font-bold uppercase tracking-wider ${
+                mode === "preview" ? "bg-blue-900 text-white" : "text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              <Eye size={12} /> Preview
+            </button>
+          </div>
         </div>
       </div>
 
@@ -215,10 +218,10 @@ export default function RichTextEditor({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full p-4 bg-white font-serif text-base text-gray-900 leading-relaxed outline-none resize-y"
+          className="w-full p-3.5 sm:p-4 bg-white font-serif text-base text-gray-900 leading-relaxed outline-none resize-y"
         />
       ) : (
-        <div className="p-6 min-h-[260px] max-h-[420px] overflow-y-auto font-serif text-gray-800 space-y-4 bg-[#FCFBF9]">
+        <div className="p-4 sm:p-6 min-h-[260px] max-h-[420px] overflow-y-auto font-serif text-gray-800 space-y-4 bg-[#FCFBF9]">
           {previewBlocks.length === 0 ? (
             <p className="italic text-gray-400">Nothing written yet.</p>
           ) : (
@@ -226,10 +229,33 @@ export default function RichTextEditor({
               b.type === "heading" ? (
                 <h3
                   key={i}
-                  className="text-xl font-bold text-blue-900 border-l-4 border-amber-400 pl-3 pt-2"
+                  className="text-lg sm:text-xl font-bold text-blue-900 border-l-4 border-amber-400 pl-3 pt-2"
                 >
                   {b.text}
                 </h3>
+              ) : b.type === "quote" ? (
+                <blockquote
+                  key={i}
+                  className="border-l-4 border-red-900 pl-4 italic text-gray-700 bg-white py-2 pr-3"
+                >
+                  {b.text}
+                </blockquote>
+              ) : b.type === "image" ? (
+                <figure key={i} className="my-2">
+                  <SmartImage
+                    src={b.url}
+                    alt={b.alt || "Embedded visual"}
+                    mode="inline"
+                    fit="contain"
+                    containerClassName="border border-gray-200 rounded"
+                    className="max-h-72"
+                  />
+                  {b.alt && (
+                    <figcaption className="text-[11px] italic text-gray-500 mt-1 text-right">
+                      {b.alt}
+                    </figcaption>
+                  )}
+                </figure>
               ) : b.type === "bullet" ? (
                 <div key={i} className="flex items-start gap-2.5 pl-2">
                   <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-red-900 shrink-0" />

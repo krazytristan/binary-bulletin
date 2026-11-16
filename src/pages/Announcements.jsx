@@ -206,33 +206,33 @@ export default function Announcements() {
       {/* ANNOUNCEMENT READING MODAL */}
       {selectedItem && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-blue-900/80 backdrop-blur-sm p-0 md:p-10"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-blue-900/80 backdrop-blur-sm p-0 sm:p-4 md:p-10"
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="bg-[#FCFBF9] w-full h-full md:h-auto max-w-4xl max-h-full overflow-y-auto shadow-2xl border-0 md:border-4 border-blue-900 relative flex flex-col custom-scrollbar"
+            className="bg-[#FCFBF9] w-full max-w-4xl max-h-[94dvh] sm:max-h-[90dvh] overflow-y-auto shadow-2xl border-t-4 sm:border-4 border-blue-900 relative flex flex-col custom-scrollbar"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              type="button"
-              aria-label="Close announcement modal"
-              onClick={() => setSelectedItem(null)}
-              className="absolute top-4 right-4 p-2 bg-white text-blue-900 border-2 border-blue-900 hover:bg-red-900 hover:text-white hover:border-red-900 transition-colors z-10 shadow-[2px_2px_0px_0px_rgba(30,58,138,1)]"
-            >
-              <X size={20} />
-            </button>
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-blue-950 bg-amber-400 px-2.5 py-1 border border-amber-500 truncate">
+                {formatDate(selectedItem.created_at)}
+              </span>
+              <button
+                type="button"
+                aria-label="Close announcement modal"
+                onClick={() => setSelectedItem(null)}
+                className="min-w-[40px] min-h-[40px] flex items-center justify-center bg-white text-blue-900 border-2 border-blue-900 hover:bg-red-900 hover:text-white hover:border-red-900 transition-colors shrink-0"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-            <div className="p-6 md:p-12 flex flex-col bg-white flex-1 min-h-screen md:min-h-0">
-              <div className="flex flex-wrap items-center gap-3 mb-5 mt-10 md:mt-0">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-blue-950 bg-amber-400 px-3 py-1 border border-amber-500">
-                  {formatDate(selectedItem.created_at)}
-                </span>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-red-900">
-                  {PUBLICATION.institution}
-                </span>
-              </div>
+            <div className="p-5 sm:p-8 md:p-12 flex flex-col bg-white flex-1">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-red-900 mb-3">
+                {PUBLICATION.institution}
+              </p>
 
-              <h2 className="text-2xl md:text-4xl font-serif font-black tracking-tight leading-tight text-blue-900 mb-6 pb-6 border-b-2 border-gray-200">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black tracking-tight leading-tight text-blue-900 mb-6 pb-5 border-b-2 border-gray-200 break-words">
                 {cleanEditorialText(selectedItem.title)}
               </h2>
 

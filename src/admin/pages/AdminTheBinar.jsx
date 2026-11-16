@@ -152,19 +152,19 @@ export default function AdminTheBinar() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-2 sm:p-4 md:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
       
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">The Binary Online</h1>
-          <p className="text-gray-500">Manage video content and reports.</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">The Binary Online</h1>
+          <p className="text-xs sm:text-sm text-gray-500">Manage video content and reports.</p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 bg-blue-900 text-white px-5 py-2.5 rounded-none font-bold hover:bg-gray-800 transition  shadow-red-100"
+          className="self-start sm:self-auto min-h-[42px] flex items-center gap-2 bg-blue-900 text-white px-5 py-2.5 rounded-none font-bold hover:bg-gray-800 transition text-sm"
         >
-          <Plus size={20} /> Add Video
+          <Plus size={18} /> Add Video
         </button>
       </div>
 
@@ -192,8 +192,9 @@ export default function AdminTheBinar() {
                   <video src={v.video_url} controls className="w-full h-full object-cover" />
                 )}
                 <button 
+                  aria-label={`Delete ${v.title}`}
                   onClick={() => setDeleteId(v.id)}
-                  className="absolute top-2 right-2 bg-white/90 p-2 rounded-none text-red-500 opacity-0 group-hover:opacity-100 transition "
+                  className="absolute top-2 right-2 min-w-[38px] min-h-[38px] flex items-center justify-center bg-white/95 p-2 rounded-none text-red-600 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition shadow"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -212,8 +213,8 @@ export default function AdminTheBinar() {
 
       {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-blue-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-          <div className="bg-white p-8 rounded-none w-full max-w-lg  animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
+        <div className="fixed inset-0 bg-blue-900/60 backdrop-blur-sm flex justify-center items-end sm:items-center z-50 p-0 sm:p-4">
+          <div className="bg-white p-5 sm:p-8 rounded-t-2xl sm:rounded-none w-full max-w-lg animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[92dvh]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-gray-900">Add Video Content</h2>
               <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X /></button>
@@ -241,7 +242,7 @@ export default function AdminTheBinar() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                     <label className="text-xs font-bold text-gray-400 uppercase ml-1">Author</label>
                     <input

@@ -8,6 +8,7 @@ import {
   normalizeRole,
 } from "../utils/rbac";
 import { checkTableExists } from "../utils/cmsService";
+import ResponsiveModal from "../components/ResponsiveModal";
 import {
   FileText,
   Clock,
@@ -20,7 +21,6 @@ import {
   Eye,
   MessageSquare,
   BookOpen,
-  X,
   ArrowUpRight,
   AlertTriangle,
   RefreshCw,
@@ -344,7 +344,7 @@ export default function Dashboard() {
 
       {/* Helpful alert when all existing articles are still drafts */}
       {!loading && articles.length > 0 && totalPublished === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between gap-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-start gap-3">
             <FileText className="w-5 h-5 text-blue-800 shrink-0 mt-0.5" />
             <div className="text-xs text-blue-950">
@@ -359,7 +359,7 @@ export default function Dashboard() {
           </div>
           <Link
             to="/admin-panel/articles"
-            className="shrink-0 px-3 py-1.5 bg-blue-900 text-white text-xs font-bold rounded-lg hover:bg-blue-800 transition"
+            className="shrink-0 self-start sm:self-auto px-3.5 py-2 bg-blue-900 text-white text-xs font-bold rounded-lg hover:bg-blue-800 transition"
           >
             Review Articles
           </Link>
@@ -367,7 +367,7 @@ export default function Dashboard() {
       )}
 
       {/* 10 Real-Time KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3.5">
         {kpiCards.map((card) => {
           const Icon = card.icon;
           return (
@@ -518,11 +518,11 @@ export default function Dashboard() {
                 const widthPct = Math.round((cat.count / maxCatCount) * 100);
                 return (
                   <div key={cat.name} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-700">
+                    <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-0.5 text-xs">
+                      <span className="font-semibold text-slate-700 truncate">
                         {cat.name}
                       </span>
-                      <span className="text-slate-600 font-medium">
+                      <span className="text-slate-600 font-medium shrink-0">
                         <strong className="text-slate-900">{cat.count}</strong>{" "}
                         articles &middot;{" "}
                         <strong className="text-slate-900">
@@ -810,74 +810,59 @@ export default function Dashboard() {
       </div>
 
       {/* Editorial Style Guide Modal */}
-      {styleGuideOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-slate-200">
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-blue-900">
-                  The Binary Bulletin
-                </p>
-                <h3 className="text-lg font-black text-slate-900">
-                  Campus Journalism &amp; Editorial Style Guide
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setStyleGuideOpen(false)}
-                className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 space-y-4 text-sm text-slate-700 leading-relaxed">
-              <div>
-                <h4 className="font-bold text-slate-900 mb-1">
-                  1. Institutional Naming &amp; Capitalization
-                </h4>
-                <p>
-                  Always write <strong>AMA Computer College Lipa Campus</strong>{" "}
-                  on first reference (may use <strong>AMACC Lipa</strong> on
-                  subsequent references). Refer to the publication as{" "}
-                  <strong>The Binary Bulletin</strong>.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 mb-1">
-                  2. Headlines, Leads &amp; Attribution
-                </h4>
-                <p>
-                  News headlines should use active voice, present tense, and
-                  sentence or title case consistently without trailing periods.
-                  Verify all names, official titles, dates, venues, and quotes
-                  prior to submitting for editorial review.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 mb-1">
-                  3. Photojournalism &amp; Captions
-                </h4>
-                <p>
-                  Every image must include a descriptive caption identifying the
-                  subject, context, and date, plus an accurate photo credit
-                  (e.g., <em>Photo by [Name] / The Binary Bulletin</em>).
-                </p>
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 mb-1">
-                  4. Editorial Workflow Discipline
-                </h4>
-                <p>
-                  Writers save drafts and submit for review. Section/News
-                  Editors review grammar and facts and may request revisions.
-                  Only authorized Editors-in-Chief, Managing Editors, News
-                  Editors, or Super Admins may approve and publish final copy.
-                </p>
-              </div>
-            </div>
+      <ResponsiveModal
+        open={styleGuideOpen}
+        onClose={() => setStyleGuideOpen(false)}
+        subtitle="The Binary Bulletin"
+        title="Campus Journalism & Editorial Style Guide"
+        maxWidthClass="max-w-2xl"
+      >
+        <div className="space-y-4 text-sm text-slate-700 leading-relaxed">
+          <div>
+            <h4 className="font-bold text-slate-900 mb-1">
+              1. Institutional Naming &amp; Capitalization
+            </h4>
+            <p>
+              Always write <strong>AMA Computer College Lipa Campus</strong>{" "}
+              on first reference (may use <strong>AMACC Lipa</strong> on
+              subsequent references). Refer to the publication as{" "}
+              <strong>The Binary Bulletin</strong>.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-900 mb-1">
+              2. Headlines, Leads &amp; Attribution
+            </h4>
+            <p>
+              News headlines should use active voice, present tense, and
+              sentence or title case consistently without trailing periods.
+              Verify all names, official titles, dates, venues, and quotes
+              prior to submitting for editorial review.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-900 mb-1">
+              3. Photojournalism &amp; Captions
+            </h4>
+            <p>
+              Every image must include a descriptive caption identifying the
+              subject, context, and date, plus an accurate photo credit
+              (e.g., <em>Photo by [Name] / The Binary Bulletin</em>).
+            </p>
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-900 mb-1">
+              4. Editorial Workflow Discipline
+            </h4>
+            <p>
+              Writers save drafts and submit for review. Section/News
+              Editors review grammar and facts and may request revisions.
+              Only authorized Editors-in-Chief, Managing Editors, News
+              Editors, or Super Admins may approve and publish final copy.
+            </p>
           </div>
         </div>
-      )}
+      </ResponsiveModal>
     </div>
   );
 }

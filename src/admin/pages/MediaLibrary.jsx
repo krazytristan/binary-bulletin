@@ -372,11 +372,11 @@ export default function MediaLibrary() {
         </div>
 
         {canManage && (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
             <select
               value={uploadBucket}
               onChange={(e) => setUploadBucket(e.target.value)}
-              className="px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg font-semibold"
+              className="px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg font-semibold min-h-[42px]"
             >
               {BUCKETS.map((b) => (
                 <option key={b} value={b}>
@@ -385,7 +385,7 @@ export default function MediaLibrary() {
               ))}
             </select>
 
-            <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-900 text-white text-xs font-bold hover:bg-blue-800 cursor-pointer transition shadow-sm">
+            <label className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-900 text-white text-xs font-bold hover:bg-blue-800 cursor-pointer transition shadow-sm min-h-[42px]">
               <Upload className="w-4 h-4" />
               {uploading ? "Validating & Uploading..." : "Upload Images"}
               <input
@@ -403,11 +403,11 @@ export default function MediaLibrary() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           <button
             type="button"
             onClick={() => setSelectedFolder("all")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+            className={`px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 min-h-[38px] ${
               selectedFolder === "all"
                 ? "bg-slate-900 text-white"
                 : "bg-white border border-slate-200 text-slate-600"
@@ -420,7 +420,7 @@ export default function MediaLibrary() {
               key={b}
               type="button"
               onClick={() => setSelectedFolder(b)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold capitalize ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold capitalize whitespace-nowrap shrink-0 min-h-[38px] ${
                 selectedFolder === b
                   ? "bg-blue-900 text-white"
                   : "bg-white border border-slate-200 text-slate-600"
@@ -440,14 +440,15 @@ export default function MediaLibrary() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search filename, caption, credit..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg"
+              className="w-full pl-8 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg min-h-[40px]"
             />
           </div>
           <button
             type="button"
             onClick={loadMedia}
-            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
             title="Refresh"
+            aria-label="Refresh media library"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -464,7 +465,7 @@ export default function MediaLibrary() {
           No media assets found in this folder.
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {filteredItems.map((item) => {
             const refs = usageMap[item.file_url] || [];
             return (
@@ -508,12 +509,13 @@ export default function MediaLibrary() {
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5">
                       <button
                         type="button"
                         onClick={() => setPreviewItem(item)}
                         title="Preview"
-                        className="p-1 text-slate-500 hover:text-blue-900"
+                        aria-label="Preview media"
+                        className="p-1.5 text-slate-500 hover:text-blue-900 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-lg hover:bg-slate-50"
                       >
                         <Eye className="w-3.5 h-3.5" />
                       </button>
@@ -521,7 +523,8 @@ export default function MediaLibrary() {
                         type="button"
                         onClick={() => copyUrl(item.file_url)}
                         title="Copy URL"
-                        className="p-1 text-slate-500 hover:text-blue-900"
+                        aria-label="Copy URL"
+                        className="p-1.5 text-slate-500 hover:text-blue-900 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-lg hover:bg-slate-50"
                       >
                         <Copy className="w-3.5 h-3.5" />
                       </button>
@@ -530,7 +533,8 @@ export default function MediaLibrary() {
                           type="button"
                           onClick={() => setEditItem({ ...item })}
                           title="Edit Attribution"
-                          className="p-1 text-slate-500 hover:text-blue-900"
+                          aria-label="Edit attribution"
+                          className="p-1.5 text-slate-500 hover:text-blue-900 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-lg hover:bg-slate-50"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
@@ -542,7 +546,8 @@ export default function MediaLibrary() {
                         type="button"
                         onClick={() => setDeleteTarget(item)}
                         title="Delete"
-                        className="p-1 text-red-500 hover:text-red-700"
+                        aria-label="Delete media"
+                        className="p-1.5 text-red-500 hover:text-red-700 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-lg hover:bg-red-50"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -557,9 +562,9 @@ export default function MediaLibrary() {
 
       {/* Preview Modal */}
       {previewItem && (
-        <div className="fixed inset-0 z-50 bg-slate-900/75 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl">
-            <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
+        <div className="fixed inset-0 z-50 bg-slate-900/75 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-2xl w-full max-h-[92dvh] flex flex-col overflow-hidden shadow-2xl">
+            <div className="px-4 sm:px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3 shrink-0">
               <h3 className="text-sm font-black text-slate-900 truncate">
                 {previewItem.title || previewItem.file_name}
               </h3>
@@ -568,20 +573,21 @@ export default function MediaLibrary() {
                   href={previewItem.file_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-900 hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-900 hover:underline whitespace-nowrap"
                 >
                   Open Original <ExternalLink className="w-3 h-3" />
                 </a>
                 <button
                   type="button"
                   onClick={() => setPreviewItem(null)}
-                  className="p-1 text-slate-500"
+                  className="p-2 text-slate-500 hover:text-slate-800 rounded-lg min-w-[40px] min-h-[40px] flex items-center justify-center"
+                  aria-label="Close preview"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
-            <div className="p-5 space-y-3">
+            <div className="p-4 sm:p-5 space-y-3 overflow-y-auto">
               <SmartImage
                 src={previewItem.file_url}
                 alt={previewItem.alt_text || previewItem.file_name}
@@ -622,21 +628,22 @@ export default function MediaLibrary() {
 
       {/* Edit Metadata Modal */}
       {editItem && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full max-h-[92dvh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between shrink-0">
               <h3 className="text-sm font-black text-slate-900">
                 Edit Image Metadata &amp; Attribution
               </h3>
               <button
                 type="button"
                 onClick={() => setEditItem(null)}
-                className="p-1 text-slate-400"
+                className="p-2 text-slate-400 hover:text-slate-700 rounded-lg min-w-[40px] min-h-[40px] flex items-center justify-center"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <form onSubmit={handleSaveMetadata} className="p-5 space-y-3 text-xs">
+            <form onSubmit={handleSaveMetadata} className="p-5 space-y-3 text-xs overflow-y-auto">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
                   Title
@@ -690,17 +697,17 @@ export default function MediaLibrary() {
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setEditItem(null)}
-                  className="px-4 py-2 rounded-lg border border-slate-200 font-bold text-slate-600"
+                  className="px-4 py-2.5 rounded-lg border border-slate-200 font-bold text-slate-600 min-h-[42px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-blue-900 text-white font-bold hover:bg-blue-800"
+                  className="px-4 py-2.5 rounded-lg bg-blue-900 text-white font-bold hover:bg-blue-800 min-h-[42px]"
                 >
                   Save Metadata
                 </button>
@@ -712,8 +719,8 @@ export default function MediaLibrary() {
 
       {/* Safe Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full p-5 sm:p-6 border border-slate-200 shadow-2xl">
             <h3 className="text-base font-black text-slate-900 mb-2">
               Delete Media File?
             </h3>
@@ -735,18 +742,18 @@ export default function MediaLibrary() {
                 announcement, or gallery album.
               </p>
             )}
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-700"
+                className="px-4 py-2.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 min-h-[42px]"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDelete}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700"
+                className="px-4 py-2.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 min-h-[42px]"
               >
                 {(usageMap[deleteTarget.file_url] || []).length > 0
                   ? "Confirm Delete Anyway"

@@ -39,22 +39,22 @@ export default function Contact() {
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white flex flex-col">
       <Navbar />
 
-      <main className="max-w-3xl mx-auto px-6 py-12 md:py-20 flex-1 w-full">
-        <header className="mb-14 text-center border-b-[3px] border-blue-900 pb-10">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-900 mb-4">
+      <main className="max-w-3xl mx-auto px-3.5 sm:px-6 py-8 sm:py-12 md:py-20 flex-1 w-full">
+        <header className="mb-8 sm:mb-14 text-center border-b-[3px] border-blue-900 pb-6 sm:pb-10">
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-red-900 mb-3 sm:mb-4">
             Editorial Board &amp; Correspondence
           </p>
-          <h1 className="text-4xl md:text-6xl font-serif font-black uppercase tracking-tighter mb-5 text-blue-900">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif font-black uppercase tracking-tighter mb-4 sm:mb-5 text-blue-900">
             Letters to the Editor
           </h1>
-          <p className="font-serif text-gray-600 text-base md:text-lg italic max-w-xl mx-auto leading-relaxed">
+          <p className="font-serif text-gray-600 text-sm sm:text-base md:text-lg italic max-w-xl mx-auto leading-relaxed">
             Submit campus news tips, event coverage requests, corrections, or letters of opinion directly to the editorial staff of {PUBLICATION.name}. All submissions undergo editorial review.
           </p>
         </header>
 
         {submitted ? (
-          <div className="text-center py-16 bg-white border-2 border-blue-900 p-8 shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
-            <h2 className="text-3xl font-serif font-black uppercase mb-4 text-blue-900">
+          <div className="text-center py-12 sm:py-16 bg-white border-2 border-blue-900 p-6 sm:p-8 shadow-[4px_4px_0px_0px_rgba(30,58,138,1)] md:shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
+            <h2 className="text-2xl sm:text-3xl font-serif font-black uppercase mb-4 text-blue-900">
               Correspondence Received
             </h2>
             <p className="font-serif text-gray-600 mb-8 italic max-w-md mx-auto leading-relaxed">
@@ -63,7 +63,7 @@ export default function Contact() {
             <button
               type="button"
               onClick={() => setSubmitted(false)}
-              className="text-xs font-bold uppercase tracking-widest border-b-2 border-red-900 text-red-900 pb-1 hover:text-blue-900 hover:border-blue-900 transition-all"
+              className="min-h-[44px] px-4 text-xs font-bold uppercase tracking-widest border-b-2 border-red-900 text-red-900 pb-1 hover:text-blue-900 hover:border-blue-900 transition-all"
             >
               Submit Another Letter
             </button>
@@ -71,7 +71,7 @@ export default function Contact() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="bg-white border-2 border-blue-900 p-8 md:p-12 space-y-8 shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]"
+            className="bg-white border-2 border-blue-900 p-5 sm:p-8 md:p-12 space-y-6 sm:space-y-8 shadow-[4px_4px_0px_0px_rgba(30,58,138,1)] md:shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]"
           >
             <div className="grid md:grid-cols-2 gap-8">
               <div>

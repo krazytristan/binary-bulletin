@@ -251,15 +251,61 @@ export default function Events() {
         />
       </div>
 
-      {/* TABLE/LIST */}
-      <div className="bg-white border border-gray-100 rounded-none  overflow-hidden">
+      {/* TABLE/LIST (Mobile Cards + Desktop Table) */}
+      <div className="bg-white border border-gray-100 rounded-none overflow-hidden">
         {loading ? (
           <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-blue-900" size={32} /></div>
         ) : filteredEvents.length === 0 ? (
           <div className="p-20 text-center text-gray-400">No events scheduled.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <>
+            {/* Mobile Cards (<md) */}
+            <div className="md:hidden divide-y divide-gray-100">
+              {filteredEvents.map((event) => (
+                <div key={`m-${event.id}`} className="p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <SmartImage
+                      src={event.image_url}
+                      alt={event.title}
+                      mode="thumbnail"
+                      fit="cover"
+                      containerClassName="w-16 h-16 shrink-0 border border-gray-100"
+                      fallbackLabel=""
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-sm text-gray-900 line-clamp-2">{event.title}</p>
+                      <p className="text-xs font-semibold text-blue-900 mt-1">
+                        {new Date(event.event_date).toLocaleDateString()} &bull; {event.event_time}
+                      </p>
+                      <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5 truncate">
+                        <MapPin size={12} className="shrink-0 text-gray-400" />
+                        <span className="truncate">{event.location}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => openEdit(event)}
+                      className="min-h-[38px] px-3 inline-flex items-center gap-1.5 text-xs font-bold bg-blue-900 text-white"
+                    >
+                      <Edit3 size={14} /> Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteId(event.id)}
+                      className="min-h-[38px] px-3 inline-flex items-center gap-1.5 text-xs font-bold border border-red-200 bg-red-50 text-red-600"
+                    >
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table (>=md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50/50 text-xs uppercase tracking-widest text-gray-400 font-bold">
                   <th className="px-6 py-4">Event</th>
@@ -315,13 +361,14 @@ export default function Events() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
       {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-blue-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-          <div className="bg-white p-6 md:p-8 rounded-none w-full max-w-3xl  overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-blue-900/60 backdrop-blur-sm flex justify-center items-end sm:items-center z-50 p-0 sm:p-4">
+          <div className="bg-white p-5 sm:p-6 md:p-8 rounded-t-2xl sm:rounded-none w-full max-w-3xl overflow-y-auto max-h-[94dvh] animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-gray-900">{editing ? 'Edit' : 'New'} Event</h2>
               <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X /></button>

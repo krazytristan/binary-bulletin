@@ -247,35 +247,37 @@ export default function Home() {
       )}
 
       {siteSettings?.breaking_news_enabled && siteSettings?.breaking_news_text && (
-        <div className="bg-red-900 text-white py-2.5 px-4 text-center text-xs font-bold tracking-wider uppercase">
-          <span className="bg-amber-400 text-blue-950 px-2 py-0.5 mr-2.5 font-black">
-            Breaking
-          </span>
-          {siteSettings.breaking_news_link ? (
-            <Link to={siteSettings.breaking_news_link} className="hover:underline">
-              {siteSettings.breaking_news_text}
-            </Link>
-          ) : (
-            <span>{siteSettings.breaking_news_text}</span>
-          )}
+        <div className="bg-red-900 text-white py-2 px-3 sm:px-4 text-center text-xs font-bold tracking-wider uppercase">
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1">
+            <span className="bg-amber-400 text-blue-950 px-2 py-0.5 font-black shrink-0">
+              Breaking
+            </span>
+            {siteSettings.breaking_news_link ? (
+              <Link to={siteSettings.breaking_news_link} className="hover:underline break-words">
+                {siteSettings.breaking_news_text}
+              </Link>
+            ) : (
+              <span className="break-words">{siteSettings.breaking_news_text}</span>
+            )}
+          </div>
         </div>
       )}
 
       {siteSettings?.homepage_config?.announcementBanner && (
-        <div className="bg-blue-50 border-b border-blue-200 text-blue-900 py-2 px-4 text-center text-xs font-semibold">
+        <div className="bg-blue-50 border-b border-blue-200 text-blue-900 py-2 px-3 sm:px-4 text-center text-xs font-semibold">
           {siteSettings.homepage_config.announcementBanner}
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-8">
+      <main className="max-w-7xl mx-auto px-3.5 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8">
         {/* --- CLASSIC MASTHEAD --- */}
-        <header className="mb-8 md:mb-10 text-center border-b-[3px] border-blue-900 pb-4 md:pb-6">
-          <div className="flex justify-between items-center border-b border-gray-300 pb-2.5 mb-4 md:mb-6 text-[11px] font-sans uppercase tracking-widest text-gray-600">
+        <header className="mb-6 md:mb-10 text-center border-b-[3px] border-blue-900 pb-4 md:pb-6">
+          <div className="flex justify-between items-center border-b border-gray-300 pb-2 sm:pb-2.5 mb-3 sm:mb-4 md:mb-6 text-[10px] sm:text-[11px] font-sans uppercase tracking-widest text-gray-600">
             <div className="hidden md:flex items-center gap-2">
               <MapPin size={13} className="text-blue-900" />
               <span>{PUBLICATION.location}</span>
             </div>
-            <div className="mx-auto md:mx-0 font-bold text-red-900 tracking-[0.16em]">
+            <div className="mx-auto md:mx-0 font-bold text-red-900 tracking-[0.14em] sm:tracking-[0.16em]">
               Official Student Publication &bull; {PUBLICATION.institution}
             </div>
             <div className="hidden md:block font-semibold text-blue-900">
@@ -283,7 +285,7 @@ export default function Home() {
             </div>
           </div>
 
-          <h1 className="text-[11vw] sm:text-6xl md:text-8xl lg:text-[7.5rem] font-serif font-black uppercase tracking-tighter leading-[0.9] text-blue-900">
+          <h1 className="text-[clamp(2.25rem,10.5vw,7.5rem)] font-serif font-black uppercase tracking-tighter leading-[0.9] text-blue-900">
             The Binary<br className="md:hidden" /> Bulletin
           </h1>
 
@@ -306,7 +308,7 @@ export default function Home() {
         </header>
 
         {/* --- FRONT PAGE FILTER BAR --- */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 border-b border-gray-200 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 md:mb-10 border-b border-gray-200 pb-4 sm:pb-5">
           <p className="text-xs font-serif italic text-gray-600">
             Covering campus news, student voices, official advisories, and academic milestones.
           </p>
@@ -319,7 +321,7 @@ export default function Home() {
               type="text"
               aria-label="Filter front page stories"
               placeholder="Filter headlines..."
-              className="w-full bg-white border border-gray-300 rounded-none py-2.5 pl-10 pr-4 text-[#111827] outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 font-sans text-xs tracking-wide placeholder:text-gray-400 transition-colors"
+              className="w-full min-h-[42px] bg-white border border-gray-300 rounded-none py-2.5 pl-10 pr-4 text-[#111827] outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 font-sans text-xs tracking-wide placeholder:text-gray-400 transition-colors"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -327,9 +329,9 @@ export default function Home() {
         </div>
 
         {/* --- MAIN NEWSPAPER GRID --- */}
-        <div className="grid lg:grid-cols-12 gap-x-8 gap-y-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-x-8 gap-y-8 md:gap-y-10 lg:gap-y-12 mb-12 md:mb-16">
           {/* COLUMN 1: EDITORIAL, VOICES & BULLETINS (Left Sidebar) */}
-          <div className="lg:col-span-3 space-y-10 lg:border-r border-gray-300 lg:pr-8 order-2 lg:order-1">
+          <div className="md:col-span-1 lg:col-span-3 space-y-8 md:space-y-10 lg:border-r border-gray-300 lg:pr-8 order-2 lg:order-1">
             {/* Editorial block */}
             <section className="border-b border-gray-300 pb-8">
               <div className="flex items-center gap-2 mb-4 text-blue-900 border-t-2 border-blue-900 pt-2.5">
@@ -456,8 +458,8 @@ export default function Home() {
           </div>
 
           {/* COLUMN 2: FRONT PAGE LEAD (Center) */}
-          <div className="lg:col-span-6 lg:border-r border-gray-300 lg:pr-8 order-1 lg:order-2">
-            <div className="border-t-[3px] border-blue-900 pt-2.5 mb-6">
+          <div className="md:col-span-2 lg:col-span-6 lg:border-r border-gray-300 lg:pr-8 order-1 lg:order-2">
+            <div className="border-t-[3px] border-blue-900 pt-2.5 mb-4 md:mb-6">
               <h2 className="uppercase tracking-widest font-sans font-bold text-xs text-blue-900 text-center">
                 Front Page Lead
               </h2>
@@ -466,13 +468,13 @@ export default function Home() {
             {featured ? (
               <article className="block">
                 <Link to={`/article/${featured.id}`} className="group block">
-                  <div className="text-center mb-3">
+                  <div className="text-center mb-2.5 md:mb-3">
                     <span className="inline-block bg-red-900 text-white px-2.5 py-0.5 text-[10px] font-sans font-bold uppercase tracking-widest">
                       {featured.category}
                     </span>
                   </div>
 
-                  <h2 className="text-3xl md:text-5xl font-serif font-black leading-[1.12] mb-4 md:mb-5 group-hover:text-red-900 transition-colors text-center text-gray-900">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-black leading-[1.14] mb-3 md:mb-5 group-hover:text-red-900 transition-colors text-center text-gray-900 break-words">
                     {cleanEditorialText(featured.title)}
                   </h2>
 
@@ -536,7 +538,7 @@ export default function Home() {
           </div>
 
           {/* COLUMN 3: RECENT DISPATCHES & EVENTS (Right Sidebar) */}
-          <div className="lg:col-span-3 space-y-8 order-3">
+          <div className="md:col-span-1 lg:col-span-3 space-y-8 order-3">
             <section>
               <h2 className="font-sans font-bold uppercase text-xs tracking-widest border-t-2 border-blue-900 pt-2.5 mb-6 text-blue-900">
                 Recent Dispatches
@@ -782,18 +784,18 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-0 pt-2">
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2 sm:gap-0 pt-2">
                 <input
                   type="email"
                   aria-label="Campus email address"
                   placeholder="Enter your campus or personal email"
-                  className="grow border-2 border-blue-900 px-5 py-3.5 font-sans font-medium text-blue-950 text-xs tracking-wide outline-none focus:bg-amber-50 placeholder:text-blue-900/50 bg-white"
+                  className="grow min-h-[44px] border-2 border-blue-900 px-4 sm:px-5 py-3 font-sans font-medium text-blue-950 text-sm sm:text-xs tracking-wide outline-none focus:bg-amber-50 placeholder:text-blue-900/50 bg-white"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <button
                   type="submit"
-                  className="bg-blue-900 text-white border-2 border-blue-900 sm:border-l-0 px-7 py-3.5 font-sans font-bold uppercase text-xs tracking-widest hover:bg-red-900 hover:border-red-900 transition-colors whitespace-nowrap"
+                  className="min-h-[44px] bg-blue-900 text-white border-2 border-blue-900 sm:border-l-0 px-7 py-3 font-sans font-bold uppercase text-xs tracking-widest hover:bg-red-900 hover:border-red-900 transition-colors whitespace-nowrap"
                 >
                   Subscribe
                 </button>

@@ -211,11 +211,11 @@ export default function AdminGallery() {
                       <Clock size={12} /> {new Date(album.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                     </p>
                   </div>
-                  <div className="flex gap-1">
-                    <button onClick={() => openEdit(album)} className="p-1.5 text-gray-400 hover:text-blue-900 transition-colors">
+                  <div className="flex gap-1 shrink-0">
+                    <button onClick={() => openEdit(album)} className="p-2 text-gray-400 hover:text-blue-900 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" aria-label="Edit album">
                       <Edit3 size={16} />
                     </button>
-                    <button onClick={() => setDeleteId(album.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                    <button onClick={() => setDeleteId(album.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" aria-label="Delete album">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -228,18 +228,18 @@ export default function AdminGallery() {
 
       {/* MODAL (Matches Dashboard Create Style) */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="absolute inset-0 bg-gray-950/20 backdrop-blur-sm" onClick={resetForm} />
           
-          <div className="relative bg-white w-full max-w-xl rounded-none  flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-gray-50 flex justify-between items-center">
+          <div className="relative bg-white w-full max-w-xl rounded-t-xl sm:rounded-none flex flex-col max-h-[92dvh]">
+            <div className="p-4 sm:p-6 border-b border-gray-50 flex justify-between items-center shrink-0">
               <h2 className="text-lg font-bold text-gray-900">
                 {editing ? "Edit Album" : "Create New Album"}
               </h2>
-              <button onClick={resetForm} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
+              <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 p-2 min-w-[40px] min-h-[40px] flex items-center justify-center" aria-label="Close modal"><X size={20}/></button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6 overflow-y-auto">
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-2">Album Title</label>
                 <input
@@ -268,7 +268,7 @@ export default function AdminGallery() {
               </div>
 
               {preview.length > 0 && (
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                   {preview.map((img, i) => (
                     <div key={i} className="relative aspect-square rounded-none overflow-hidden border border-gray-100 bg-gray-50">
                       <SmartImage src={img} alt={`Preview ${i + 1}`} mode="preview" fit="contain" containerClassName="h-full w-full" />
@@ -276,8 +276,8 @@ export default function AdminGallery() {
                         const newFiles = files.filter((_, idx) => idx !== i);
                         setFiles(newFiles);
                         setPreview(newFiles.map(f => URL.createObjectURL(f)));
-                      }} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-none z-10">
-                        <X size={10} />
+                      }} className="absolute top-1 right-1 bg-red-500 text-white p-1.5 rounded-none z-10 min-w-[28px] min-h-[28px] flex items-center justify-center" aria-label="Remove preview image">
+                        <X size={12} />
                       </button>
                     </div>
                   ))}
@@ -285,12 +285,12 @@ export default function AdminGallery() {
               )}
             </form>
 
-            <div className="p-6 border-t border-gray-50 flex justify-end gap-3">
-              <button type="button" onClick={resetForm} className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-gray-600 transition">Cancel</button>
+            <div className="p-4 sm:p-6 border-t border-gray-50 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 shrink-0">
+              <button type="button" onClick={resetForm} className="px-4 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition min-h-[42px]">Cancel</button>
               <button
                 disabled={actionLoading}
                 onClick={handleSubmit}
-                className="bg-blue-900 hover:bg-red-900 text-white px-6 py-2 rounded-none font-bold text-sm flex items-center gap-2 transition"
+                className="bg-blue-900 hover:bg-red-900 text-white px-6 py-2.5 rounded-none font-bold text-sm flex items-center justify-center gap-2 transition min-h-[42px]"
               >
                 {actionLoading ? <Loader2 size={16} className="animate-spin" /> : "Save Album"}
               </button>
@@ -301,11 +301,11 @@ export default function AdminGallery() {
 
       {/* VIEWER DIALOG */}
       {viewerIndex !== null && (
-        <div className="fixed inset-0 bg-blue-900/95 flex items-center justify-center z-[60] p-4 backdrop-blur-sm">
-          <button onClick={() => setViewerIndex(null)} className="absolute top-8 right-8 text-white/50 hover:text-white transition"><X size={32} /></button>
+        <div className="fixed inset-0 bg-blue-900/95 flex items-center justify-center z-[60] p-2 sm:p-4 backdrop-blur-sm">
+          <button onClick={() => setViewerIndex(null)} className="absolute top-3 right-3 sm:top-8 sm:right-8 text-white/75 hover:text-white transition p-2 bg-black/30 sm:bg-transparent rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center z-20" aria-label="Close viewer"><X size={28} /></button>
           
-          <button onClick={() => setViewerIndex(prev => (prev - 1 + currentAlbum.length) % currentAlbum.length)} className="absolute left-4 p-4 text-white/30 hover:text-white transition bg-white/5 rounded-full">
-            <ChevronLeft size={40} />
+          <button onClick={() => setViewerIndex(prev => (prev - 1 + currentAlbum.length) % currentAlbum.length)} className="absolute left-2 sm:left-4 p-2.5 sm:p-4 text-white/70 hover:text-white transition bg-black/30 sm:bg-white/5 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center z-20" aria-label="Previous photo">
+            <ChevronLeft className="w-6 h-6 sm:w-10 sm:h-10" />
           </button>
           
           <SmartImage
@@ -314,28 +314,28 @@ export default function AdminGallery() {
             mode="lightbox"
             fit="contain"
             showDimensionsBadge
-            containerClassName="max-w-5xl w-full max-h-[85vh] bg-transparent"
-            className="max-h-[85vh] rounded-none"
+            containerClassName="max-w-5xl w-full max-h-[82dvh] bg-transparent"
+            className="max-h-[82dvh] rounded-none"
           />
           
-          <button onClick={() => setViewerIndex(prev => (prev + 1) % currentAlbum.length)} className="absolute right-4 p-4 text-white/30 hover:text-white transition bg-white/5 rounded-full">
-            <ChevronRight size={40} />
+          <button onClick={() => setViewerIndex(prev => (prev + 1) % currentAlbum.length)} className="absolute right-2 sm:right-4 p-2.5 sm:p-4 text-white/70 hover:text-white transition bg-black/30 sm:bg-white/5 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center z-20" aria-label="Next photo">
+            <ChevronRight className="w-6 h-6 sm:w-10 sm:h-10" />
           </button>
         </div>
       )}
 
       {/* DELETE CONFIRMATION */}
       {deleteId && (
-        <div className="fixed inset-0 bg-gray-950/20 backdrop-blur-sm flex justify-center items-center z-[70] p-4">
-          <div className="bg-white p-8 rounded-none text-center max-w-xs w-full  border border-gray-50">
+        <div className="fixed inset-0 bg-gray-950/20 backdrop-blur-sm flex justify-center items-end sm:items-center z-[70] p-0 sm:p-4">
+          <div className="bg-white p-6 sm:p-8 rounded-t-xl sm:rounded-none text-center max-w-sm w-full border border-gray-50">
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 size={24} />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Album?</h2>
             <p className="text-sm text-gray-500 mb-6">This record will be permanently removed.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 transition">Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 py-2 bg-red-500 text-white text-sm font-bold rounded-none  shadow-blue-100 active:scale-95 transition">Delete</button>
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+              <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 transition min-h-[42px]">Cancel</button>
+              <button onClick={confirmDelete} className="flex-1 py-2.5 bg-red-500 text-white text-sm font-bold rounded-none shadow-blue-100 active:scale-95 transition min-h-[42px]">Delete</button>
             </div>
           </div>
         </div>

@@ -156,18 +156,18 @@ export default function AdminAnnouncements() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto min-h-screen bg-gray-50/50">
+    <div className="p-3 sm:p-6 max-w-6xl mx-auto min-h-screen bg-gray-50/50">
       
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Announcements</h1>
-          <p className="text-gray-500 text-sm">Create and manage public updates for the bulletin.</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Announcements</h1>
+          <p className="text-gray-500 text-xs sm:text-sm">Create and manage public updates for the bulletin.</p>
         </div>
 
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 bg-blue-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-none font-semibold transition-all  shadow-red-200"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-none font-semibold transition-all shadow-red-200 min-h-[44px]"
         >
           <Plus size={20} />
           New Announcement
@@ -178,7 +178,7 @@ export default function AdminAnnouncements() {
       {fetching ? (
         <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-900" size={40} /></div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {announcements.map((a) => (
             <div key={a.id} className="bg-white rounded-none border border-gray-100  overflow-hidden flex flex-col group">
               <div className="relative h-48 bg-gray-100">
@@ -191,16 +191,16 @@ export default function AdminAnnouncements() {
                   fallbackLabel="No Featured Image"
                 />
                 <div className="absolute top-3 right-3 flex gap-2 z-10">
-                  <button onClick={() => handleEdit(a)} className="p-2 bg-white/90 backdrop-blur rounded-full text-blue-900 hover:bg-blue-900 hover:text-white transition-colors">
+                  <button onClick={() => handleEdit(a)} className="p-2.5 bg-white/90 backdrop-blur rounded-full text-blue-900 hover:bg-blue-900 hover:text-white transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center" aria-label="Edit announcement">
                     <Edit2 size={16} />
                   </button>
-                  <button onClick={() => handleDelete(a.id)} className="p-2 bg-white/90 backdrop-blur rounded-full text-red-600 hover:bg-red-600 hover:text-white transition-colors">
+                  <button onClick={() => handleDelete(a.id)} className="p-2.5 bg-white/90 backdrop-blur rounded-full text-red-600 hover:bg-red-600 hover:text-white transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center" aria-label="Delete announcement">
                     <Trash2 size={16} />
                   </button>
                 </div>
               </div>
 
-              <div className="p-5 flex-1 flex flex-col">
+              <div className="p-4 sm:p-5 flex-1 flex flex-col">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-blue-900 mb-2">
                   {new Date(a.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
                 </span>
@@ -214,17 +214,17 @@ export default function AdminAnnouncements() {
 
       {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-none  w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-xl sm:rounded-none w-full max-w-xl max-h-[92dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
             
-            <div className="flex justify-between items-center p-6 border-b">
-              <h2 className="text-xl font-bold text-gray-800">
+            <div className="flex justify-between items-center p-4 sm:p-6 border-b shrink-0">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">
                 {editing ? "Edit Announcement" : "Create Announcement"}
               </h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600"><X /></button>
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 p-2 min-w-[40px] min-h-[40px] flex items-center justify-center" aria-label="Close modal"><X /></button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
                 <input
@@ -281,18 +281,18 @@ export default function AdminAnnouncements() {
                 {imageError && <p className="text-xs text-red-600 mt-1.5 font-medium">{imageError}</p>}
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-4">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-none font-bold transition-all"
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-none font-bold transition-all min-h-[44px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-3 bg-blue-900 hover:bg-gray-800 text-white rounded-none font-bold transition-all flex items-center justify-center gap-2  shadow-red-100"
+                  className="flex-1 px-4 py-3 bg-blue-900 hover:bg-gray-800 text-white rounded-none font-bold transition-all flex items-center justify-center gap-2 shadow-red-100 min-h-[44px]"
                 >
                   {loading && <Loader2 size={18} className="animate-spin" />}
                   {editing ? "Update Post" : "Publish Post"}

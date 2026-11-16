@@ -75,13 +75,13 @@ export default function Gallery() {
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white flex flex-col">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-6 py-12 flex-1 w-full">
-        <header className="mb-12 border-b-[3px] border-blue-900 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <main className="max-w-7xl mx-auto px-3.5 sm:px-6 py-6 sm:py-12 flex-1 w-full">
+        <header className="mb-8 sm:mb-12 border-b-[3px] border-blue-900 pb-6 sm:pb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-900 mb-3">
+            <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-red-900 mb-2 sm:mb-3">
               Photojournalism &amp; Campus Visuals
             </p>
-            <h1 className="text-4xl md:text-7xl font-serif font-black uppercase tracking-tighter text-blue-900">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter text-blue-900">
               Gallery
             </h1>
           </div>
@@ -97,7 +97,7 @@ export default function Gallery() {
               placeholder="Search albums..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-none py-2 pl-9 pr-4 text-xs font-medium outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 transition-colors"
+              className="w-full min-h-[42px] bg-white border border-gray-300 rounded-none py-2 pl-9 pr-4 text-sm sm:text-xs font-medium outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 transition-colors"
             />
           </div>
         </header>
@@ -178,9 +178,9 @@ export default function Gallery() {
             type="button"
             aria-label="Close photo viewer"
             onClick={() => setViewer(null)}
-            className="absolute top-5 right-5 p-2 text-white hover:text-amber-400 transition-colors z-10"
+            className="absolute top-3 right-3 sm:top-5 sm:right-5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-950/70 text-white hover:text-amber-400 transition-colors z-20"
           >
-            <X size={26} />
+            <X size={24} />
           </button>
 
           <button
@@ -190,9 +190,9 @@ export default function Gallery() {
               e.stopPropagation();
               prevImage();
             }}
-            className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 p-2 text-white hover:text-amber-400 transition-colors z-10 bg-blue-900/60 border border-white/20"
+            className="absolute left-2 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-white hover:text-amber-400 transition-colors z-20 bg-blue-900/70 border border-white/20"
           >
-            <ChevronLeft size={28} />
+            <ChevronLeft size={24} />
           </button>
 
           <button
@@ -202,13 +202,13 @@ export default function Gallery() {
               e.stopPropagation();
               nextImage();
             }}
-            className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 p-2 text-white hover:text-amber-400 transition-colors z-10 bg-blue-900/60 border border-white/20"
+            className="absolute right-2 sm:right-4 md:right-6 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-white hover:text-amber-400 transition-colors z-20 bg-blue-900/70 border border-white/20"
           >
-            <ChevronRight size={28} />
+            <ChevronRight size={24} />
           </button>
 
           <div
-            className="w-full max-w-6xl max-h-screen p-8 md:p-14 flex flex-col items-center justify-center gap-4"
+            className="w-full max-w-6xl max-h-screen p-3 sm:p-8 md:p-14 flex flex-col items-center justify-center gap-3 sm:gap-4"
             onClick={(e) => e.stopPropagation()}
           >
             <SmartImage
@@ -216,11 +216,11 @@ export default function Gallery() {
               mode="lightbox"
               fit="contain"
               loading="eager"
-              containerClassName="border-[3px] border-amber-400 shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] bg-white"
+              containerClassName="border-[3px] border-amber-400 shadow-[4px_4px_0px_0px_rgba(251,191,36,1)] sm:shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] bg-white"
               alt={`${currentTitle} — Exhibit ${viewerIndex + 1}`}
               showDimensionsBadge
             />
-            <div className="bg-white px-5 py-2 border-2 border-blue-900 shadow-lg text-xs font-bold uppercase tracking-widest text-blue-900 text-center">
+            <div className="bg-white px-4 sm:px-5 py-2 border-2 border-blue-900 shadow-lg text-[11px] sm:text-xs font-bold uppercase tracking-widest text-blue-900 text-center max-w-full">
               {currentTitle} &bull; Photo {viewerIndex + 1} of {currentAlbum.length}
             </div>
           </div>

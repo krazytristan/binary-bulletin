@@ -16,6 +16,7 @@ import {
   BarChart3,
   Users,
   Activity,
+  X,
 } from "lucide-react";
 import { hasPermission } from "../utils/rbac";
 
@@ -136,20 +137,30 @@ export default function Sidebar({ setSidebarOpen, role = "Staff Writer" }) {
   return (
     <div className="w-full h-full bg-white flex flex-col border-r-2 border-blue-900 font-sans">
       {/* BRANDING SECTION */}
-      <div className="px-6 py-5 border-b-2 border-blue-900 flex items-center gap-3">
-        <img
-          src="/binary-logo.png"
-          alt="The Binary Bulletin"
-          className="h-9 w-9 object-contain rounded-full border border-blue-900 p-0.5 bg-white shrink-0"
-        />
-        <div>
-          <h2 className="text-lg font-serif font-black text-blue-900 tracking-tight uppercase leading-none">
-            Newsroom CMS
-          </h2>
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
-            The Binary Bulletin
-          </p>
+      <div className="px-4 sm:px-6 py-4 sm:py-5 border-b-2 border-blue-900 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-3 min-w-0">
+          <img
+            src="/binary-logo.png"
+            alt="The Binary Bulletin"
+            className="h-9 w-9 object-contain rounded-full border border-blue-900 p-0.5 bg-white shrink-0"
+          />
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-serif font-black text-blue-900 tracking-tight uppercase leading-none truncate">
+              Newsroom CMS
+            </h2>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1 truncate">
+              The Binary Bulletin
+            </p>
+          </div>
         </div>
+        <button
+          type="button"
+          aria-label="Close navigation drawer"
+          onClick={() => setSidebarOpen?.(false)}
+          className="md:hidden min-w-[40px] min-h-[40px] flex items-center justify-center text-gray-500 hover:text-blue-900 hover:bg-gray-100 transition shrink-0"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       {/* NAVIGATION LINKS */}
@@ -169,7 +180,7 @@ export default function Sidebar({ setSidebarOpen, role = "Staff Writer" }) {
                     to={link.path}
                     onClick={() => setSidebarOpen?.(false)}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-all ${
+                      `flex items-center gap-3 px-3 min-h-[42px] py-2 text-[11px] font-bold uppercase tracking-wider transition-all ${
                         isActive
                           ? "bg-blue-900 text-white"
                           : "text-gray-700 hover:bg-gray-100 hover:text-red-900"

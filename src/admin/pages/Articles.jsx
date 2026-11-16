@@ -24,9 +24,10 @@ import {
 } from "../../utils/imageUtils";
 import RichTextEditor from "../../components/RichTextEditor";
 import SmartImage from "../../components/SmartImage";
+import ResponsiveModal from "../../components/ResponsiveModal";
+import ResponsiveFilterBar from "../../components/ResponsiveFilterBar";
 import {
   Plus,
-  Search,
   Edit3,
   Trash2,
   Eye,
@@ -931,28 +932,46 @@ export default function Articles() {
         })}
       </div>
 
-      {/* Search & Category Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by headline, author, or section..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-600"
-          />
-        </div>
+      {/* Search & Collapsible Filters */}
+      <ResponsiveFilterBar
+        searchValue={searchQuery}
+        onSearchChange={(val) => {
+          setSearchQuery(val);
+          setPage(1);
+        }}
+        searchPlaceholder="Search by headline, author, or section..."
+        searchAriaLabel="Search articles"
+        activeFilterCount={
+          (categoryFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0)
+        }
+      >
         <select
+          aria-label="Filter by workflow status"
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setPage(1);
+          }}
+          className="md:hidden w-full min-h-[42px] px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg font-medium text-slate-700"
+        >
+          <option value="all">All Statuses ({articles.length})</option>
+          {ARTICLE_STATUSES.map((st) => (
+            <option key={st.value} value={st.value}>
+              {st.label} (
+              {articles.filter((a) => (a.status || "published") === st.value).length}
+              )
+            </option>
+          ))}
+        </select>
+
+        <select
+          aria-label="Filter by section"
           value={categoryFilter}
           onChange={(e) => {
             setCategoryFilter(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:border-blue-600"
+          className="w-full md:w-auto min-h-[42px] px-3 py-2 text-sm md:text-xs bg-white border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:border-blue-600"
         >
           <option value="all">All Sections</option>
           {categoryChoices.map((c) => (
@@ -961,9 +980,9 @@ export default function Articles() {
             </option>
           ))}
         </select>
-      </div>
+      </ResponsiveFilterBar>
 
-      {/* Articles Table */}
+      {/* Articles Listing (Mobile Cards + Desktop Table) */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-xs text-slate-500">
@@ -974,8 +993,145 @@ export default function Articles() {
             No articles match the selected filters.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <>
+            {/* Mobile Card List (<md) */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {paginatedArticles.map((art) => {
+                const st = getStatusMeta(art.status || "published");
+                const isOwn =
+                  art.author_id && user?.id && art.author_id === user.id;
+                const canEditThis = canEditAll || isOwn;
+
+                return (
+                  <div key={`m-${art.id}`} className="p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      {art.image_url ? (
+                        <SmartImage
+                          src={art.image_url}
+                          alt={art.title}
+                          mode="thumbnail"
+                          fit="cover"
+                          containerClassName="w-16 h-14 rounded-lg border border-slate-200 shrink-0"
+                          fallbackLabel=""
+                        />
+                      ) : (
+                        <div className="w-16 h-14 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+                          <ImageIcon className="w-5 h-5 text-slate-400" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                          <span
+                            className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${st.badge}`}
+                          >
+                            {st.label}
+                          </span>
+                          {art.is_breaking && (
+                            <span className="inline-flex items-center gap-0.5 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-red-100 text-red-700">
+                              <Flame className="w-2.5 h-2.5" /> Breaking
+                            </span>
+                          )}
+                          {art.is_featured && (
+                            <span className="inline-flex items-center gap-0.5 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                              <Star className="w-2.5 h-2.5" /> Featured
+                            </span>
+                          )}
+                        </div>
+                        <p className="font-bold text-sm text-slate-900 line-clamp-2 leading-snug">
+                          {art.title}
+                        </p>
+                        <p className="text-[11px] text-slate-500 mt-1">
+                          {art.category || "News"} &middot;{" "}
+                          {art.author_name || "Staff Writer"} &middot;{" "}
+                          {(Number(art.views) || 0).toLocaleString()} views
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                      <span className="text-[11px] text-slate-400">
+                        Updated{" "}
+                        {formatDate(art.updated_at || art.created_at, {
+                          short: true,
+                        })}
+                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewArticle(art)}
+                          className="min-w-[36px] min-h-[36px] px-2.5 inline-flex items-center gap-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:text-blue-900 hover:bg-blue-50"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Preview</span>
+                        </button>
+                        {canEditThis && (
+                          <button
+                            type="button"
+                            onClick={() => openEditArticle(art)}
+                            className="min-w-[36px] min-h-[36px] px-2.5 inline-flex items-center gap-1 rounded-lg bg-blue-900 text-white text-xs font-semibold hover:bg-blue-800"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Edit</span>
+                          </button>
+                        )}
+                        {canPublish && art.status !== "published" && (
+                          <button
+                            type="button"
+                            onClick={() => handleQuickStatus(art, "published")}
+                            title="Publish Now"
+                            className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        {canPublish && art.status === "published" && (
+                          <button
+                            type="button"
+                            onClick={() => handleQuickStatus(art, "draft")}
+                            title="Unpublish to Draft"
+                            className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDuplicate(art)}
+                          title="Duplicate"
+                          className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-slate-200 text-slate-600"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                        {canEditAll && art.status !== "archived" && (
+                          <button
+                            type="button"
+                            onClick={() => handleQuickStatus(art, "archived")}
+                            title="Archive"
+                            className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-slate-200 text-slate-600"
+                          >
+                            <Archive className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(art)}
+                            title="Delete"
+                            className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table (>=md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   <th className="py-3 px-4">Article</th>
@@ -1139,35 +1295,38 @@ export default function Articles() {
               </tbody>
             </table>
           </div>
+          </>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
-            <span>
+          <div className="px-3 sm:px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2 text-xs text-slate-600">
+            <span className="truncate">
               Showing {(page - 1) * pageSize + 1}–
               {Math.min(page * pageSize, filteredArticles.length)} of{" "}
               {filteredArticles.length}
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 type="button"
+                aria-label="Previous page"
                 disabled={page === 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="p-1.5 rounded border border-slate-200 bg-white disabled:opacity-40"
+                className="min-w-[38px] min-h-[38px] flex items-center justify-center rounded border border-slate-200 bg-white disabled:opacity-40"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
               <span className="px-2 font-bold">
                 {page} / {totalPages}
               </span>
               <button
                 type="button"
+                aria-label="Next page"
                 disabled={page === totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="p-1.5 rounded border border-slate-200 bg-white disabled:opacity-40"
+                className="min-w-[38px] min-h-[38px] flex items-center justify-center rounded border border-slate-200 bg-white disabled:opacity-40"
               >
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -1176,11 +1335,11 @@ export default function Articles() {
 
       {/* Comprehensive Article Editor & Workflow Modal */}
       {editorOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-2 sm:p-4">
-          <div className="bg-white rounded-2xl w-full max-w-6xl max-h-[94vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-6xl h-[96dvh] sm:h-auto sm:max-h-[94dvh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
             {/* Modal Top Bar */}
-            <div className="px-5 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50">
-              <div className="flex items-center gap-3">
+            <div className="px-4 sm:px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-2 bg-slate-50 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
                 <span className="text-xs font-black uppercase tracking-wider text-blue-900">
                   {form.id ? "Edit Article" : "New Article"}
                 </span>
@@ -1193,7 +1352,7 @@ export default function Articles() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() =>
@@ -1202,15 +1361,17 @@ export default function Articles() {
                       created_at: new Date().toISOString(),
                     })
                   }
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50"
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  Live Preview
+                  <span className="hidden min-[380px]:inline">Live Preview</span>
+                  <span className="min-[380px]:hidden">Preview</span>
                 </button>
                 <button
                   type="button"
+                  aria-label="Close editor"
                   onClick={() => setEditorOpen(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200"
+                  className="min-w-[38px] min-h-[38px] flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-200"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1251,7 +1412,7 @@ export default function Articles() {
             )}
 
             {/* Sub-Tabs */}
-            <div className="px-5 border-b border-slate-200 flex items-center gap-4 bg-white">
+            <div className="px-4 sm:px-5 border-b border-slate-200 flex items-center gap-4 bg-white overflow-x-auto no-scrollbar whitespace-nowrap shrink-0">
               {[
                 { id: "content", label: "Content & Metadata", icon: Edit3 },
                 {
@@ -1759,16 +1920,16 @@ export default function Articles() {
             </div>
 
             {/* Workflow Action Bar Footer */}
-            <div className="px-5 py-3.5 border-t border-slate-200 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="px-3.5 sm:px-5 py-3 border-t border-slate-200 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-2.5 shrink-0">
               <input
                 type="text"
                 value={workflowNote}
                 onChange={(e) => setWorkflowNote(e.target.value)}
                 placeholder="Optional workflow note / revision reason..."
-                className="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg md:w-72"
+                className="w-full min-h-[38px] px-3 py-1.5 text-sm sm:text-xs bg-white border border-slate-200 rounded-lg md:w-72"
               />
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <button
                   type="button"
                   disabled={saving}
@@ -1867,225 +2028,209 @@ export default function Articles() {
       )}
 
       {/* Preview Modal */}
-      {previewArticle && (
-        <div className="fixed inset-0 z-[60] bg-slate-900/70 flex items-center justify-center p-4">
-          <div className="bg-[#FCFBF9] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-slate-300 shadow-2xl">
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-widest text-blue-900">
-                Editorial Article Preview
-              </span>
-              <div className="flex items-center gap-2">
-                {previewArticle.id && (
-                  <a
-                    href={`/article/${previewArticle.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 hover:underline mr-2"
-                  >
-                    Public Link <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setPreviewArticle(null)}
-                  className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+      <ResponsiveModal
+        open={Boolean(previewArticle)}
+        onClose={() => setPreviewArticle(null)}
+        title="Editorial Article Preview"
+        zIndexClass="z-[60]"
+        maxWidthClass="max-w-3xl"
+        bodyClassName="bg-[#FCFBF9] p-5 sm:p-8 md:p-10 space-y-5"
+        headerActions={
+          previewArticle?.id && (
+            <a
+              href={`/article/${previewArticle.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 hover:underline mr-1"
+            >
+              Public Link <ExternalLink className="w-3 h-3" />
+            </a>
+          )
+        }
+      >
+        {previewArticle && (
+          <>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900">
+              <span>{previewArticle.category || "Campus News"}</span>
+              <span>&middot;</span>
+              <span>{estimateReadingTime(previewArticle.content)}</span>
             </div>
-            <div className="p-6 sm:p-10 space-y-5">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900">
-                <span>{previewArticle.category || "Campus News"}</span>
-                <span>&middot;</span>
-                <span>{estimateReadingTime(previewArticle.content)}</span>
-              </div>
-              <h1 className="font-serif text-3xl sm:text-4xl font-black text-slate-900 leading-tight">
-                {previewArticle.title}
-              </h1>
-              {previewArticle.subheadline && (
-                <p className="text-lg text-slate-600 font-serif italic">
-                  {previewArticle.subheadline}
-                </p>
-              )}
-              <p className="text-xs text-slate-500 border-y border-slate-200 py-2.5">
-                By{" "}
-                <strong className="text-slate-900">
-                  {previewArticle.author_name || "Editorial Staff"}
-                </strong>{" "}
-                &middot;{" "}
-                {formatDate(
-                  previewArticle.published_at || previewArticle.created_at
-                )}
+            <h1 className="font-serif text-2xl sm:text-4xl font-black text-slate-900 leading-tight break-words">
+              {previewArticle.title}
+            </h1>
+            {previewArticle.subheadline && (
+              <p className="text-base sm:text-lg text-slate-600 font-serif italic">
+                {previewArticle.subheadline}
               </p>
-              {previewArticle.image_url && (
-                <figure>
-                  <SmartImage
-                    src={previewArticle.image_url}
-                    alt={previewArticle.image_caption || previewArticle.title}
-                    mode="article"
-                    fit="contain"
-                    loading="eager"
-                    showDimensionsBadge
-                    containerClassName="rounded-lg border border-slate-200"
-                    className="max-h-[480px]"
-                  />
-                  {(previewArticle.image_caption ||
-                    previewArticle.image_credit) && (
-                    <figcaption className="text-xs text-slate-500 mt-2 italic">
-                      {previewArticle.image_caption}{" "}
-                      {previewArticle.image_credit && (
-                        <span className="not-italic font-semibold text-slate-600">
-                          ({previewArticle.image_credit})
-                        </span>
-                      )}
-                    </figcaption>
-                  )}
-                </figure>
+            )}
+            <p className="text-xs text-slate-500 border-y border-slate-200 py-2.5">
+              By{" "}
+              <strong className="text-slate-900">
+                {previewArticle.author_name || "Editorial Staff"}
+              </strong>{" "}
+              &middot;{" "}
+              {formatDate(
+                previewArticle.published_at || previewArticle.created_at
               )}
-              <div className="space-y-4 font-serif text-slate-800 leading-relaxed">
-                {parseArticleBlocks(previewArticle.content, {
-                  category: previewArticle.category,
-                }).map((block, idx) => {
-                  if (block.type === "heading") {
-                    return (
-                      <h2
-                        key={idx}
-                        className="text-xl font-bold text-slate-900 pt-2"
-                      >
-                        {block.text}
-                      </h2>
-                    );
-                  }
-                  if (block.type === "quote") {
-                    return (
-                      <blockquote
-                        key={idx}
-                        className="border-l-4 border-blue-900 pl-4 italic text-slate-700"
-                      >
-                        {block.text}
-                      </blockquote>
-                    );
-                  }
-                  if (block.type === "bullet") {
-                    return (
-                      <li key={idx} className="ml-5 list-disc">
-                        {block.text}
-                      </li>
-                    );
-                  }
-                  if (block.type === "image") {
-                    return (
-                      <figure key={idx} className="my-4">
-                        <SmartImage
-                          src={block.url}
-                          alt={block.alt || "Article visual"}
-                          mode="inline"
-                          fit="contain"
-                          containerClassName="rounded-lg border border-slate-200"
-                          className="max-h-[460px]"
-                        />
-                        {block.alt && (
-                          <figcaption className="text-xs text-slate-500 mt-1">
-                            {block.alt}
-                          </figcaption>
-                        )}
-                      </figure>
-                    );
-                  }
-                  return <p key={idx}>{block.text}</p>;
-                })}
-              </div>
+            </p>
+            {previewArticle.image_url && (
+              <figure>
+                <SmartImage
+                  src={previewArticle.image_url}
+                  alt={previewArticle.image_caption || previewArticle.title}
+                  mode="article"
+                  fit="contain"
+                  loading="eager"
+                  showDimensionsBadge
+                  containerClassName="rounded-lg border border-slate-200"
+                  className="max-h-[480px]"
+                />
+                {(previewArticle.image_caption ||
+                  previewArticle.image_credit) && (
+                  <figcaption className="text-xs text-slate-500 mt-2 italic">
+                    {previewArticle.image_caption}{" "}
+                    {previewArticle.image_credit && (
+                      <span className="not-italic font-semibold text-slate-600">
+                        ({previewArticle.image_credit})
+                      </span>
+                    )}
+                  </figcaption>
+                )}
+              </figure>
+            )}
+            <div className="space-y-4 font-serif text-slate-800 leading-relaxed">
+              {parseArticleBlocks(previewArticle.content, {
+                category: previewArticle.category,
+              }).map((block, idx) => {
+                if (block.type === "heading") {
+                  return (
+                    <h2
+                      key={idx}
+                      className="text-xl font-bold text-slate-900 pt-2"
+                    >
+                      {block.text}
+                    </h2>
+                  );
+                }
+                if (block.type === "quote") {
+                  return (
+                    <blockquote
+                      key={idx}
+                      className="border-l-4 border-blue-900 pl-4 italic text-slate-700"
+                    >
+                      {block.text}
+                    </blockquote>
+                  );
+                }
+                if (block.type === "bullet") {
+                  return (
+                    <li key={idx} className="ml-5 list-disc">
+                      {block.text}
+                    </li>
+                  );
+                }
+                if (block.type === "image") {
+                  return (
+                    <figure key={idx} className="my-4">
+                      <SmartImage
+                        src={block.url}
+                        alt={block.alt || "Article visual"}
+                        mode="inline"
+                        fit="contain"
+                        containerClassName="rounded-lg border border-slate-200"
+                        className="max-h-[460px]"
+                      />
+                      {block.alt && (
+                        <figcaption className="text-xs text-slate-500 mt-1">
+                          {block.alt}
+                        </figcaption>
+                      )}
+                    </figure>
+                  );
+                }
+                return <p key={idx}>{block.text}</p>;
+              })}
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </ResponsiveModal>
 
       {/* Media Picker Modal */}
-      {mediaPickerOpen && (
-        <div className="fixed inset-0 z-[70] bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-sm font-black text-slate-900">
-                Select Image from Media Library
-              </h3>
+      <ResponsiveModal
+        open={mediaPickerOpen}
+        onClose={() => setMediaPickerOpen(false)}
+        title="Select Image from Media Library"
+        zIndexClass="z-[70]"
+        maxWidthClass="max-w-3xl"
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {mediaItems.length === 0 ? (
+            <p className="col-span-full text-center text-xs text-slate-500 py-10">
+              No media items registered yet. Upload images in the Media
+              Library or upload directly on the article.
+            </p>
+          ) : (
+            mediaItems.map((m) => (
               <button
+                key={m.id}
                 type="button"
-                onClick={() => setMediaPickerOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700"
+                onClick={() =>
+                  mediaCallbackRef.current?.(
+                    m.file_url,
+                    m.caption || m.file_name
+                  )
+                }
+                className="group text-left border border-slate-200 rounded-lg overflow-hidden hover:border-blue-600 transition"
               >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-5 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {mediaItems.length === 0 ? (
-                <p className="col-span-full text-center text-xs text-slate-500 py-10">
-                  No media items registered yet. Upload images in the Media
-                  Library or upload directly on the article.
+                <SmartImage
+                  src={m.thumbnail_url || m.file_url}
+                  alt={m.alt_text || m.file_name}
+                  mode="thumbnail"
+                  fit="auto"
+                  containerClassName="w-full h-24"
+                  fallbackLabel=""
+                />
+                <p className="p-1.5 text-[10px] font-medium text-slate-700 truncate">
+                  {m.title || m.file_name}
                 </p>
-              ) : (
-                mediaItems.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() =>
-                      mediaCallbackRef.current?.(
-                        m.file_url,
-                        m.caption || m.file_name
-                      )
-                    }
-                    className="group text-left border border-slate-200 rounded-lg overflow-hidden hover:border-blue-600 transition"
-                  >
-                    <SmartImage
-                      src={m.thumbnail_url || m.file_url}
-                      alt={m.alt_text || m.file_name}
-                      mode="thumbnail"
-                      fit="auto"
-                      containerClassName="w-full h-24"
-                      fallbackLabel=""
-                    />
-                    <p className="p-1.5 text-[10px] font-medium text-slate-700 truncate">
-                      {m.title || m.file_name}
-                    </p>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
+              </button>
+            ))
+          )}
         </div>
-      )}
+      </ResponsiveModal>
 
       {/* Delete Confirmation Modal */}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-[70] bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <h3 className="text-base font-black text-slate-900 mb-2">
-              Delete Article Permanently?
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed mb-5">
-              Are you sure you want to permanently delete{" "}
-              <strong>&ldquo;{deleteTarget.title}&rdquo;</strong>? Consider
-              archiving instead if you want to retain editorial history.
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-700"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteConfirm}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700"
-              >
-                Delete Forever
-              </button>
-            </div>
+      <ResponsiveModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete Article Permanently?"
+        zIndexClass="z-[70]"
+        maxWidthClass="max-w-md"
+        footer={
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              className="w-full sm:w-auto min-h-[42px] px-4 py-2 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteConfirm}
+              className="w-full sm:w-auto min-h-[42px] px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700"
+            >
+              Delete Forever
+            </button>
           </div>
-        </div>
-      )}
+        }
+      >
+        <p className="text-xs text-slate-600 leading-relaxed">
+          Are you sure you want to permanently delete{" "}
+          <strong>&ldquo;{deleteTarget?.title}&rdquo;</strong>? Consider
+          archiving instead if you want to retain editorial history.
+        </p>
+      </ResponsiveModal>
     </div>
   );
 }

@@ -223,18 +223,18 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#FCFBF9] overflow-hidden font-sans text-blue-900 selection:bg-red-900 selection:text-white">
+    <div className="min-h-screen flex bg-[#FCFBF9] font-sans text-blue-900 selection:bg-red-900 selection:text-white">
       {/* MOBILE OVERLAY */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-blue-950/40 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-blue-950/50 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* SIDEBAR NAVIGATION */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-white transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 z-50 h-full w-64 max-w-[85vw] bg-white transition-transform duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
@@ -242,59 +242,59 @@ export default function AdminLayout() {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col md:ml-64 min-w-0 h-screen">
+      <div className="flex-1 flex flex-col md:ml-64 min-w-0 min-h-screen">
         {/* HEADER / TOPBAR */}
-        <header className="bg-white sticky top-0 z-30 px-6 h-18 py-3 flex justify-between items-center border-b-2 border-blue-900 shrink-0">
-          <div className="flex items-center gap-4">
+        <header className="bg-white sticky top-0 z-30 px-3 sm:px-6 h-14 sm:h-16 flex justify-between items-center gap-2 border-b-2 border-blue-900 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               type="button"
-              aria-label="Open menu"
+              aria-label="Open navigation drawer"
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden p-2 hover:bg-gray-100 transition"
+              className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-gray-100 transition shrink-0"
             >
               <Menu size={22} className="text-blue-900" />
             </button>
-            <div>
-              <h1 className="text-lg sm:text-xl font-serif font-black uppercase tracking-tight text-blue-900">
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-lg md:text-xl font-serif font-black uppercase tracking-tight text-blue-900 truncate">
                 {pageTitle}
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-5">
+          <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
             {/* NOTIFICATIONS */}
             <div className="relative" ref={notifRef}>
               <button
                 type="button"
                 aria-label="Notifications"
                 onClick={() => setNotifOpen(!notifOpen)}
-                className="relative p-2 text-gray-500 hover:text-blue-900 hover:bg-gray-100 transition"
+                className="relative min-w-[42px] min-h-[42px] flex items-center justify-center text-gray-500 hover:text-blue-900 hover:bg-gray-100 transition"
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-red-900 text-white text-[9px] font-bold flex items-center justify-center rounded-full">
+                  <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 bg-red-900 text-white text-[9px] font-bold flex items-center justify-center rounded-full">
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
               </button>
 
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border-2 border-blue-900 shadow-[6px_6px_0px_0px_rgba(30,58,138,1)] z-50">
-                  <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-                    <span className="text-xs font-bold uppercase tracking-widest text-blue-900">
+                <div className="fixed inset-x-3 top-16 sm:inset-x-auto sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:w-96 bg-white border-2 border-blue-900 shadow-[4px_4px_0px_0px_rgba(30,58,138,1)] sm:shadow-[6px_6px_0px_0px_rgba(30,58,138,1)] z-50 max-h-[75dvh] flex flex-col">
+                  <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-2 bg-gray-50 shrink-0">
+                    <span className="text-xs font-bold uppercase tracking-widest text-blue-900 truncate">
                       Notifications ({unreadCount} unread)
                     </span>
                     {unreadCount > 0 && (
                       <button
                         type="button"
                         onClick={markAllRead}
-                        className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-red-900 hover:text-blue-900"
+                        className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-red-900 hover:text-blue-900 shrink-0"
                       >
                         <CheckCheck size={12} /> Mark all read
                       </button>
                     )}
                   </div>
-                  <div className="max-h-72 overflow-y-auto divide-y divide-gray-100">
+                  <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
                     {notifications.length === 0 ? (
                       <div className="p-6 text-center text-xs font-serif italic text-gray-500">
                         No editorial notifications yet.
@@ -378,7 +378,7 @@ export default function AdminLayout() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white border-2 border-blue-900 shadow-[4px_4px_0px_0px_rgba(30,58,138,1)] overflow-hidden z-50">
+                <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-1.5rem)] bg-white border-2 border-blue-900 shadow-[4px_4px_0px_0px_rgba(30,58,138,1)] overflow-hidden z-50">
                   <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-200">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 truncate">
                       {profileData.email}

@@ -343,7 +343,7 @@ export default function HomepageCMS() {
               <label className="block font-bold text-slate-700 mb-2">
                 Visible Homepage Sections
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {[
                   ["showEditorial", "Editorial Desk"],
                   ["showVoices", "Campus Voices"],
@@ -355,7 +355,7 @@ export default function HomepageCMS() {
                 ].map(([key, label]) => (
                   <label
                     key={key}
-                    className="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-slate-50 font-semibold text-slate-700 cursor-pointer"
+                    className="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-slate-50 font-semibold text-slate-700 cursor-pointer min-h-[44px]"
                   >
                     <input
                       type="checkbox"
@@ -419,9 +419,9 @@ export default function HomepageCMS() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {(form.homepage_config.editorialBoard || []).map((m, idx) => (
-                <div key={idx} className="flex items-center gap-2">
+                <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 p-2.5 sm:p-0 bg-slate-50 sm:bg-transparent rounded-lg border border-slate-200 sm:border-0">
                   <input
                     type="text"
                     placeholder="Full Name"
@@ -429,26 +429,29 @@ export default function HomepageCMS() {
                     onChange={(e) =>
                       updateBoardMember(idx, "name", e.target.value)
                     }
-                    className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg"
+                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg bg-white min-h-[40px]"
                   />
-                  <input
-                    type="text"
-                    placeholder="Role (e.g. Editor-in-Chief)"
-                    value={m.position}
-                    onChange={(e) =>
-                      updateBoardMember(idx, "position", e.target.value)
-                    }
-                    className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg"
-                  />
-                  {canManage && (
-                    <button
-                      type="button"
-                      onClick={() => removeBoardMember(idx)}
-                      className="p-1.5 text-red-500 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2 flex-1">
+                    <input
+                      type="text"
+                      placeholder="Role (e.g. Editor-in-Chief)"
+                      value={m.position}
+                      onChange={(e) =>
+                        updateBoardMember(idx, "position", e.target.value)
+                      }
+                      className="flex-1 px-3 py-2 border border-slate-200 rounded-lg bg-white min-h-[40px]"
+                    />
+                    {canManage && (
+                      <button
+                        type="button"
+                        onClick={() => removeBoardMember(idx)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
+                        aria-label="Remove board member"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

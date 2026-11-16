@@ -10,6 +10,7 @@ import {
 import { formatDate } from "../../utils/editorial";
 import { logActivity } from "../../utils/cmsService";
 import SmartImage from "../../components/SmartImage";
+import ResponsiveFilterBar from "../../components/ResponsiveFilterBar";
 import {
   Users as UsersIcon,
   Shield,
@@ -19,7 +20,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   X,
-  Search,
   UserCheck,
   UserX,
 } from "lucide-react";
@@ -268,21 +268,18 @@ export default function Users() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search staff by name, email, or role..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg"
-          />
-        </div>
+      <ResponsiveFilterBar
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search staff by name, email, or role..."
+        searchAriaLabel="Search editorial staff"
+        activeFilterCount={roleFilter !== "all" ? 1 : 0}
+      >
         <select
+          aria-label="Filter by editorial role"
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg font-medium"
+          className="w-full md:w-auto min-h-[42px] px-3 py-2 text-sm md:text-xs bg-white border border-slate-200 rounded-lg font-medium"
         >
           <option value="all">All Editorial Roles</option>
           {EDITORIAL_ROLES.map((r) => (
@@ -291,9 +288,9 @@ export default function Users() {
             </option>
           ))}
         </select>
-      </div>
+      </ResponsiveFilterBar>
 
-      {/* Staff Table */}
+      {/* Staff Directory (Mobile Cards + Desktop Table) */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         {loading ? (
           <div className="p-10 text-center text-xs text-slate-500">
@@ -304,8 +301,127 @@ export default function Users() {
             No matching staff accounts found.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <>
+            {/* Mobile Card List (<md) */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {filteredUsers.map((u) => {
+                const normRole = normalizeRole(u.role);
+                const isActive = u.is_active !== false;
+                const authored = getUserArticles(u);
+
+                return (
+                  <div key={`m-${u.id}`} className="p-4 space-y-3 text-xs">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        {u.avatar_url ? (
+                          <SmartImage
+                            src={u.avatar_url}
+                            alt={u.full_name || u.email || "Staff avatar"}
+                            mode="avatar"
+                            fit="cover"
+                            containerClassName="w-10 h-10 rounded-full border border-slate-200 shrink-0"
+                            fallbackLabel=""
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-900 font-black text-sm flex items-center justify-center shrink-0">
+                            {(u.full_name || u.email || "U")
+                              .charAt(0)
+                              .toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm text-slate-900 truncate">
+                            {u.full_name || "Unnamed Member"}
+                          </p>
+                          <p className="text-[11px] text-slate-500 truncate">
+                            {u.email}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                          isActive
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {isActive ? "Active" : "Suspended"}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
+                      <span className="inline-flex items-center gap-1 font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900">
+                        <Shield className="w-3 h-3" />
+                        {normRole}
+                      </span>
+                      <span>Desk: {u.assigned_section || "General"}</span>
+                      <span>&middot;</span>
+                      <span>{authored.length} articles</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                      <span className="text-[11px] text-slate-400">
+                        Joined{" "}
+                        {formatDate(u.last_login_at || u.created_at, {
+                          short: true,
+                        })}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setActivityUser(u)}
+                          title="View Contributor Activity"
+                          className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-slate-200 text-slate-600"
+                        >
+                          <Activity className="w-3.5 h-3.5" />
+                        </button>
+                        {canManage && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => openEditModal(u)}
+                              title="Edit Role & Profile"
+                              className="min-w-[36px] min-h-[36px] px-2.5 inline-flex items-center gap-1 rounded-lg bg-blue-900 text-white font-semibold"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleResetPassword(u)}
+                              title="Send Password Reset"
+                              className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700"
+                            >
+                              <KeyRound className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleActive(u)}
+                              title={isActive ? "Deactivate" : "Activate"}
+                              className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border ${
+                                isActive
+                                  ? "border-red-200 bg-red-50 text-red-600"
+                                  : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              }`}
+                            >
+                              {isActive ? (
+                                <UserX className="w-3.5 h-3.5" />
+                              ) : (
+                                <UserCheck className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table (>=md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   <th className="py-3 px-4">Contributor</th>
@@ -445,6 +561,7 @@ export default function Users() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
@@ -473,9 +590,9 @@ export default function Users() {
 
       {/* Edit User Modal */}
       {editUser && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[92dvh] overflow-y-auto shadow-2xl border border-slate-200">
+            <div className="sticky top-0 z-10 bg-white px-5 py-4 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-sm font-black text-slate-900">
                 Manage Staff Account
               </h3>
@@ -577,18 +694,18 @@ export default function Users() {
                 Account Active (can access Admin Dashboard)
               </label>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setEditUser(null)}
-                  className="px-4 py-2 rounded-lg border border-slate-200 font-bold text-slate-600"
+                  className="px-4 py-2.5 rounded-lg border border-slate-200 font-bold text-slate-600 min-h-[42px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-lg bg-blue-900 text-white font-bold hover:bg-blue-800 disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-lg bg-blue-900 text-white font-bold hover:bg-blue-800 disabled:opacity-50 min-h-[42px]"
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
@@ -600,11 +717,11 @@ export default function Users() {
 
       {/* Contributor Activity Drawer/Modal */}
       {activityUser && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[82vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-xl w-full max-h-[90dvh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-black text-slate-900">
+              <div className="min-w-0 pr-2">
+                <h3 className="text-sm font-black text-slate-900 truncate">
                   Contributor Activity: {activityUser.full_name || activityUser.email}
                 </h3>
                 <p className="text-[11px] text-slate-500">
@@ -615,7 +732,8 @@ export default function Users() {
               <button
                 type="button"
                 onClick={() => setActivityUser(null)}
-                className="p-1 text-slate-400"
+                className="p-2 text-slate-400 hover:text-slate-700 rounded-lg min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
+                aria-label="Close activity"
               >
                 <X className="w-4 h-4" />
               </button>

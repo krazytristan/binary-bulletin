@@ -177,23 +177,28 @@ export default function TheBinar() {
       {/* VIDEO LIGHTBOX */}
       {viewer && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/95 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-blue-950/95 backdrop-blur-md"
           onClick={() => setViewer(null)}
         >
           <div
-            className="w-full max-w-5xl bg-white border-2 border-amber-400 shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] relative"
+            className="w-full max-w-5xl max-h-[92dvh] overflow-y-auto bg-white border-2 border-amber-400 shadow-[4px_4px_0px_0px_rgba(251,191,36,1)] sm:shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] relative flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              type="button"
-              aria-label="Close video player"
-              onClick={() => setViewer(null)}
-              className="absolute -top-11 right-0 p-2 text-white hover:text-amber-400 transition-colors"
-            >
-              <X size={26} />
-            </button>
+            <div className="sticky top-0 z-10 bg-blue-950 text-white px-4 py-2.5 flex items-center justify-between gap-3 border-b border-amber-400">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-amber-300 truncate">
+                The Binary Online
+              </span>
+              <button
+                type="button"
+                aria-label="Close video player"
+                onClick={() => setViewer(null)}
+                className="min-w-[40px] min-h-[40px] flex items-center justify-center text-white hover:text-amber-400 transition-colors shrink-0"
+              >
+                <X size={22} />
+              </button>
+            </div>
 
-            <div className="aspect-video bg-black w-full border-b border-amber-400">
+            <div className="aspect-video bg-black w-full border-b border-amber-400 shrink-0">
               {isYouTubeUrl(viewer.video_url) ? (
                 <iframe
                   src={getYouTubeEmbedUrl(viewer.video_url, { autoplay: true })}

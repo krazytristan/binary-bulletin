@@ -204,13 +204,13 @@ export default function Comments() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.id}
               type="button"
               onClick={() => setFilterStatus(f.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${
+              className={`px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 min-h-[38px] ${
                 filterStatus === f.id
                   ? "bg-blue-900 text-white"
                   : "bg-white border border-slate-200 text-slate-600"
@@ -221,14 +221,14 @@ export default function Comments() {
           ))}
         </div>
 
-        <div className="relative sm:w-72">
+        <div className="relative w-full sm:w-72">
           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search comments, reader, article..."
-            className="w-full pl-8 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg"
+            className="w-full pl-8 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-lg min-h-[40px]"
           />
         </div>
       </div>
@@ -290,39 +290,39 @@ export default function Comments() {
                     </span>
 
                     {canModerate && (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => handleStatusChange(c, "approved")}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 text-[11px] font-bold hover:bg-emerald-100"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-emerald-50 text-emerald-700 text-[11px] font-bold hover:bg-emerald-100 min-h-[36px]"
                         >
                           <CheckCircle2 className="w-3 h-3" /> Approve
                         </button>
                         <button
                           type="button"
                           onClick={() => handleStatusChange(c, "hidden")}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-[11px] font-bold hover:bg-slate-200"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-slate-100 text-slate-700 text-[11px] font-bold hover:bg-slate-200 min-h-[36px]"
                         >
                           <EyeOff className="w-3 h-3" /> Hide
                         </button>
                         <button
                           type="button"
                           onClick={() => handleStatusChange(c, "spam")}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-50 text-amber-800 text-[11px] font-bold hover:bg-amber-100"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-amber-50 text-amber-800 text-[11px] font-bold hover:bg-amber-100 min-h-[36px]"
                         >
                           <ShieldAlert className="w-3 h-3" /> Spam
                         </button>
                         <button
                           type="button"
                           onClick={() => handleStatusChange(c, "rejected")}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-red-50 text-red-700 text-[11px] font-bold hover:bg-red-100"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-red-50 text-red-700 text-[11px] font-bold hover:bg-red-100 min-h-[36px]"
                         >
                           <XCircle className="w-3 h-3" /> Reject
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeleteTarget(c)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-red-600 hover:bg-red-50 text-[11px] font-bold"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-red-600 hover:bg-red-50 text-[11px] font-bold min-h-[36px]"
                         >
                           <Trash2 className="w-3 h-3" /> Delete
                         </button>
@@ -368,8 +368,8 @@ export default function Comments() {
 
       {/* Delete Confirmation */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-xl">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full p-5 sm:p-6 border border-slate-200 shadow-xl">
             <h3 className="text-base font-black text-slate-900 mb-2">
               Delete Comment?
             </h3>
@@ -377,18 +377,18 @@ export default function Comments() {
               Permanently remove this reader comment? This action cannot be
               undone.
             </p>
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-700"
+                className="px-4 py-2.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 min-h-[42px]"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleDelete}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-bold"
+                className="px-4 py-2.5 rounded-lg bg-red-600 text-white text-xs font-bold min-h-[42px]"
               >
                 Delete
               </button>

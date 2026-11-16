@@ -302,8 +302,95 @@ export default function Categories() {
             No sections found in database.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <>
+            {/* Mobile Card List (<md) */}
+            <div className="md:hidden divide-y divide-slate-100 text-xs">
+              {categories.map((cat, idx) => {
+                const isActive = cat.is_active !== false;
+                return (
+                  <div key={`m-${cat.id}`} className="p-4 space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FolderTree className="w-4 h-4 text-blue-900 shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm text-slate-900 truncate">
+                            #{cat.sort_order ?? idx + 1} &middot; {cat.name}
+                          </p>
+                          <p className="text-[11px] text-slate-400 font-mono truncate">
+                            /{cat.slug || slugify(cat.name)}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={!canManage}
+                        onClick={() => handleToggleActive(cat)}
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${
+                          isActive
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-slate-200 text-slate-600"
+                        }`}
+                      >
+                        {isActive ? "Active" : "Inactive"}
+                      </button>
+                    </div>
+
+                    {cat.description && (
+                      <p className="text-slate-600 leading-relaxed line-clamp-2">
+                        {cat.description}
+                      </p>
+                    )}
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                      <span className="text-[11px] text-slate-500">
+                        Editor: <strong>{getEditorName(cat.editor_id || cat.assigned_editor_id)}</strong> &middot; {articleCounts[cat.name] || 0} articles
+                      </span>
+                      {canManage && (
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => handleReorder(idx, -1)}
+                            aria-label="Move up"
+                            className="min-w-[34px] min-h-[34px] flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 disabled:opacity-30"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === categories.length - 1}
+                            onClick={() => handleReorder(idx, 1)}
+                            aria-label="Move down"
+                            className="min-w-[34px] min-h-[34px] flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 disabled:opacity-30"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openEdit(cat)}
+                            className="min-w-[34px] min-h-[34px] px-2.5 inline-flex items-center gap-1 rounded-lg bg-blue-900 text-white font-semibold"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" /> Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(cat)}
+                            aria-label="Delete section"
+                            className="min-w-[34px] min-h-[34px] flex items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table (>=md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   <th className="py-3 px-4">Order</th>
@@ -407,13 +494,14 @@ export default function Categories() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
       {/* Add/Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[92dvh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-sm font-black text-slate-900">
                 {form.id ? "Edit Publication Section" : "Create Section"}
@@ -421,12 +509,13 @@ export default function Categories() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-700"
+                className="p-2 text-slate-400 hover:text-slate-700 rounded-lg min-w-[40px] min-h-[40px] flex items-center justify-center"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <form onSubmit={handleSave} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleSave} className="p-5 space-y-3.5 text-xs overflow-y-auto">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
@@ -529,8 +618,8 @@ export default function Categories() {
                 />
               </div>
 
-              <div className="flex items-center gap-6 pt-1">
-                <label className="flex items-center gap-2 font-semibold text-slate-700">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-1">
+                <label className="flex items-center gap-2 font-semibold text-slate-700 min-h-[36px]">
                   <input
                     type="checkbox"
                     checked={form.is_active}
@@ -540,7 +629,7 @@ export default function Categories() {
                   />
                   Active Section
                 </label>
-                <label className="flex items-center gap-2 font-semibold text-slate-700">
+                <label className="flex items-center gap-2 font-semibold text-slate-700 min-h-[36px]">
                   <input
                     type="checkbox"
                     checked={form.allow_comments}
@@ -555,18 +644,18 @@ export default function Categories() {
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-200 font-bold text-slate-600"
+                  className="px-4 py-2.5 rounded-lg border border-slate-200 font-bold text-slate-600 min-h-[42px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-lg bg-blue-900 text-white font-bold hover:bg-blue-800 disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-lg bg-blue-900 text-white font-bold hover:bg-blue-800 disabled:opacity-50 min-h-[42px]"
                 >
                   {saving ? "Saving..." : "Save Section"}
                 </button>
@@ -578,8 +667,8 @@ export default function Categories() {
 
       {/* Delete Confirmation */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-xl">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full p-5 sm:p-6 border border-slate-200 shadow-xl">
             <h3 className="text-base font-black text-slate-900 mb-2">
               Delete Section?
             </h3>
@@ -587,18 +676,18 @@ export default function Categories() {
               Delete <strong>{deleteTarget.name}</strong>? Existing articles
               using this section label will keep their text category field.
             </p>
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-700"
+                className="px-4 py-2.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 min-h-[42px]"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleDelete}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-bold"
+                className="px-4 py-2.5 rounded-lg bg-red-600 text-white text-xs font-bold min-h-[42px]"
               >
                 Delete
               </button>

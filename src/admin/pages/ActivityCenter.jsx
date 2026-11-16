@@ -235,8 +235,32 @@ export default function ActivityCenter() {
               No administrative actions recorded yet.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <>
+              {/* Mobile Log Cards (<md) */}
+              <div className="md:hidden divide-y divide-slate-100 text-xs">
+                {filteredLogs.map((l) => (
+                  <div key={`m-${l.id}`} className="p-4 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className="font-bold text-slate-900 truncate">
+                        {l.user_name || "Editorial Staff"}
+                      </span>
+                      <span className="text-slate-400 shrink-0">
+                        {new Date(l.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-slate-800 leading-snug">{l.action}</p>
+                    {l.user_role && (
+                      <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                        {l.user_role}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Log Table (>=md) */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold uppercase text-slate-500">
                     <th className="py-3 px-4">Timestamp</th>
@@ -263,6 +287,7 @@ export default function ActivityCenter() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
       )}

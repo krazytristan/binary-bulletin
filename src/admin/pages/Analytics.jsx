@@ -432,7 +432,25 @@ export default function Analytics() {
               Contributor Productivity
             </h2>
           </div>
-          <div className="overflow-x-auto">
+          {/* Mobile Cards (<md) */}
+          <div className="md:hidden divide-y divide-slate-100 text-xs">
+            {contributorStats.map((c) => (
+              <div key={`m-${c.author}`} className="p-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-bold text-slate-900 truncate">{c.author}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {c.total} total &middot; <span className="text-emerald-700 font-semibold">{c.published} published</span>
+                  </p>
+                </div>
+                <span className="font-black text-blue-900 shrink-0">
+                  {c.views.toLocaleString()} views
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table (>=md) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-200 text-[10px] font-bold uppercase text-slate-500">

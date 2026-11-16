@@ -113,24 +113,24 @@ export default function News() {
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white flex flex-col">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 flex-1 w-full">
+      <main className="max-w-7xl mx-auto px-3.5 sm:px-6 py-6 sm:py-10 md:py-12 flex-1 w-full">
         {/* --- HEADER --- */}
-        <header className="mb-8 md:mb-12 border-b-[3px] border-blue-900 pb-6 md:pb-8">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-900 mb-3">
+        <header className="mb-6 md:mb-12 border-b-[3px] border-blue-900 pb-5 md:pb-8">
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-red-900 mb-2 sm:mb-3">
             Campus Reporting &amp; Dispatches
           </p>
-          <h1 className="text-4xl md:text-7xl font-serif font-black uppercase tracking-tighter mb-6 text-blue-900">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter mb-4 sm:mb-6 text-blue-900">
             News &amp; Archive
           </h1>
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-5 overflow-x-auto no-scrollbar pb-2 whitespace-nowrap -mx-4 px-4 md:mx-0 md:px-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+            <div className="flex items-center gap-4 sm:gap-5 overflow-x-auto no-scrollbar pb-1 whitespace-nowrap -mx-3.5 px-3.5 md:mx-0 md:px-0">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
-                  className={`text-xs font-bold uppercase tracking-widest transition-colors shrink-0 pb-1 ${
+                  className={`min-h-[40px] flex items-center text-xs font-bold uppercase tracking-widest transition-colors shrink-0 pb-1 ${
                     category === cat
                       ? "text-red-900 border-b-2 border-red-900"
                       : "text-gray-500 hover:text-blue-900"
@@ -152,7 +152,7 @@ export default function News() {
                 placeholder="Search archive..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-white border border-gray-300 rounded-none py-2 pl-9 pr-4 text-xs font-medium outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 transition-colors"
+                className="w-full min-h-[42px] bg-white border border-gray-300 rounded-none py-2 pl-9 pr-4 text-sm sm:text-xs font-medium outline-none focus:border-red-900 focus:ring-1 focus:ring-red-900 transition-colors"
               />
             </div>
           </div>
@@ -224,7 +224,7 @@ export default function News() {
             )}
 
             {/* --- GRID (ALL DEVICES) --- */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8 md:gap-y-12">
               {filtered.map((a) => {
                 const isLeadDesktop =
                   latest && a.id === latest.id && !search && category === "All";

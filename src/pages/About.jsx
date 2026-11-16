@@ -92,12 +92,12 @@ export default function About() {
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white flex flex-col">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-6 py-12 md:py-20 flex-1 w-full">
-        <header className="mb-14 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-900 mb-4">
+      <main className="max-w-4xl mx-auto px-3.5 sm:px-6 py-8 sm:py-12 md:py-20 flex-1 w-full">
+        <header className="mb-10 sm:mb-14 text-center">
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-red-900 mb-3 sm:mb-4">
             {PUBLICATION.institution}
           </p>
-          <h1 className="text-4xl md:text-7xl font-serif font-black uppercase tracking-tighter mb-6 text-blue-900">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-serif font-black uppercase tracking-tighter mb-5 sm:mb-6 text-blue-900">
             Masthead &amp; Charter
           </h1>
           <div className="w-24 h-[3px] bg-amber-400 mx-auto"></div>

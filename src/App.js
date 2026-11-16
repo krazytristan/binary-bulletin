@@ -1,41 +1,53 @@
+import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
 
 /* AUTH GUARD */
 import ProtectedRoute from "./components/ProtectedRoute";
 
-/* PUBLIC PAGES */
+/* EAGER CORE PUBLIC SHELL & LANDING PAGE */
 import Home from "./pages/Home";
-import News from "./pages/News";
-import Events from "./pages/Events";
-import About from "./pages/About";
-import Announcements from "./pages/Announcements";
-import Contact from "./pages/Contact";
-import ArticleView from "./pages/ArticleView";
-import TheBinar from "./pages/TheBinar";
-import Gallery from "./pages/Gallery";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
-/* ADMIN CORE */
-import Login from "./admin/Login";
-import AdminLayout from "./admin/AdminLayout";
-import Dashboard from "./admin/Dashboard";
+/* LAZY-LOADED SECONDARY PUBLIC PAGES */
+const News = lazy(() => import("./pages/News"));
+const Events = lazy(() => import("./pages/Events"));
+const About = lazy(() => import("./pages/About"));
+const Announcements = lazy(() => import("./pages/Announcements"));
+const Contact = lazy(() => import("./pages/Contact"));
+const ArticleView = lazy(() => import("./pages/ArticleView"));
+const TheBinar = lazy(() => import("./pages/TheBinar"));
+const Gallery = lazy(() => import("./pages/Gallery"));
 
-/* ADMIN SUB-PAGES */
-import Articles from "./admin/pages/Articles";
-import MediaLibrary from "./admin/pages/MediaLibrary";
-import Categories from "./admin/pages/Categories";
-import HomepageCMS from "./admin/pages/HomepageCMS";
-import Comments from "./admin/pages/Comments";
-import Analytics from "./admin/pages/Analytics";
-import ActivityCenter from "./admin/pages/ActivityCenter";
-import Users from "./admin/pages/Users";
-import AdminGallery from "./admin/pages/AdminGallery";
-import AdminTheBinar from "./admin/pages/AdminTheBinar";
-import AdminEvents from "./admin/pages/Events";
-import AdminAnnouncements from "./admin/pages/Announcements";
-import Messages from "./admin/pages/Messages";
-import Settings from "./admin/pages/Settings";
+/* LAZY-LOADED ADMIN CORE & MODULES */
+const Login = lazy(() => import("./admin/Login"));
+const AdminLayout = lazy(() => import("./admin/AdminLayout"));
+const Dashboard = lazy(() => import("./admin/Dashboard"));
+const Articles = lazy(() => import("./admin/pages/Articles"));
+const MediaLibrary = lazy(() => import("./admin/pages/MediaLibrary"));
+const Categories = lazy(() => import("./admin/pages/Categories"));
+const HomepageCMS = lazy(() => import("./admin/pages/HomepageCMS"));
+const Comments = lazy(() => import("./admin/pages/Comments"));
+const Analytics = lazy(() => import("./admin/pages/Analytics"));
+const ActivityCenter = lazy(() => import("./admin/pages/ActivityCenter"));
+const Users = lazy(() => import("./admin/pages/Users"));
+const AdminGallery = lazy(() => import("./admin/pages/AdminGallery"));
+const AdminTheBinar = lazy(() => import("./admin/pages/AdminTheBinar"));
+const AdminEvents = lazy(() => import("./admin/pages/Events"));
+const AdminAnnouncements = lazy(() => import("./admin/pages/Announcements"));
+const Messages = lazy(() => import("./admin/pages/Messages"));
+const Settings = lazy(() => import("./admin/pages/Settings"));
+
+function RouteLoadingFallback() {
+  return (
+    <div className="min-h-screen bg-[#FCFBF9] flex flex-col items-center justify-center p-6 text-center">
+      <div className="w-8 h-8 border-2 border-blue-900 border-t-transparent rounded-full animate-spin mb-3" />
+      <p className="text-xs font-bold uppercase tracking-widest text-blue-900">
+        Loading Edition...
+      </p>
+    </div>
+  );
+}
 
 function NotFound() {
   return (
@@ -68,7 +80,8 @@ function NotFound() {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <Suspense fallback={<RouteLoadingFallback />}>
+        <Routes>
         {/* --- PUBLIC ROUTES --- */}
         <Route path="/" element={<Home />} />
         <Route path="/news" element={<News />} />
@@ -107,7 +120,8 @@ function App() {
 
         {/* --- 404 HANDLING --- */}
         <Route path="*" element={<NotFound />} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

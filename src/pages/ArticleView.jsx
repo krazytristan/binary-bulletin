@@ -241,41 +241,59 @@ export default function ArticleView() {
     <div className="min-h-screen bg-[#FCFBF9] text-[#111827] font-sans antialiased selection:bg-blue-900 selection:text-white flex flex-col">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-16 flex-1 w-full">
-        <div className="flex items-center justify-between mb-8 md:mb-10">
+      <main className="max-w-4xl mx-auto px-3.5 sm:px-6 py-6 sm:py-10 md:py-16 flex-1 w-full">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6 md:mb-10">
           <Link
             to="/news"
-            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-red-900 hover:text-blue-900 transition-colors"
+            className="inline-flex items-center gap-1.5 min-h-[40px] text-xs font-bold uppercase tracking-widest text-red-900 hover:text-blue-900 transition-colors"
           >
             <ChevronLeft size={15} /> Back to News &amp; Archive
           </Link>
 
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-900 border border-blue-900 px-3 py-1.5 hover:bg-blue-900 hover:text-white transition-colors"
-          >
-            {copied ? <Check size={14} /> : <Share2 size={14} />}
-            {copied ? "Link Copied" : "Share"}
-          </button>
+          <div className="flex items-center gap-2">
+            {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
+              <button
+                type="button"
+                onClick={() =>
+                  navigator
+                    .share({
+                      title: cleanEditorialText(article.title),
+                      url: window.location.href,
+                    })
+                    .catch(() => {})
+                }
+                className="sm:hidden inline-flex items-center gap-1.5 min-h-[40px] text-xs font-bold uppercase tracking-wider bg-blue-900 text-white px-3.5 py-2 hover:bg-red-900 transition-colors"
+              >
+                <Share2 size={14} /> Share
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              className="inline-flex items-center gap-2 min-h-[40px] text-xs font-bold uppercase tracking-wider text-blue-900 border border-blue-900 px-3.5 py-2 hover:bg-blue-900 hover:text-white transition-colors"
+            >
+              {copied ? <Check size={14} /> : <Share2 size={14} />}
+              {copied ? "Link Copied" : "Copy Link"}
+            </button>
+          </div>
         </div>
 
         <article>
-          <header className="text-center mb-8 md:mb-12">
-            <span className="text-[11px] font-bold uppercase tracking-widest bg-amber-400 border border-amber-500 text-blue-950 px-3 py-1 inline-block mb-4 md:mb-6 shadow-sm">
+          <header className="text-center mb-6 md:mb-12">
+            <span className="text-[11px] font-bold uppercase tracking-widest bg-amber-400 border border-amber-500 text-blue-950 px-3 py-1 inline-block mb-3 md:mb-6 shadow-sm">
               {article.category || "Official Notice"}
             </span>
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-black leading-[1.12] mb-6 text-gray-900">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-black leading-[1.15] mb-4 md:mb-6 text-gray-900 break-words">
               {cleanEditorialText(article.title)}
             </h1>
 
             {(article.subheadline || validDeck) && (
-              <p className="text-lg md:text-xl font-serif italic text-gray-700 max-w-2xl mx-auto mb-6 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl font-serif italic text-gray-700 max-w-2xl mx-auto mb-5 md:mb-6 leading-relaxed">
                 {article.subheadline || validDeck}
               </p>
             )}
 
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-bold uppercase tracking-wider text-gray-500 border-y border-gray-200 py-3">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 gap-y-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 border-y border-gray-200 py-3">
               <span className="text-blue-900">
                 By {article.author_name || "Editorial Staff"}
               </span>
@@ -289,8 +307,8 @@ export default function ArticleView() {
           </header>
 
           {article.image_url && (
-            <figure className="mb-10 md:mb-12">
-              <div className="w-full bg-[#F5F3EE] border-2 border-blue-900 overflow-hidden shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
+            <figure className="mb-8 md:mb-12">
+              <div className="w-full bg-[#F5F3EE] border-2 border-blue-900 overflow-hidden shadow-[4px_4px_0px_0px_rgba(30,58,138,1)] md:shadow-[8px_8px_0px_0px_rgba(30,58,138,1)]">
                 <SmartImage
                   src={article.image_url}
                   mode="article"
@@ -477,7 +495,7 @@ export default function ArticleView() {
 
             <form
               onSubmit={handleCommentSubmit}
-              className="bg-white border border-gray-300 p-5 space-y-3"
+              className="bg-white border border-gray-300 p-4 sm:p-5 space-y-3"
             >
               <p className="text-xs font-bold uppercase tracking-wider text-gray-800">
                 Leave a Comment
@@ -498,7 +516,7 @@ export default function ArticleView() {
                     }))
                   }
                   placeholder="Your Name (optional)"
-                  className="px-3 py-2 text-xs border border-gray-300 focus:outline-none focus:border-blue-900"
+                  className="min-h-[42px] px-3 py-2 text-sm sm:text-xs border border-gray-300 focus:outline-none focus:border-blue-900"
                 />
                 <input
                   type="email"
@@ -510,7 +528,7 @@ export default function ArticleView() {
                     }))
                   }
                   placeholder="Campus Email (optional, kept private)"
-                  className="px-3 py-2 text-xs border border-gray-300 focus:outline-none focus:border-blue-900"
+                  className="min-h-[42px] px-3 py-2 text-sm sm:text-xs border border-gray-300 focus:outline-none focus:border-blue-900"
                 />
               </div>
               <textarea
@@ -521,12 +539,12 @@ export default function ArticleView() {
                   setCommentForm((p) => ({ ...p, content: e.target.value }))
                 }
                 placeholder="Share a respectful, constructive perspective on this report..."
-                className="w-full px-3 py-2 text-xs border border-gray-300 focus:outline-none focus:border-blue-900"
+                className="w-full px-3 py-2.5 text-sm sm:text-xs border border-gray-300 focus:outline-none focus:border-blue-900"
               />
               <button
                 type="submit"
                 disabled={commentSubmitting}
-                className="bg-blue-900 text-white px-5 py-2 text-xs font-bold uppercase tracking-widest hover:bg-red-900 transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto min-h-[44px] bg-blue-900 text-white px-5 py-2.5 text-xs font-bold uppercase tracking-widest hover:bg-red-900 transition-colors disabled:opacity-50"
               >
                 {commentSubmitting ? "Submitting..." : "Submit Comment"}
               </button>
@@ -536,14 +554,18 @@ export default function ArticleView() {
 
         {/* Related */}
         {related.length > 0 && (
-          <section className="mt-20 pt-12 border-t border-gray-300">
-            <h3 className="font-sans font-bold text-xs uppercase tracking-widest text-center mb-8 text-red-900">
+          <section className="mt-14 md:mt-20 pt-10 md:pt-12 border-t border-gray-300">
+            <h3 className="font-sans font-bold text-xs uppercase tracking-widest text-center mb-6 md:mb-8 text-red-900">
               More from {PUBLICATION.name}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-8">
               {related.map((item) => (
-                <Link key={item.id} to={`/article/${item.id}`} className="group">
-                  <div className="aspect-[16/10] border border-gray-300 mb-3 overflow-hidden bg-gray-100 group-hover:border-blue-900 transition-colors">
+                <Link
+                  key={item.id}
+                  to={`/article/${item.id}`}
+                  className="group flex flex-row md:flex-col items-start gap-3.5 md:gap-0 bg-white md:bg-transparent p-3 md:p-0 border border-gray-200 md:border-0"
+                >
+                  <div className="w-24 h-20 md:w-full md:h-auto md:aspect-[16/10] shrink-0 border border-gray-300 md:mb-3 overflow-hidden bg-gray-100 group-hover:border-blue-900 transition-colors">
                     {item.image_url ? (
                       <SmartImage
                         src={item.image_url}
@@ -556,16 +578,18 @@ export default function ArticleView() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-blue-50/70">
-                        <Newspaper size={24} className="text-blue-900/40" />
+                        <Newspaper size={20} className="text-blue-900/40" />
                       </div>
                     )}
                   </div>
-                  <span className="block text-[10px] font-bold uppercase tracking-widest text-red-900 mb-1">
-                    {item.category}
-                  </span>
-                  <h4 className="font-serif font-bold text-lg leading-snug group-hover:text-red-900 text-gray-900 transition-colors">
-                    {cleanEditorialText(item.title)}
-                  </h4>
+                  <div className="flex-1 min-w-0">
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-red-900 mb-1">
+                      {item.category}
+                    </span>
+                    <h4 className="font-serif font-bold text-base md:text-lg leading-snug group-hover:text-red-900 text-gray-900 transition-colors line-clamp-2 md:line-clamp-none">
+                      {cleanEditorialText(item.title)}
+                    </h4>
+                  </div>
                 </Link>
               ))}
             </div>

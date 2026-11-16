@@ -114,27 +114,27 @@ export default function Messages() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto flex flex-col h-[calc(100vh-100px)]">
+    <div className="bg-gray-50 min-h-full">
+      <div className="max-w-7xl mx-auto flex flex-col lg:h-[calc(100vh-128px)]">
         
         {/* Header Area */}
-        <div className="flex justify-between items-end mb-6 px-2">
+        <div className="flex flex-wrap justify-between items-end gap-3 mb-4 sm:mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-              <Inbox className="text-blue-900" /> Communications
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2.5">
+              <Inbox className="text-blue-900 shrink-0" /> Communications
             </h1>
-            <p className="text-gray-500 text-sm mt-1">Manage and respond to inbound contact requests.</p>
+            <p className="text-gray-500 text-xs sm:text-sm mt-1">Manage and respond to inbound contact requests.</p>
           </div>
-          <div className="bg-white border border-gray-200  px-4 py-2 rounded-none text-sm font-semibold text-gray-700">
+          <div className="bg-white border border-gray-200 px-3.5 py-2 rounded-none text-xs sm:text-sm font-semibold text-gray-700 shrink-0">
             <span className="text-blue-900">{messages.filter(m => !m.is_read).length}</span> Unread
           </div>
         </div>
 
-        {/* Main Interface Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 bg-white border border-gray-200 rounded-none  overflow-hidden flex-1">
+        {/* Main Interface Grid (Mobile Master-Detail Switch + Desktop Split) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 bg-white border border-gray-200 rounded-none overflow-hidden flex-1">
           
           {/* Message List Panel */}
-          <div className="lg:col-span-4 border-r border-gray-100 flex flex-col bg-white">
+          <div className={`lg:col-span-4 lg:border-r border-gray-100 flex-col bg-white ${selectedMessage ? "hidden lg:flex" : "flex"}`}>
             <div className="p-4 border-b border-gray-50 bg-gray-50/50 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
               Recent Transmissions
             </div>
@@ -182,15 +182,22 @@ export default function Messages() {
           </div>
 
           {/* Message Detail Panel */}
-          <div className="lg:col-span-8 flex flex-col bg-white overflow-hidden">
+          <div className={`lg:col-span-8 flex-col bg-white overflow-hidden ${selectedMessage ? "flex" : "hidden lg:flex"}`}>
             {selectedMessage ? (
               <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {/* Toolbar */}
-                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
-                  <div className="flex items-center gap-2">
+                <div className="p-3 sm:p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/30 gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMessage(null)}
+                      className="lg:hidden min-h-[38px] px-2.5 inline-flex items-center gap-1 text-xs font-bold text-blue-900 border border-blue-200 bg-blue-50"
+                    >
+                      &larr; Inbox
+                    </button>
                     <button 
                       onClick={() => toggleReadStatus(selectedMessage.id, selectedMessage.is_read)}
-                      className="p-2 hover:bg-white hover: border border-transparent hover:border-gray-200 rounded-none text-gray-500 transition-all active:scale-95"
+                      className="min-w-[40px] min-h-[40px] flex items-center justify-center hover:bg-white border border-transparent hover:border-gray-200 rounded-none text-gray-500 transition-all active:scale-95"
                       title="Mark as unread"
                     >
                       {selectedMessage.is_read ? <Mail size={18} /> : <MailOpen size={18} className="text-blue-900" />}
@@ -198,7 +205,7 @@ export default function Messages() {
                     <button 
                       onClick={() => deleteMessage(selectedMessage.id)}
                       disabled={deleting === selectedMessage.id}
-                      className="p-2 hover:bg-red-50 hover:border-blue-100 border border-transparent rounded-none text-gray-500 hover:text-red-600 transition-all disabled:opacity-50"
+                      className="min-w-[40px] min-h-[40px] flex items-center justify-center hover:bg-red-50 border border-transparent rounded-none text-gray-500 hover:text-red-600 transition-all disabled:opacity-50"
                     >
                       {deleting === selectedMessage.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
                     </button>
