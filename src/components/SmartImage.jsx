@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Newspaper } from "lucide-react";
 import { classifyOrientation, resolveObjectFit } from "../utils/imageUtils";
 
@@ -20,11 +20,37 @@ export default function SmartImage({
   onClick,
   showDimensionsBadge = false,
 }) {
+  const imgRef = useRef(null);
   const [status, setStatus] = useState(src ? "loading" : "error");
   const [dims, setDims] = useState(null);
 
   useEffect(() => {
-    setStatus(src ? "loading" : "error");
+    if (!src) {
+      setStatus("error");
+      setDims(null);
+      return;
+    }
+
+    const img = imgRef.current;
+    // Recover synchronously if the browser already decoded a cached image before mount/remount
+    if (img && img.complete) {
+      if (img.naturalWidth > 0) {
+        setDims({
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          orientation: classifyOrientation(img.naturalWidth, img.naturalHeight),
+        });
+        setStatus("loaded");
+        return;
+      }
+      if (img.currentSrc) {
+        setStatus("error");
+        setDims(null);
+        return;
+      }
+    }
+
+    setStatus("loading");
     setDims(null);
   }, [src]);
 
@@ -52,19 +78,27 @@ export default function SmartImage({
 
   const isContain = resolvedFit === "contain";
   const fitClass = isContain ? "object-contain" : "object-cover";
+  const hasExplicitWidth = /\bw-/.test(containerClassName);
+  const hasFixedFrame = /\b(h-\d|h-\[|h-full|h-screen|min-h-|aspect-)/.test(
+    containerClassName
+  );
 
-  // Adaptive frame defaults when no fixed aspect/height is imposed on full-article views
+  // Adaptive frame defaults: fit inside fixed boxes without clipping, size naturally for free-flow article frames
   const defaultSizingClass =
     mode === "lightbox"
-      ? "max-h-[85vh] max-w-full w-auto h-auto mx-auto"
+      ? "max-h-[85dvh] max-w-full w-auto h-auto mx-auto"
       : isContain
-        ? "w-full h-auto max-w-full mx-auto"
+        ? hasFixedFrame
+          ? "w-full h-full max-w-full max-h-full mx-auto"
+          : "w-full h-auto max-w-full mx-auto"
         : "w-full h-full";
 
   if (!src || status === "error") {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-slate-100 text-slate-400 select-none ${containerClassName}`}
+        className={`flex flex-col items-center justify-center bg-slate-100 text-slate-400 select-none ${
+          !hasExplicitWidth ? "w-full" : ""
+        } ${!hasFixedFrame ? "min-h-[140px]" : ""} ${containerClassName}`}
       >
         <FallbackIcon className="w-7 h-7 opacity-40 mb-1.5" />
         {fallbackLabel && (
@@ -78,18 +112,22 @@ export default function SmartImage({
 
   return (
     <div
-      className={`relative overflow-hidden ${
+      className={`relative overflow-hidden ${!hasExplicitWidth ? "w-full" : ""} ${
+        status === "loading" && !hasFixedFrame ? "min-h-[160px]" : ""
+      } ${
         isContain ? "bg-[#F5F3EE]/80 flex items-center justify-center" : "bg-slate-100"
       } ${containerClassName}`}
     >
       {status === "loading" && (
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-slate-200/70 animate-pulse"
+          className="absolute inset-0 bg-slate-200/60 animate-pulse pointer-events-none z-0"
         />
       )}
 
       <img
+        ref={imgRef}
+        key={src}
         src={src}
         alt={alt}
         loading={loading}
@@ -97,13 +135,11 @@ export default function SmartImage({
         onLoad={handleLoad}
         onError={handleError}
         onClick={onClick}
-        className={`${defaultSizingClass} ${fitClass} transition-opacity duration-300 ${
-          status === "loaded" ? "opacity-100" : "opacity-0"
-        } print:max-w-full print:h-auto print:object-contain ${className}`}
+        className={`relative z-10 ${defaultSizingClass} ${fitClass} opacity-100 print:max-w-full print:h-auto print:object-contain ${className}`}
       />
 
       {showDimensionsBadge && dims?.width > 0 && (
-        <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-slate-900/75 text-white text-[9px] font-mono uppercase tracking-wider pointer-events-none">
+        <span className="absolute bottom-2 left-2 z-20 px-2 py-0.5 rounded bg-slate-900/75 text-white text-[9px] font-mono uppercase tracking-wider pointer-events-none">
           {dims.width}&times;{dims.height} &middot; {dims.orientation}
         </span>
       )}

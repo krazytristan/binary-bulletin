@@ -1,3 +1,6 @@
+import React, { StrictMode } from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import SmartImage from "./components/SmartImage";
 import {
   formatDate,
   formatEventDateParts,
@@ -118,4 +121,34 @@ test("validates supported image formats and formats file sizes", async () => {
   const zeroResult = await validateImageFile(zeroBytePng);
   expect(zeroResult.valid).toBe(false);
   expect(zeroResult.error).toMatch(/empty/i);
+});
+
+test("SmartImage renders visible img under StrictMode and handles load/error fallbacks", () => {
+  render(
+    <StrictMode>
+      <SmartImage
+        src="https://example.com/photo.jpg"
+        alt="Campus headline"
+        mode="card"
+        fit="auto"
+        containerClassName="w-full h-full"
+      />
+    </StrictMode>
+  );
+
+  const img = screen.getByAltText("Campus headline");
+  expect(img).toBeInTheDocument();
+  expect(img.className).toContain("opacity-100");
+  expect(img.className).not.toContain("opacity-0");
+
+  Object.defineProperty(img, "naturalWidth", { configurable: true, value: 800 });
+  Object.defineProperty(img, "naturalHeight", { configurable: true, value: 1200 });
+  fireEvent.load(img);
+
+  // Portrait card adapts to object-contain inside fixed container height without clipping
+  expect(img.className).toContain("object-contain");
+  expect(img.className).toContain("h-full");
+
+  fireEvent.error(img);
+  expect(screen.getByText("Visual Unavailable")).toBeInTheDocument();
 });
